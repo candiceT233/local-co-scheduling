@@ -1,9 +1,15 @@
+# env
+hermes_ddmd/
+
+# saved logs
 1job_log/  
 2job_log/  
 diagrams/  
 HermesBufferProblem/  
-molecular_dynamics_runs/  
 old_log/  
 save_log/
+
+# output files
+molecular_dynamics_runs/  
 aggregate.h5
 
