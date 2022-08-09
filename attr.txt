@@ -1,0 +1,12 @@
+HDF5 "molecular_dynamics_runs/stage0000/task0000/residue_100.h5" {
+GROUP "/" {
+   DATASET "contact_map" {
+      DATATYPE  H5T_VLEN { H5T_STD_I16LE}
+      DATASPACE  SIMPLE { ( 1000 ) / ( 1000 ) }
+   }
+   DATASET "point_cloud" {
+      DATATYPE  H5T_IEEE_F32LE
+      DATASPACE  SIMPLE { ( 1000, 3, 100 ) / ( 1000, 3, 100 ) }
+   }
+}
+}
