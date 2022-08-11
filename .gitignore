@@ -8,6 +8,8 @@ diagrams/
 HermesBufferProblem/  
 old_log/  
 save_log/
+*.err
+*.log
 
 # output files
 molecular_dynamics_runs/  

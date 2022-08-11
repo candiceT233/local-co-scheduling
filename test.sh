@@ -19,15 +19,15 @@ OPT=$1
 OPT2=$2
 mkdir -p $DEV1_DIR/$HSLABS
 mkdir -p $DEV2_DIR/$HSLABS
-rm -rf ${DEV1_DIR}/hermes_slabs/*
-rm -rf ${DEV2_DIR}/hermes_swap/*
+rm -rf ${DEV1_DIR}/$HSLABS/*
+rm -rf ${DEV2_DIR}/$HSLABS/*
+rm -rf /mnt/hdd/$USER/hermes_swap/*
 
 hermes_simulation(){
   echo "Test: hermes_simulation "
 
   cd $SCRIPT_DIR
   rm -rf molecular_dynamics_runs
-
 
   echo "Running single process simulation with hermes vfd ..."
 
@@ -37,17 +37,9 @@ hermes_simulation(){
 
   HDF5_DRIVER=hermes \
     HDF5_PLUGIN_PATH=${HERMES_INSTALL_DIR}/lib/hermes_vfd \
-    HDF5_DRIVER_CONFIG="true 16000" HERMES_CONF=${HERMES_CONF} \
+    HDF5_DRIVER_CONFIG="true 65536" HERMES_CONF=${HERMES_CONF} \
     LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/hermes_vfd/libhdf5_hermes_vfd.so \
     python sim_emulator.py --residue 100 -n 2 -a 1000 -f 1000 > >(tee hm-sim.log) 2>hm-sim.err
-    
-    # time python -m trace -t --ignore-module=trace,argparse,numpy,deepdrivemd.data.api \
-    # sim_emulator.py --residue 100 -n 6 -a 100 -f 100 > >(tee hm-sim.pytrace.log) 2>hm-sim.pytrace.err
-
-    # time python -m trace -t sim_emulator.py --residue 100 -n 6 -a 100 -f 100 > >(tee hm-sim.pytrace.log) 2>hm-sim.pytrace.err
-
-    # time python sim_emulator.py --residue 100 -n 6 -a 1000 -f 1000 > >(tee hm-sim.log) 2>hm-sim.err
-    # strace python sim_emulator.py --residue 100 -n 6 -a 100 -f 100 > >(tee hm-sim.trace.log) 2>hm-sim.trace.err
 
   ls molecular_dynamics_runs/*/* -hl
 }
@@ -61,9 +53,9 @@ hermes_aggregator(){
 
     echo "Running aggregation with hermes ..."
 
-    HDF5_DRIVER=hermes RECORDER_WITH_NON_MPI=1 \
+    HDF5_DRIVER=hermes \
       HDF5_PLUGIN_PATH=${HERMES_INSTALL_DIR}/lib/hermes_vfd \
-      HDF5_DRIVER_CONFIG="true 4096" HERMES_CONF=${HERMES_CONF} \
+      HDF5_DRIVER_CONFIG="true 65536" HERMES_CONF=${HERMES_CONF} \
       LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/hermes_vfd/libhdf5_hermes_vfd.so \
       python aggregate.py -no_rmsd -no_fnc --input_path . --output_path ./aggregate.h5 > >(tee hm-agg.log) 2>hm-agg.err
 
@@ -79,43 +71,38 @@ hermes_sim_agg_posix(){
   cd $SCRIPT_DIR
   rm -rf molecular_dynamics_runs # remove previous results
   rm -rf ./aggregate.h5
-  rm -rf hm-*.posix.*
+  # rm -rf hm-*.posix.*
 
   echo "HERMES_CONF=${HERMES_CONF}"
   echo "HERMES_INSTALL_DIR=${HERMES_INSTALL_DIR}"
 
   # DEFAULT BYPASS SCRATCH
+  # GLOG_v=1 \
 
   # Start a daemon
+
   HERMES_CONF=${HERMES_CONF} \
     ${HERMES_INSTALL_DIR}/bin/hermes_daemon &
-  # mpirun -n 1 -ppn 1 \
-  # -genv HERMES_CONF ${HERMES_CONF} \
-  # ${HERMES_INSTALL_DIR}/bin/hermes_daemon &
   
   sleep 3
 
   echo "Running sim_emulator.py with hermes posix ..."
-
   LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/libhermes_posix.so \
     HERMES_CLIENT=1 \
     HERMES_CONF=${HERMES_CONF} \
     HERMES_STOP_DAEMON=0 \
     ADAPTER_MODE=SCRATCH \
-    GLOG_v=1 \
-    FLAGS_logtostderr=1 \
-    python sim_emulator.py --residue 100 -n 2 -a 100 -f 1000 #> >(tee hm-sim.posix.log) 2>hm-sim.posix.err
+    python sim_emulator.py --residue 100 -n 4 -a 100 -f 1000 #> >(tee hm-sim.posix.log) 2>hm-sim.posix.err
 
   ls molecular_dynamics_runs/*/* -hl # should not have file, buffered in hermes
   
   echo "Running aggregate.py with hermes posix ..."
+  mpirun -n 1 \
   LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/libhermes_posix.so \
     HERMES_CLIENT=1 \
     HERMES_CONF=${HERMES_CONF} \
     HERMES_STOP_DAEMON=1 \
-    ADAPTER_MODE=DEFAULT \
-    GLOG_v=1 \
-    FLAGS_logtostderr=1 \
+    ADAPTER_MODE=SCRATCH \
     python aggregate.py -no_rmsd -no_fnc --input_path . --output_path ./aggregate.h5 #> >(tee hm-agg.posix.log) 2>hm-agg.posix.err
 
   ls -lrtah | grep "aggregate.h5" # check file size for correctness
@@ -168,9 +155,6 @@ hermes_sim_agg_vfd(){
 }
 
 
-
-
-
 recorder_simulation(){
 
     echo "Test: recorder_simulation "
@@ -210,6 +194,15 @@ process_recorder_result(){
   ${RECORDER_BUILD}/bin/recorder2text ${OPT2}
 }
 
+simulation_only(){
+    cd $SCRIPT_DIR
+    rm -rf molecular_dynamics_runs
+
+    python sim_emulator.py --residue 100 -n 6 -a 1000 -f 10000
+
+    ls molecular_dynamics_runs/*/* -hl
+}
+
 aggregator_only(){
     cd $SCRIPT_DIR
     rm -rf ./aggregate.h5
@@ -224,14 +217,7 @@ aggregator_nocm_only(){
     ls -lrtah | grep "aggregate.no_cm.h5"
 }
 
-simulation_only(){
-    cd $SCRIPT_DIR
-    rm -rf molecular_dynamics_runs
 
-    time python sim_emulator.py --residue 100 -n 6 -a 1000 -f 10000
-
-    ls molecular_dynamics_runs/*/* -hl
-}
 
 build_hermes(){
   set -e
