@@ -1,6 +1,6 @@
 # env
 hermes_ddmd/
-hermes_slabs
+hermes_slabs/
 
 # saved logs
 1job_log/  
@@ -9,10 +9,12 @@ diagrams/
 HermesBufferProblem/  
 old_log/  
 save_log/
+
 *.err
 *.log
 
 # output files
 molecular_dynamics_runs/  
+
 aggregate.h5
 
