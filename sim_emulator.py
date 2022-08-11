@@ -102,6 +102,9 @@ class SimEmulator:
                     fletcher32=False,
                     chunks=True
                     )
+        
+            # fletcher32=False,
+            # chunks=False
 
     def trajectory(self):
         coordinates = np.random.rand(self.n_atoms, 3)
@@ -165,7 +168,7 @@ def user_input():
     parser.add_argument('--fnc', default=True)
     parser.add_argument('--rmsd', default=True)
     parser.add_argument('--contact_map', default=True)
-    parser.add_argument('--point_cloud', default=True)
+    parser.add_argument('--point_cloud', default=True) # =False for Hermes VFD to work, default=True
     parser.add_argument('--trajectory', default=False)
     parser.add_argument('--output_filename', default=None)
     parser.add_argument('--adios-sst', action='store_true', default=False)
@@ -190,12 +193,15 @@ if __name__ == "__main__":
             is_point_cloud = args.point_cloud,
             is_rmsd = args.rmsd,
             is_fnc = args.fnc)
-    
-    for i in range(obj.n_jobs):
+
+    def runs(i):
+
         task_dir = "molecular_dynamics_runs/stage0000/task{:04d}/".format(i)
         Path(task_dir).mkdir(parents=True, exist_ok=True)
         cms = obj.contact_maps()
         pcs = obj.point_clouds()
+
+        times = []
 
         # if obj.adios_on is True:
         #     # reset file open by task id
@@ -203,76 +209,40 @@ if __name__ == "__main__":
         #     obj.adios.file_path = task_dir + os.path.basename(obj.adios.file_path)
         #     obj.adios.stream_path = task_dir + os.path.basename(obj.adios.stream_path)
         #     obj.adios.setup_conn()
+        #     times.append(time.time())
         #     if cms is not None:
         #         obj.adios.put({'contact_map': cms})
         #     if pcs is not None:
         #         obj.adios.put({'point_cloud': pcs})
+        #     times.append(time.time())
         # else:
         if cms is not None:
             obj.h5file(cms, 'contact_map', task_dir + obj.output_filename + ".h5")# + f"_ins_{i}.h5")
         if pcs is not None:
             obj.h5file(pcs, 'point_cloud', task_dir + obj.output_filename + ".h5")#f"_ins_{i}.h5")
-
+    #
+        # if obj.adios_on is True:
+        #     obj.adios.close_conn()
         dcd = obj.trajectories()
         if dcd is not None:
             obj.dcdfile(dcd, task_dir + obj.output_filename + ".dcd")#f"_ins_{i}.dcd")
         obj.pdbfile(None, task_dir + "dummy.pdb")#obj.output_filename + ".pdb")
-    print("total bytes written:{} in {} file(s)".format(obj.nbytes, i + 1), file = sys.stderr)
+
+        #print (max(times) - min(times), min(times), max(times) ) 
+        return task_dir, obj.nbytes
+
+
+    for i in range(obj.n_jobs):
+        runs(i)
+    # with Pool(obj.n_jobs) as p:
+        # res = (p.map(runs, list(range(obj.n_jobs))))
+    files = []
+    fbytes = 0
+    for fname, fbyte in res:
+        files.append(fname)
+        fbytes += fbyte
+
+    print("total bytes written:{} in {} file(s)".format(fbytes, obj.n_jobs), file = sys.stderr)
     # obj.adios.close_conn() if obj.adios_on else None
 
-
-
-    # def runs(i):
-
-    #     task_dir = "molecular_dynamics_runs/stage0000/task{:04d}/".format(i)
-    #     Path(task_dir).mkdir(parents=True, exist_ok=True)
-    #     cms = obj.contact_maps()
-    #     pcs = obj.point_clouds()
-
-    #     times = []
-
-    #     if obj.adios_on is True:
-    #         # reset file open by task id
-    #         obj.adios.close_conn()
-    #         obj.adios.file_path = task_dir + os.path.basename(obj.adios.file_path)
-    #         obj.adios.stream_path = task_dir + os.path.basename(obj.adios.stream_path)
-    #         obj.adios.setup_conn()
-    #         times.append(time.time())
-    #         if cms is not None:
-    #             obj.adios.put({'contact_map': cms})
-    #         if pcs is not None:
-    #             obj.adios.put({'point_cloud': pcs})
-    #         times.append(time.time())
-    #     else:
-
-    #     if cms is not None:
-    #         obj.h5file(cms, 'contact_map', task_dir + obj.output_filename + ".h5")# + f"_ins_{i}.h5")
-    #     if pcs is not None:
-    #         obj.h5file(pcs, 'point_cloud', task_dir + obj.output_filename + ".h5")#f"_ins_{i}.h5")
-    
-    #     if obj.adios_on is True:
-    #         obj.adios.close_conn()
-        
-    #     dcd = obj.trajectories()
-    #     if dcd is not None:
-    #         obj.dcdfile(dcd, task_dir + obj.output_filename + ".dcd")#f"_ins_{i}.dcd")
-    #     obj.pdbfile(None, task_dir + "dummy.pdb")#obj.output_filename + ".pdb")
-
-    #     #print (max(times) - min(times), min(times), max(times) ) 
-    #     return task_dir, obj.nbytes
-
-
-    # #for i in range(obj.n_jobs):
-    # with Pool(obj.n_jobs) as p:
-    #     res = (p.map(runs, list(range(obj.n_jobs))))
-    # files = []
-    # fbytes = 0
-    # for fname, fbyte in res:
-    #     files.append(fname)
-    #     fbytes += fbyte
-
-
-    # # print("total bytes written:{} in {} file(s)".format(fbytes, obj.n_jobs))
-    # # obj.adios.close_conn() if obj.adios_on else None
-    # print("total bytes written:{} in {} file(s)".format(fbytes, obj.n_jobs), file = sys.stderr) # to stderr
     # # print("Error", file = sys.stderr )
