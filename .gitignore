@@ -9,6 +9,7 @@ diagrams/
 HermesBufferProblem/  
 old_log/  
 save_log/
+save_job_log/
 
 *.err
 *.log
