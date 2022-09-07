@@ -99,12 +99,10 @@ class SimEmulator:
                     ds_name,
                     data=data,
                     dtype=dtype,
-                    fletcher32=False,
-                    chunks=True
+                    # fletcher32=False,
+                    # chunks=True
                     )
-        
-            # fletcher32=False,
-            # chunks=False
+
 
     def trajectory(self):
         coordinates = np.random.rand(self.n_atoms, 3)

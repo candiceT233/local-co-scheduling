@@ -123,34 +123,47 @@ hermes_sim_agg_vfd(){
   # HERMES_CONF=${HERMES_CONF} ${HERMES_INSTALL_DIR}/bin/hermes_daemon &
   # sleep 3
 
-  RES=100
-  SIZE=100
-  NJOB=1
-  echo "${SIZE}00"
-  mkdir -p ${NJOB}job_log
+  # RES=295
+  # SIZE=100
+  # NJOB=1
   
-  echo "Running sim_emulator with hermes vfd ..."
-  echo "sim_emulator ${SIZE}00 elements and ${NJOB} jobs ..."
-  
-  HDF5_DRIVER=hermes \
-    HDF5_PLUGIN_PATH=${HERMES_INSTALL_DIR}/lib/hermes_vfd \
-    HDF5_DRIVER_CONFIG="true 65536" HERMES_CONF=${HERMES_CONF} \
-    LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/hermes_vfd/libhdf5_hermes_vfd.so \
-    python sim_emulator.py --residue ${RES} -n ${NJOB} -a 1000 -f  "${SIZE}00" > >(tee hm-sim.$SIZE.log) 2>hm-sim.$SIZE.err
-  
-  ls molecular_dynamics_runs/*/* -hl
-  
-  HDF5_DRIVER=hermes \
-    HDF5_PLUGIN_PATH=${HERMES_INSTALL_DIR}/lib/hermes_vfd \
-    HDF5_DRIVER_CONFIG="true 65536" HERMES_CONF=${HERMES_CONF} \
-    LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/hermes_vfd/libhdf5_hermes_vfd.so \
-    python aggregate.py -no_rmsd -no_fnc --input_path . --output_path ./aggregate.h5 > >(tee hm-agg.$SIZE.log) 2>hm-agg.$SIZE.err
+  mkdir -p curr_job_log/
 
-  ls -lrtah | grep "aggregate.h5"
+  for RES in 145 210 295 ; do #  145 210 295
+    for NJOB in 1 ; do #  2 4 8
+      for SIZE in 100 ; do #  200 400 800
+
+        F_NAME=f$SIZE.n${NJOB}.r${RES}
+  
+        echo "Running sim_emulator with hermes vfd ..."
+        echo "sim_emulator ${SIZE}00 elements ${RES} residues and ${NJOB} jobs ..."
+        
+        HDF5_DRIVER=hermes \
+          HDF5_PLUGIN_PATH=${HERMES_INSTALL_DIR}/lib/hermes_vfd \
+          HDF5_DRIVER_CONFIG="true 65536" HERMES_CONF=${HERMES_CONF} \
+          LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/hermes_vfd/libhdf5_hermes_vfd.so \
+          python sim_emulator.py --residue ${RES} -n ${NJOB} -a 1000 -f  "${SIZE}00" \
+          > >(tee hm-sim.${F_NAME}.log) 2>hm-sim.${F_NAME}.err
+        
+        ls molecular_dynamics_runs/*/* -hl
+        
+        HDF5_DRIVER=hermes \
+          HDF5_PLUGIN_PATH=${HERMES_INSTALL_DIR}/lib/hermes_vfd \
+          HDF5_DRIVER_CONFIG="true 65536" HERMES_CONF=${HERMES_CONF} \
+          LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/hermes_vfd/libhdf5_hermes_vfd.so \
+          python aggregate.py -no_rmsd -no_fnc --input_path . --output_path ./aggregate.h5 \
+          > >(tee hm-agg.${F_NAME}.log) 2>hm-agg.${F_NAME}.err
+
+        ls -lrtah | grep "aggregate.h5"
+
+        mv hm-*.${F_NAME}.* curr_job_log/
+      done
+    done
+  done
 
   # killall hermes_daemon # clean up daemon
   
-  mv hm-*.$SIZE.* ${NJOB}job_log/
+  
 
 }
 
@@ -237,6 +250,36 @@ build_hdf5(){
   cd -
 }
 
+cleanup_logs(){
+  rm -rf hm-vfd.txt
+  touch hm-vfd.txt
+
+  # for RES in 100 145 210 295; do
+  #   for SIZE in 100 200 400 800; do
+  #     for NJOB in 1 2 4 8; do
+
+  #       F_NAME=f$SIZE.n${NJOB}.r${RES}
+  #       F_SIM=curr_job_log/hm-sim.${F_NAME}.log
+  #       F_AGG=curr_job_log/hm-agg.${F_NAME}.log
+  #       if [ -f "$F_SIM" ]; then
+  #         echo -e "\n$F_SIM exists."
+  #         python3 analyze.py curr_job_log/hm-sim.${F_NAME}.log | tee -a hm-vfd.txt
+  #       fi
+
+  #       if [ -f "$F_AGG" ]; then
+  #         echo -e "\n$F_AGG exists."
+  #         python3 analyze.py curr_job_log/hm-agg.${F_NAME}.log | tee -a hm-vfd.txt
+  #       fi
+  #     done
+  #   done
+  # done
+
+  # clean up logs
+  stamp=$(date +%s | cut -c 7-10)
+  mkdir -p save_job_log/
+  mv curr_job_log/ save_job_log/${stamp}_job_log/
+}
+
 if [ "$OPT" == "makehm" ]
 then 
   build_hermes
@@ -321,5 +364,10 @@ then
   exit 0
 fi
 
+if [ "$OPT" == "cln-log" ]
+then 
+  cleanup_logs
+  exit 0
+fi
 
 

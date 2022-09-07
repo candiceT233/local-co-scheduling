@@ -184,8 +184,10 @@ def main():
 
     read_write_size(df,['/contact_map', '/point_cloud',''], infile)
 
+    print("Writing to Excel ...")
     df.to_excel(f"{infile}.xlsx")
     # df.to_csv(f"{infile}.csv")
+    print("Write to Excel done.")
 
 if __name__ == "__main__":
     main()
