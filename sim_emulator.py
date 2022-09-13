@@ -229,16 +229,19 @@ if __name__ == "__main__":
         #print (max(times) - min(times), min(times), max(times) ) 
         return task_dir, obj.nbytes
 
-
-    for i in range(obj.n_jobs):
-        runs(i)
-    # with Pool(obj.n_jobs) as p:
-        # res = (p.map(runs, list(range(obj.n_jobs))))
     files = []
     fbytes = 0
-    for fname, fbyte in res:
-        files.append(fname)
+    for i in range(obj.n_jobs):
+        fname, fbyte = runs(i)
         fbytes += fbyte
+
+    # with Pool(obj.n_jobs) as p:
+        # res = (p.map(runs, list(range(obj.n_jobs))))
+    # files = []
+    # fbytes = 0
+    # for fname, fbyte in res:
+    #     files.append(fname)
+    #     fbytes += fbyte
 
     print("total bytes written:{} in {} file(s)".format(fbytes, obj.n_jobs), file = sys.stderr)
     # obj.adios.close_conn() if obj.adios_on else None
