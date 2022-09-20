@@ -36,10 +36,11 @@ def read_block(acc_dict,t,f,count):
         
         # tmp = line.replace("-- ", "")
         # tmp = line.replace("- ", "")
+
+        # get the pair of key:value
         tmp = line.strip().split(':')
 
-        # if any(x in ignore_line for x in tmp):
-        #     continue
+        # if no value, then read next key:value
         if len(tmp) == 0:
             break
 
@@ -50,15 +51,18 @@ def read_block(acc_dict,t,f,count):
         if len(tmp) > 1:
             v = tmp[1].strip()
             # v = v.replace("/", "")
-            
-        if k in acc_dict[count].keys():
-            if 'Blob' in k:
-                acc_dict[count][k].append(int(v))
-        else:
-            if 'Blob' in k:
-                acc_dict[count][k] = [int(v)]
-            else:
-                acc_dict[count][k] = v
+        
+        acc_dict[count][k] = v
+
+        # if k in acc_dict[count].keys():
+        #     if 'Blob' in k:
+        #         acc_dict[count][k].append(int(v))
+        # else:
+        #     if 'Blob' in k:
+        #         acc_dict[count][k] = [int(v)]
+        #     else:
+        #         acc_dict[count][k] = v
+
         # if count == 283:
         #     exit(1)
         # print("Line {}: {}".format(count, v))
@@ -157,37 +161,55 @@ def df_correct_type(df):
             #     print(f"Error : {df[c]} ")
             #     print(df[df[c].isnull()])
             #     # print(df[df[c].isnull()])
-
-def main():
-
-    cmdargs = sys.argv
-
-    if(len(cmdargs) < 2):
-        exit("Please give input file")
     
-
-    infile = cmdargs[1]
-
+def process(infile):
     print("Log to dataframe ...")
     df = log_to_df(infile)
     df = df.transpose()
     print("Dictionary to dataframe done.")
 
-    # pd.set_option('max_columns', None)
-    # print(df.head(3))
-    # print(df.columns)
-    # for c in ignore_line:
-    #     del df[c]
-
     print("Analyzing read & write IO ...")
     df_correct_type(df)
 
-    read_write_size(df,['/contact_map', '/point_cloud',''], infile)
+    # read_write_size(df,['/contact_map', '/point_cloud',''], infile)
 
     print("Writing to Excel ...")
     df.to_excel(f"{infile}.xlsx")
     # df.to_csv(f"{infile}.csv")
     print("Write to Excel done.")
 
+def process_all(dir_path):
+    # list to store files
+    res = []
+
+    # Iterate directory
+    for path in os.listdir(dir_path):
+        # check if current path is a file
+        if os.path.isfile(os.path.join(dir_path, path)):
+            if '.log' in path and 'xlsx' not in path:
+                res.append(os.path.join(dir_path, path))
+    print(res)
+    print(len(res))
+
+    for infile in res:
+        print(f"Analyzing {infile}...")
+        process(infile)
+        print(f"{infile} done.\n")
+
+def main():
+    dir_path = "save_job_log/4627_job_log"
+    # 1352_job_log , 2375_job_log , 4627_job_log
+
+    cmdargs = sys.argv
+    if(len(cmdargs) < 2):
+        exit("Please give input file or 'all'")
+    
+    inarg = cmdargs[1]
+
+    if inarg == 'all':
+        process_all(dir_path)
+    else:
+        process(inarg)
+    
 if __name__ == "__main__":
     main()
