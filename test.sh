@@ -17,6 +17,9 @@ fi
 
 OPT=$1
 OPT2=$2
+
+rm -rf device*_slab*.hermes
+
 mkdir -p $DEV1_DIR/$HSLABS
 mkdir -p $DEV2_DIR/$HSLABS
 rm -rf ${DEV1_DIR}/$HSLABS/*
@@ -132,6 +135,9 @@ hermes_sim_agg_vfd(){
   for RES in 145 210 295 ; do #  145 210 295
     for NJOB in 1 ; do #  2 4 8
       for SIZE in 100 ; do #  200 400 800
+        rm -rf molecular_dynamics_runs
+        rm -rf ./aggregate.h5
+        rm -rf device1_slab*
 
         F_NAME=f$SIZE.n${NJOB}.r${RES}
   
@@ -168,43 +174,43 @@ hermes_sim_agg_vfd(){
 }
 
 
-recorder_simulation(){
+darshan_simulation(){
 
-    echo "Test: recorder_simulation "
+    echo "Test: darshan_simulation "
 
     cd $SCRIPT_DIR
     rm -rf molecular_dynamics_runs
 
     echo "Running simulation with recorder ..."
-    #ls -l ${RECORDER_BUILD}/lib/librecorder.so
+    #ls -l ${darshan_BUILD}/lib/librecorder.so
 
-    RECORDER_WITH_NON_MPI=1 \
-      LD_PRELOAD=${RECORDER_BUILD}/lib/librecorder.so \
+    darshan_WITH_NON_MPI=1 \
+      LD_PRELOAD=${darshan_BUILD}/lib/librecorder.so \
       python sim_emulator.py --residue 100 -n 6 -a 100 -f 100
 
     ls molecular_dynamics_runs/*/* -hl
 }
 
-recorder_aggregator(){
+darshan_aggregator(){
 
-  echo "Test: recorder_aggregator "
+  echo "Test: darshan_aggregator "
 
   cd $SCRIPT_DIR
   rm -rf ./aggregate.h5
 
   echo "Running aggregation with recorder ..."
 
-  LD_PRELOAD=${RECORDER_BUILD}/lib/librecorder.so \
+  LD_PRELOAD=${darshan_BUILD}/lib/librecorder.so \
     python aggregate.py -no_rmsd -no_fnc --input_path . --output_path ./aggregate.h5
 
   ls -lrtah | grep "aggregate.h5"
 
 }
 
-process_recorder_result(){
-  # pip install recorder_viz numpy bokeh prettytable pandas
-  python ${RECORDER_REPO}/tools/reporter/reporter.py ${OPT2}
-  ${RECORDER_BUILD}/bin/recorder2text ${OPT2}
+process_darshan_result(){
+  # pip install darshan_viz numpy bokeh prettytable pandas
+  python ${darshan_REPO}/tools/reporter/reporter.py ${OPT2}
+  ${darshan_BUILD}/bin/recorder2text ${OPT2}
 }
 
 simulation_only(){
@@ -254,31 +260,66 @@ cleanup_logs(){
   rm -rf hm-vfd.txt
   touch hm-vfd.txt
 
-  # for RES in 100 145 210 295; do
-  #   for SIZE in 100 200 400 800; do
-  #     for NJOB in 1 2 4 8; do
+  for RES in 100 145 210 295; do
+    for SIZE in 100 800 ; do # 200 400 800
+      for NJOB in 1 ; do #2 4 8
 
-  #       F_NAME=f$SIZE.n${NJOB}.r${RES}
-  #       F_SIM=curr_job_log/hm-sim.${F_NAME}.log
-  #       F_AGG=curr_job_log/hm-agg.${F_NAME}.log
-  #       if [ -f "$F_SIM" ]; then
-  #         echo -e "\n$F_SIM exists."
-  #         python3 analyze.py curr_job_log/hm-sim.${F_NAME}.log | tee -a hm-vfd.txt
-  #       fi
+        F_NAME=f$SIZE.n${NJOB}.r${RES}
+        F_SIM=curr_job_log/hm-sim.${F_NAME}.log
+        F_AGG=curr_job_log/hm-agg.${F_NAME}.log
+        if [ -f "$F_SIM" ]; then
+          echo -e "\n$F_SIM exists."
+          python3 analyze.py curr_job_log/hm-sim.${F_NAME}.log | tee -a hm-vfd.txt
+        fi
 
-  #       if [ -f "$F_AGG" ]; then
-  #         echo -e "\n$F_AGG exists."
-  #         python3 analyze.py curr_job_log/hm-agg.${F_NAME}.log | tee -a hm-vfd.txt
-  #       fi
-  #     done
-  #   done
-  # done
+        if [ -f "$F_AGG" ]; then
+          echo -e "\n$F_AGG exists."
+          python3 analyze.py curr_job_log/hm-agg.${F_NAME}.log | tee -a hm-vfd.txt
+        fi
+      done
+    done
+  done
 
   # clean up logs
   stamp=$(date +%s | cut -c 7-10)
   mkdir -p save_job_log/
   mv curr_job_log/ save_job_log/${stamp}_job_log/
 }
+
+logpt_vfd(){
+  LOGPT_VOL_DIR=/home/mtang11/scripts/local-co-scheduling/vol-log-passthrough
+
+  HDF5_DRIVER=hermes \
+  HDF5_PLUGIN_PATH="${HERMES_INSTALL_DIR}/lib/hermes_vfd:$LOGPT_VOL_DIR" \
+  LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$LOGPT_VOL_DIR \
+  HDF5_VOL_CONNECTOR="vol_log_passthrough under_vol=0;under_info={};" \
+  HDF5_DRIVER_CONFIG="true 65536" HERMES_CONF=${HERMES_CONF} \
+  LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/hermes_vfd/libhdf5_hermes_vfd.so \
+  python sim_emulator.py --residue 1 -n 1 -a 100 -f 100 \
+  > >(tee ptvol-vfd.log) 2>ptvol-vfd.err
+  
+}
+
+logpt_vol(){
+  LOGPT_VOL_DIR=/home/mtang11/scripts/local-co-scheduling/vol-log-passthrough
+
+  HDF5_PLUGIN_PATH=$LOGPT_VOL_DIR \
+  HDF5_VOL_CONNECTOR="vol_log_passthrough under_vol=0;under_info={};" \
+  LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$LOGPT_VOL_DIR \
+  python sim_emulator.py --residue 100 -n 1 -a 100 -f 100 > >(tee ptvol-h5py.log) 2>ptvol-h5py.err
+}
+
+if [ "$OPT" == "logpt" ] 
+then 
+  logpt_vol
+  exit 0
+fi
+
+if [ "$OPT" == "logpt-vfd" ] 
+then 
+  logpt_vfd
+  exit 0
+fi
 
 if [ "$OPT" == "makehm" ]
 then 
@@ -312,19 +353,19 @@ fi
 
 if [ "$OPT" == "rec-sim" ]
 then 
-  recorder_simulation
+  darshan_simulation
   exit 0
 fi
 
 if [ "$OPT" == "rec-agg" ]
 then 
-  recorder_aggregator
+  darshan_aggregator
   exit 0
 fi
 
 if [ "$OPT" == "rec-aggnocm" ]
 then 
-  #recorder_aggregator_nocm_only
+  #darshan_aggregator_nocm_only
   echo "Not yet"
   exit 0
 fi
@@ -335,7 +376,7 @@ then
   then
     echo "Please enter a recorder result folder..."
   else
-    process_recorder_result
+    process_darshan_result
   fi
   exit 0
 fi
