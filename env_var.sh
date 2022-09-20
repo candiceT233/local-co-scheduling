@@ -21,7 +21,8 @@ SPACK_DIR=$HOME/spack
 
 # Hermes running dirs -----------
 # CONF_NAME=hermes_single3.conf
-CONF_NAME=hermes.conf
+# CONF_NAME=hermes_single2.yaml
+CONF_NAME=hermes.yaml
 SCRIPT_DIR=$HOME/scripts/local-co-scheduling
 mkdir -p $SCRIPT_DIR/hermes_slabs
 

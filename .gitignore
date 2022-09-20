@@ -2,14 +2,18 @@
 hermes_ddmd/
 hermes_slabs/
 
+# other scripts
+vol-log-passthrough/
+diagrams/  
+
 # saved logs
 1job_log/  
 2job_log/  
-diagrams/  
 HermesBufferProblem/  
 old_log/  
 save_log/
 save_job_log/
+old_save_jog_log/
 
 *.err
 *.log
