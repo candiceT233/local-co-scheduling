@@ -25,3 +25,4 @@ molecular_dynamics_runs/
 aggregate.h5
 hermes_swap/
 device*_slab*.hermes
+swap*.hermes
