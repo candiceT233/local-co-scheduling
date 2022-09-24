@@ -2,15 +2,16 @@
 hermes_ddmd/
 hermes_slabs/
 
-# other scripts
+# other repos
 vol-log-passthrough/
-diagrams/  
+vol-provenance/
 
 # saved logs
 1job_log/  
 2job_log/  
 HermesBufferProblem/  
-old_log/  
+old_log/
+diagrams/  
 save_log/
 save_job_log/
 old_save_jog_log/
@@ -22,4 +23,5 @@ old_save_jog_log/
 molecular_dynamics_runs/  
 molecular_dynamics_runs/
 aggregate.h5
-
+hermes_swap/
+device*_slab*.hermes
