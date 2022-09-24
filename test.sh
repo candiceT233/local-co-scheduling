@@ -18,7 +18,7 @@ fi
 OPT=$1
 OPT2=$2
 
-rm -rf device*_slab*.hermes
+rm -rf $SCRIPT_DIR/device*_slab*.hermes
 
 mkdir -p $DEV1_DIR/$HSLABS
 mkdir -p $DEV2_DIR/$HSLABS
@@ -36,13 +36,13 @@ hermes_simulation(){
 
   #MPICH_SO="/qfs/people/tang584/spack/opt/spack/linux-centos7-skylake_avx512/gcc-9.1.0/mpich-4.0.2-mgup4qvsylc4vs4uimdwwzx5dapmm26h/lib/libmpich.so"
   #HDEBUG_SO="${HERMES_INSTALL_DIR}/lib/libhermes_debug.so"
-  # 65536 16384 
+  # 65536 16384 131072
 
   HDF5_DRIVER=hermes \
     HDF5_PLUGIN_PATH=${HERMES_INSTALL_DIR}/lib/hermes_vfd \
     HDF5_DRIVER_CONFIG="true 65536" HERMES_CONF=${HERMES_CONF} \
     LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/hermes_vfd/libhdf5_hermes_vfd.so \
-    python sim_emulator.py --residue 100 -n 2 -a 1000 -f 1000 > >(tee hm-sim.log) 2>hm-sim.err
+    python sim_emulator.py --residue 100 -n 2 -a 1000 -f 10000 > >(tee hm-sim.log) 2>hm-sim.err
 
   ls molecular_dynamics_runs/*/* -hl
 }
@@ -173,40 +173,6 @@ hermes_sim_agg_vfd(){
 
 }
 
-
-darshan_simulation(){
-
-    echo "Test: darshan_simulation "
-
-    cd $SCRIPT_DIR
-    rm -rf molecular_dynamics_runs
-
-    echo "Running simulation with recorder ..."
-    #ls -l ${darshan_BUILD}/lib/librecorder.so
-
-    darshan_WITH_NON_MPI=1 \
-      LD_PRELOAD=${darshan_BUILD}/lib/librecorder.so \
-      python sim_emulator.py --residue 100 -n 6 -a 100 -f 100
-
-    ls molecular_dynamics_runs/*/* -hl
-}
-
-darshan_aggregator(){
-
-  echo "Test: darshan_aggregator "
-
-  cd $SCRIPT_DIR
-  rm -rf ./aggregate.h5
-
-  echo "Running aggregation with recorder ..."
-
-  LD_PRELOAD=${darshan_BUILD}/lib/librecorder.so \
-    python aggregate.py -no_rmsd -no_fnc --input_path . --output_path ./aggregate.h5
-
-  ls -lrtah | grep "aggregate.h5"
-
-}
-
 process_darshan_result(){
   # pip install darshan_viz numpy bokeh prettytable pandas
   python ${darshan_REPO}/tools/reporter/reporter.py ${OPT2}
@@ -221,7 +187,6 @@ simulation_only(){
 
     ls molecular_dynamics_runs/*/* -hl
 }
-
 aggregator_only(){
     cd $SCRIPT_DIR
     rm -rf ./aggregate.h5
@@ -235,8 +200,6 @@ aggregator_nocm_only(){
     time python aggregate.py -no_rmsd -no_fnc --input_path . --output_path ./aggregate.no_cm.h5 -no_cm
     ls -lrtah | grep "aggregate.no_cm.h5"
 }
-
-
 
 build_hermes(){
   set -e
@@ -286,28 +249,93 @@ cleanup_logs(){
   mv curr_job_log/ save_job_log/${stamp}_job_log/
 }
 
-logpt_vfd(){
-  LOGPT_VOL_DIR=/home/mtang11/scripts/local-co-scheduling/vol-log-passthrough
+prov_vfd_sim(){
+  set -e # breaks if make not success
+  PROV_VOL_DIR=$SCRIPT_DIR/vol-provenance
+  cd $PROV_VOL_DIR
+  make
+  cd -
+  set +e
 
   HDF5_DRIVER=hermes \
-  HDF5_PLUGIN_PATH="${HERMES_INSTALL_DIR}/lib/hermes_vfd:$LOGPT_VOL_DIR" \
-  LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$LOGPT_VOL_DIR \
-  HDF5_VOL_CONNECTOR="vol_log_passthrough under_vol=0;under_info={};" \
+  HDF5_PLUGIN_PATH=${HERMES_INSTALL_DIR}/lib/hermes_vfd:$PROV_VOL_DIR \
+  LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PROV_VOL_DIR \
+  HDF5_VOL_CONNECTOR="provenance under_vol=0;under_info={};path=$SCRIPT_DIR;level=0;format=" \
+  HDF5_DRIVER_CONFIG="false 65536" HERMES_CONF=${HERMES_CONF} \
+  LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/hermes_vfd/libhdf5_hermes_vfd.so \
+  python sim_emulator.py --residue 100 -n 1 -a 100 -f 1000 \
+  > >(tee prov-vfd-sim.log) 2>prov-vfd-sim.err
+
+  ls molecular_dynamics_runs/*/* -hl
+
+}
+
+prov_vfd_agg(){
+  set -e # breaks if make not success
+  PROV_VOL_DIR=$SCRIPT_DIR/vol-provenance
+  cd $PROV_VOL_DIR
+  make
+  cd -
+  set +e
+
+  HDF5_DRIVER=hermes \
+  HDF5_PLUGIN_PATH="${HERMES_INSTALL_DIR}/lib/hermes_vfd:$PROV_VOL_DIR" \
+  LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PROV_VOL_DIR \
+  HDF5_VOL_CONNECTOR="provenance under_vol=0;under_info={};path=$SCRIPT_DIR;level=0;format=" \
   HDF5_DRIVER_CONFIG="true 65536" HERMES_CONF=${HERMES_CONF} \
   LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/hermes_vfd/libhdf5_hermes_vfd.so \
-  python sim_emulator.py --residue 1 -n 1 -a 100 -f 100 \
-  > >(tee ptvol-vfd.log) 2>ptvol-vfd.err
-  
+  python aggregate.py -no_rmsd -no_fnc --input_path . --output_path ./aggregate.h5 \
+  > >(tee prov-vfd-agg.log) 2>prov-vfd-agg.err
+
+  ls -lrtah | grep "aggregate.h5"
+
 }
 
 logpt_vol(){
-  LOGPT_VOL_DIR=/home/mtang11/scripts/local-co-scheduling/vol-log-passthrough
+  set -e # breaks if make not success
+  LOGPT_VOL_DIR=$SCRIPT_DIR/vol-log-passthrough
+  cd $LOGPT_VOL_DIR
+  make
+  cd -
 
   HDF5_PLUGIN_PATH=$LOGPT_VOL_DIR \
   HDF5_VOL_CONNECTOR="vol_log_passthrough under_vol=0;under_info={};" \
   LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$LOGPT_VOL_DIR \
   python sim_emulator.py --residue 100 -n 1 -a 100 -f 100 > >(tee ptvol-h5py.log) 2>ptvol-h5py.err
+  
+  ls molecular_dynamics_runs/*/* -hl
 }
+
+prov_vol(){
+  set -e # breaks if make not success
+  PROV_VOL_DIR=$SCRIPT_DIR/vol-provenance
+  cd $PROV_VOL_DIR
+  make
+  cd -
+
+  HDF5_PLUGIN_PATH=$PROV_VOL_DIR \
+  HDF5_VOL_CONNECTOR="provenance under_vol=0;under_info={};path=$SCRIPT_DIR;level=0;format=" \
+  LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PROV_VOL_DIR \
+  python sim_emulator.py --residue 100 -n 1 -a 100 -f 100 \
+  > >(tee provol-sim.log) 2>provol-sim.err
+
+  ls molecular_dynamics_runs/*/* -hl
+
+  HDF5_PLUGIN_PATH=$PROV_VOL_DIR \
+  HDF5_VOL_CONNECTOR="provenance under_vol=0;under_info={};path=$SCRIPT_DIR;level=0;format=" \
+  LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PROV_VOL_DIR \
+  python aggregate.py -no_rmsd -no_fnc --input_path . --output_path ./aggregate.h5 \
+  > >(tee prov-agg.log) 2>prov-agg.err
+
+  ls -lrtah | grep "aggregate.h5"
+
+}
+
+if [ "$OPT" == "prov" ] 
+then 
+  prov_vol
+  exit 0
+fi
 
 if [ "$OPT" == "logpt" ] 
 then 
@@ -315,9 +343,15 @@ then
   exit 0
 fi
 
-if [ "$OPT" == "logpt-vfd" ] 
+if [ "$OPT" == "prov-vfd-sim" ] 
 then 
-  logpt_vfd
+  prov_vfd_sim
+  exit 0
+fi
+
+if [ "$OPT" == "prov-vfd-agg" ] 
+then 
+  prov_vfd_agg
   exit 0
 fi
 
@@ -348,25 +382,6 @@ fi
 if [ "$OPT" == "aggnocm" ]
 then 
   aggregator_only
-  exit 0
-fi
-
-if [ "$OPT" == "rec-sim" ]
-then 
-  darshan_simulation
-  exit 0
-fi
-
-if [ "$OPT" == "rec-agg" ]
-then 
-  darshan_aggregator
-  exit 0
-fi
-
-if [ "$OPT" == "rec-aggnocm" ]
-then 
-  #darshan_aggregator_nocm_only
-  echo "Not yet"
   exit 0
 fi
 
