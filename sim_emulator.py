@@ -15,7 +15,8 @@ except:
 # from mpi4py import MPI # import the 'MPI' module to work with Hermes
 import sys # for final output to ostderr
 
-
+# SSD_PATH="/mnt/ssd/mtang11/"
+SSD_PATH=""
 
 class SimEmulator:
 
@@ -83,6 +84,7 @@ class SimEmulator:
         return pcs
 
     def h5file(self, data, ds_name, fname=None):
+        mode = "a"
 
         if fname is None:
             fname = "{}.h5".format(self.output_filename)
@@ -91,8 +93,11 @@ class SimEmulator:
             dtype = data[0].dtype
         elif data.dtype == object:
             dtype = h5py.vlen_dtype(np.dtype(data[0].dtype))
+        
+        if not os.path.exists(fname):
+            mode = "w"
 
-        with h5py.File(fname, "a", swmr=False) as h5_file:
+        with h5py.File(fname, mode, swmr=False) as h5_file: #swmr=False has async issue
             if ds_name in h5_file:
                 del h5_file[ds_name]
             h5_file.create_dataset(
@@ -194,7 +199,7 @@ if __name__ == "__main__":
 
     def runs(i):
 
-        task_dir = "molecular_dynamics_runs/stage0000/task{:04d}/".format(i)
+        task_dir = SSD_PATH + "molecular_dynamics_runs/stage0000/task{:04d}/".format(i)
         Path(task_dir).mkdir(parents=True, exist_ok=True)
         cms = obj.contact_maps()
         pcs = obj.point_clouds()
