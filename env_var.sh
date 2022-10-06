@@ -50,5 +50,6 @@ HDF5_INSTALL=$INSTALL_DIR/hdf5-1_13_1
 
 #conda activate /files0/oddite/conda/ddmd/ # original global env
 #conda activate hermes_ddmd # local
-source hermes_ddmd/bin/activate
+PY_VENV=$SCRIPT_DIR/ddmd_env
+source $PY_VENV/bin/activate
 export HDF5_USE_FILE_LOCKING='FALSE' #'TRUE'
