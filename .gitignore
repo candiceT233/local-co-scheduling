@@ -1,6 +1,7 @@
 # env
 hermes_ddmd/
 hermes_slabs/
+ddmd_env/
 
 # other repos
 vol-log-passthrough/
