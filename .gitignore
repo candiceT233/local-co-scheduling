@@ -18,6 +18,8 @@ old_save_jog_log/
 
 *.err
 *.log
+!prov-sim.log
+!prov-agg.log
 
 # output files
 molecular_dynamics_runs/  
@@ -26,3 +28,4 @@ aggregate.h5
 hermes_swap/
 device*_slab*.hermes
 swap*.hermes
+
