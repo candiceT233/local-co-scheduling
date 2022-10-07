@@ -2,7 +2,7 @@ file-2_0:
 	name: molecular_dynamics_runs/stage0000/task0000/residue_100.h5
 	dset-2_0-1_0:
 		name: contact_map
-		parent_file_name: molecular_dynamics_runs/stage0000/task0000/residue_100.h5
+		layout: H5D_CONTIGUOUS
 		offset: 2048
 		data_type_class: 9
 		type_size: 16
@@ -12,13 +12,13 @@ file-2_0:
 		dimensions: [1000,]
 		read_cnt: 1
 		blob_get_cnt: 1000
-		read_io_size: 9317104
+		read_io_size: 9313680
 file-2_0:
 	name: molecular_dynamics_runs/stage0000/task0000/residue_100.h5
 	dset-2_0-2_0:
 		name: point_cloud
-		parent_file_name: molecular_dynamics_runs/stage0000/task0000/residue_100.h5
-		offset: 9534072
+		layout: H5D_CONTIGUOUS
+		offset: 9522016
 		data_type_class: 1
 		type_size: 4
 		n_elements: 300000
@@ -29,13 +29,13 @@ file-2_0:
 		read_io_size: 1200000
 file-2_0:
 	name: molecular_dynamics_runs/stage0000/task0000/residue_100.h5
-	size: 10734072
+	size: 10722016
 	intent: H5F_ACC_RDONLY
 file-1_0:
 	name: ./aggregate.h5
 	dset-1_0-3_0:
 		name: contact_map
-		parent_file_name: ./aggregate.h5
+		layout: H5D_CHUNKED
 		offset: -1
 		data_type_class: 9
 		type_size: 16
@@ -45,12 +45,12 @@ file-1_0:
 		dimensions: [1000,]
 		write_cnt: 1
 		blob_put_cnt: 1000
-		write_io_size: 9317104
+		write_io_size: 9313680
 file-1_0:
 	name: ./aggregate.h5
 	dset-1_0-4_0:
 		name: point_cloud
-		parent_file_name: ./aggregate.h5
+		layout: H5D_CHUNKED
 		offset: -1
 		data_type_class: 1
 		type_size: 4
@@ -62,5 +62,5 @@ file-1_0:
 		write_io_size: 1200000
 file-1_0:
 	name: ./aggregate.h5
-	size: 10720724
+	size: 10654668
 	intent: H5F_ACC_RDWR
