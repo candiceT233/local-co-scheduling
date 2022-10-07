@@ -1,29 +1,37 @@
-dset-1_0-1_0:
-	name: contact_map
-	parent_file_name: molecular_dynamics_runs/stage0000/task0000/residue_100.h5
-	offset: 2048
-	data_type_class: 9
-	type_size: 16
-	n_elements: 1000
-	storage_size: 16000
-	n_dimension: 1
-	dimensions: [1000,]
-	write_cnt: 1
-	blob_put_cnt: 1000
-	write_io_size: 9314324
 file-1_0:
 	name: molecular_dynamics_runs/stage0000/task0000/residue_100.h5
-dset-2_0-2_0:
-	name: point_cloud
-	parent_file_name: molecular_dynamics_runs/stage0000/task0000/residue_100.h5
-	offset: 9560192
-	data_type_class: 1
-	type_size: 4
-	n_elements: 300000
-	storage_size: 1200000
-	n_dimension: 3
-	dimensions: [1000,3,100,]
-	write_cnt: 1
-	write_io_size: 1200000
+	dset-1_0-1_0:
+		name: contact_map
+		parent_file_name: molecular_dynamics_runs/stage0000/task0000/residue_100.h5
+		offset: 2048
+		data_type_class: 9
+		type_size: 16
+		n_elements: 1000
+		storage_size: 16000
+		n_dimension: 1
+		dimensions: [1000,]
+		write_cnt: 1
+		blob_put_cnt: 1000
+		write_io_size: 9317104
+file-1_0:
+	name: molecular_dynamics_runs/stage0000/task0000/residue_100.h5
+	size: 9532024
+	intent: H5F_ACC_RDWR
 file-2_0:
 	name: molecular_dynamics_runs/stage0000/task0000/residue_100.h5
+	dset-2_0-2_0:
+		name: point_cloud
+		parent_file_name: molecular_dynamics_runs/stage0000/task0000/residue_100.h5
+		offset: 9534072
+		data_type_class: 1
+		type_size: 4
+		n_elements: 300000
+		storage_size: 1200000
+		n_dimension: 3
+		dimensions: [1000,3,100,]
+		write_cnt: 1
+		write_io_size: 1200000
+file-2_0:
+	name: molecular_dynamics_runs/stage0000/task0000/residue_100.h5
+	size: 10734072
+	intent: H5F_ACC_RDWR
