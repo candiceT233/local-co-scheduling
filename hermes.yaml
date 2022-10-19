@@ -10,7 +10,7 @@ num_targets: 2
 
 # The maximum buffering capacity in MiB of each device. Here we say that all 4
 # devices get 50 MiB of buffering capacity.
-capacities_mb: [1000, 500]
+capacities_mb: [500, 500]
 # The size of the smallest available buffer in KiB. In general this should be
 # the page size of your system for byte addressable storage, and the block size
 # of the storage device for block addressable storage.
@@ -44,9 +44,9 @@ latencies_us: [15, 250000]
 
 # Hermes memory management. The following 4 values should add up to 1.
 # The percentage of Hermes memory to reserve for RAM buffers.
-buffer_pool_arena_percentage: 0.6
+buffer_pool_arena_percentage: 0.5
 # The percentage of Hermes memory to reserve for metadata.
-metadata_arena_percentage: 0.3
+metadata_arena_percentage: 0.4
 # The percentage of Hermes memory to reserve for short term storage.
 transient_arena_percentage: 0.1
 
@@ -60,17 +60,17 @@ system_view_state_update_interval_ms: 1000
 # The mount point of each device. RAM should be the empty string. For block
 # devices, this is the directory where Hermes will create buffering files. For
 # object storage or cloud targets, this will be a url.
-mount_points: ["", "./"] # RAM and BurstBuffer
+mount_points: ["", "./hermes_slabs"] # RAM and BurstBuffer # /mnt/ssd/mtang11/hermes_slabs
 # mount_points: ["", "/mnt/ssd/mtang11/hermes_slabs"]
 # For each device, indicate '1' if it is shared among nodes (e.g., burst
 # buffers), or '0' if it is per node (e.g., local NVMe).
 is_shared_device: [0,0]
 # The mount point of a PFS or object store for swap space, in the event that
 # Hermes buffers become full.
-swap_mount: "./hermes_swap" # the PFS
+swap_mount: "./hermes_swap" # the PFS #/mnt/ssd/mtang11/hermes_slabs
 # The number of times the buffer organizer will attempt to place a blob from
 # swap space into the hierarchy before giving up.
-num_buffer_organizer_retries: 5
+num_buffer_organizer_retries: 3
 
 # A path to a file containing a list of server names, 1 per line. If your
 # servers are named according to a pattern (e.g., server-1, server-2, etc.),

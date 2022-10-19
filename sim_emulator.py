@@ -15,8 +15,11 @@ except:
 # from mpi4py import MPI # import the 'MPI' module to work with Hermes
 import sys # for final output to ostderr
 
-# SSD_PATH="/mnt/ssd/mtang11/"
+# # SSD_PATH="/mnt/ssd/mtang11/"
 SSD_PATH=""
+if "DEV2_DIR" in os.environ:
+    SSD_PATH=os.environ.get('DEV2_DIR') + "/"
+    # print(f"Python Var : {SSD_PATH}")
 
 class SimEmulator:
 

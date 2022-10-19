@@ -2,6 +2,7 @@
 
 # get env variables
 CWD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+# CWD="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 if [ -f ${CWD}/env_var.sh ]; then
   source ${CWD}/env_var.sh
 else
@@ -28,11 +29,20 @@ rm -rf /mnt/hdd/$USER/hermes_swap/*
 
 SSD_PATH=/mnt/ssd/mtang11/
 
-hermes_simulation(){
-  echo "Test: hermes_simulation "
+build_prov(){
+  set -e # breaks if make not success
+  PROV_VOL_DIR=$SCRIPT_DIR/vol-provenance
+  cd $PROV_VOL_DIR
+  make -B
+  cd -
+  set +e
+}
+
+hermes_vfd_simulation(){
+  echo "Test: hermes_vfd_simulation "
 
   cd $SCRIPT_DIR
-  rm -rf molecular_dynamics_runs
+  rm -rf $DEV2_DIR/molecular_dynamics_runs
 
   echo "Running single process simulation with hermes vfd ..."
 
@@ -44,17 +54,17 @@ hermes_simulation(){
     HDF5_PLUGIN_PATH=${HERMES_INSTALL_DIR}/lib/hermes_vfd \
     HDF5_DRIVER_CONFIG="true 65536" HERMES_CONF=${HERMES_CONF} \
     LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/hermes_vfd/libhdf5_hermes_vfd.so \
-    python3 sim_emulator.py --residue 100 -n 2 -a 1000 -f 10000 > >(tee hm-sim.log) 2>hm-sim.err
+    python3 sim_emulator.py --residue 100 -n 2 -a 1000 -f 1000 > >(tee $LOG_DIR/hm-sim.log) 2>$LOG_DIR/hm-sim.err
 
-  ls molecular_dynamics_runs/*/* -hl
+  ls $DEV2_DIR/molecular_dynamics_runs/*/* -hl
 }
 
-hermes_aggregator(){
+hermes_vfd_aggregator(){
 
-    echo "Test: hermes_aggregator "
+    echo "Test: hermes_vfd_aggregator "
 
     cd $SCRIPT_DIR
-    rm -rf ./aggregate.h5
+    rm -rf $DEV2_DIR/aggregate.h5
 
     echo "Running aggregation with hermes ..."
 
@@ -62,13 +72,14 @@ hermes_aggregator(){
       HDF5_PLUGIN_PATH=${HERMES_INSTALL_DIR}/lib/hermes_vfd \
       HDF5_DRIVER_CONFIG="true 65536" HERMES_CONF=${HERMES_CONF} \
       LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/hermes_vfd/libhdf5_hermes_vfd.so \
-      python3 aggregate.py -no_rmsd -no_fnc --input_path . --output_path ./aggregate.h5 > >(tee hm-agg.log) 2>hm-agg.err
+      python3 aggregate.py -no_rmsd -no_fnc --input_path $DEV2_DIR --output_path ./aggregate.h5 > >(tee $LOG_DIR/hm-agg.log) 2>$LOG_DIR/hm-agg.err
 
-    ls -lrtah | grep "aggregate.h5"
+    ls -lrtah $DEV2_DIR | grep "aggregate.h5"
 }
 
 build_hermes(){
   set -e
+  cp $SCRIPT_DIR/vfd/* $HERMES_REPO/adapter/vfd/
   cd $HERMES_REPO/build
   echo `pwd`
   make -j12
@@ -86,90 +97,88 @@ build_hdf5(){
 }
 
 prov_vfd_sim(){
-  set -e # breaks if make not success
-  PROV_VOL_DIR=$SCRIPT_DIR/vol-provenance
-  cd $PROV_VOL_DIR
-  make
-  cd -
-  set +e
 
-  HDF5_DRIVER=hermes \
-  HDF5_PLUGIN_PATH=${HERMES_INSTALL_DIR}/lib/hermes_vfd:$PROV_VOL_DIR \
-  LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PROV_VOL_DIR \
-  HDF5_VOL_CONNECTOR="provenance under_vol=0;under_info={};path=$SCRIPT_DIR;level=0;format=" \
-  HDF5_DRIVER_CONFIG="false 65536" HERMES_CONF=${HERMES_CONF} \
-  LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/hermes_vfd/libhdf5_hermes_vfd.so \
-  python3 sim_emulator.py --residue 100 -n 1 -a 100 -f 1000 \
-  > >(tee prov-vfd-sim.log) 2>prov-vfd-sim.err
+  build_hermes
+  build_prov
   wait
 
-  ls molecular_dynamics_runs/*/* -hl
+  cd $SCRIPT_DIR
+  rm -rf $DEV2_DIR/molecular_dynamics_runs
+  rm -rf $LOG_DIR/stat-vfd-sim.yaml
+
+  LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PROV_VOL_DIR \
+  HDF5_PLUGIN_PATH=$PROV_VOL_DIR:${HERMES_INSTALL_DIR}/lib/hermes_vfd \
+  HDF5_VOL_CONNECTOR="provenance under_vol=0;under_info={};path=${LOG_DIR}/stat-vfd-sim.yaml;level=2;format=" \
+  HDF5_DRIVER=hermes \
+  HDF5_DRIVER_CONFIG="true 65536" HERMES_CONF=${HERMES_CONF} \
+  LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/hermes_vfd/libhdf5_hermes_vfd.so \
+  python3 sim_emulator.py --residue 100 -n 2 -a 100 -f 1000 > >(tee $LOG_DIR/prov-vfd-sim.log) 2>$LOG_DIR/prov-vfd-sim.err
+
+
+  ls $DEV2_DIR/molecular_dynamics_runs/*/* -hl
 
 }
 
 prov_vfd_agg(){
-  set -e # breaks if make not success
-  PROV_VOL_DIR=$SCRIPT_DIR/vol-provenance
-  cd $PROV_VOL_DIR
-  make
-  cd -
-  set +e
-
-  HDF5_DRIVER=hermes \
-  HDF5_PLUGIN_PATH="${HERMES_INSTALL_DIR}/lib/hermes_vfd:$PROV_VOL_DIR" \
-  LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PROV_VOL_DIR \
-  HDF5_VOL_CONNECTOR="provenance under_vol=0;under_info={};path=$SCRIPT_DIR;level=0;format=" \
-  HDF5_DRIVER_CONFIG="true 65536" HERMES_CONF=${HERMES_CONF} \
-  LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/hermes_vfd/libhdf5_hermes_vfd.so \
-  python3 aggregate.py -no_rmsd -no_fnc --input_path . --output_path ./aggregate.h5 \
-  > >(tee prov-vfd-agg.log) 2>prov-vfd-agg.err
+  build_hermes
+  build_prov
   wait
 
-  ls -lrtah | grep "aggregate.h5"
+  cd $SCRIPT_DIR
+  rm -rf $DEV2_DIR/aggregate.h5
+  rm -rf $LOG_DIR/stat-vfd-agg.yaml
+
+  set -x
+  
+  HDF5_PLUGIN_PATH=${HERMES_INSTALL_DIR}/lib/hermes_vfd:$PROV_VOL_DIR \
+  LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PROV_VOL_DIR \
+  HDF5_VOL_CONNECTOR="provenance under_vol=0;under_info={};path=${LOG_DIR}/stat-vfd-agg.yaml;level=2;format=" \
+  HDF5_DRIVER=hermes \
+  HDF5_DRIVER_CONFIG="true 65536" HERMES_CONF=${HERMES_CONF} \
+  LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/hermes_vfd/libhdf5_hermes_vfd.so \
+  python3 aggregate.py -no_rmsd -no_fnc --input_path $DEV2_DIR --output_path $DEV2_DIR/aggregate.h5 \
+  > >(tee $LOG_DIR/prov-vfd-agg.log) 2>$LOG_DIR/prov-vfd-agg.err
+  set +x
+  wait
+
+  ls -lrtah $DEV2_DIR | grep "aggregate.h5"
 
 }
 
 prov_simulation(){
-  set -e # breaks if make not success
-  PROV_VOL_DIR=$SCRIPT_DIR/vol-provenance
-  cd $PROV_VOL_DIR
-  make -B
-  cd -
+  build_prov
+  wait
 
   cd $SCRIPT_DIR
-  rm -rf molecular_dynamics_runs
-  rm -rf stat-sim.yaml
+  rm -rf $DEV2_DIR/molecular_dynamics_runs
+  rm -rf $LOG_DIR/stat-sim.yaml
   # mkdir -p molecular_dynamics_runs
   # wait
 
   LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PROV_VOL_DIR \
   HDF5_PLUGIN_PATH=$PROV_VOL_DIR \
-  HDF5_VOL_CONNECTOR="provenance under_vol=0;under_info={};path=${SCRIPT_DIR}/stat-sim.yaml;level=2;format=" \
-  python3 sim_emulator.py --residue 100 -n 1 -a 100 -f 1000 > >(tee prov-sim.log) 2>prov-sim.err
-  wait; sleep 2
+  HDF5_VOL_CONNECTOR="provenance under_vol=0;under_info={};path=${LOG_DIR}/stat-sim.yaml;level=2;format=" \
+  python3 sim_emulator.py --residue 100 -n 2 -a 100 -f 1000 > >(tee $LOG_DIR/prov-sim.log) 2>$LOG_DIR/prov-sim.err
 
-  ls molecular_dynamics_runs/*/* -hl
+  ls $DEV2_DIR/molecular_dynamics_runs/*/* -hl
 }
 
 prov_aggregation(){
-  set -e # breaks if make not success
-  PROV_VOL_DIR=$SCRIPT_DIR/vol-provenance
-  cd $PROV_VOL_DIR
-  make -B
-  cd -
+  build_prov
+  wait
 
   cd $SCRIPT_DIR
-  rm -rf ./aggregate.h5
-  rm -rf stat-agg.yaml
+  rm -rf $DEV2_DIR/aggregate.h5
+  rm -rf $LOG_DIR/stat-agg.yaml
   
   LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PROV_VOL_DIR \
   HDF5_PLUGIN_PATH=$PROV_VOL_DIR \
-  HDF5_VOL_CONNECTOR="provenance under_vol=0;under_info={};path=${SCRIPT_DIR}/stat-agg.yaml;level=2;format=" \
-  python3 aggregate.py -no_rmsd -no_fnc --input_path . --output_path ./aggregate.h5 \
-  > >(tee prov-agg.log) 2>prov-agg.err
+  HDF5_VOL_CONNECTOR="provenance under_vol=0;under_info={};path=${LOG_DIR}/stat-agg.yaml;level=2;format=" \
+  python3 aggregate.py -no_rmsd -no_fnc --input_path $DEV2_DIR --output_path $DEV2_DIR/aggregate.h5 \
+  > >(tee $LOG_DIR/prov-agg.log) 2>$LOG_DIR/prov-agg.err
   wait; sleep 2
 
-  ls -lrtah | grep "aggregate.h5"
+  ls -lrtah $DEV2_DIR | grep "aggregate.h5"
 
 }
 
@@ -203,15 +212,15 @@ then
   exit 0
 fi
 
-if [ "$OPT" == "hm-sim" ]
+if [ "$OPT" == "vfd-sim" ]
 then 
-  hermes_simulation
+  hermes_vfd_simulation
   exit 0
 fi
 
-if [ "$OPT" == "hm-agg" ]
+if [ "$OPT" == "vfd-agg" ]
 then 
-  hermes_aggregator
+  hermes_vfd_aggregator
   exit 0
 fi
 
