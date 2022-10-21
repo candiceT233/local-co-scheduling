@@ -178,6 +178,11 @@ void * print_read_write_info(const char* func_name, char * hm_bkt_name, void * o
   // printf("start_elapsed(us): %ld, ", (t_end - t_start));
   printf("time(us): %ld, ", t_end);
   printf("hm_bkt_name: %p, ", hm_bkt_name);
+
+  // char buffer[100];
+  // int j = snprintf(buffer, 6, "%s", hm_bkt_name);
+  // if(j > 0)
+  //   printf("hm_bkt_name: %s, ", buffer);
   // printf("file_name_hex: %p, ", file_name);
   
   printf("start_address: %ld, ", addr);
