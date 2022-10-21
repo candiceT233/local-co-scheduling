@@ -117,7 +117,7 @@ prov_vfd_sim(){
 
   
   LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PROV_VOL_DIR \
-  HDF5_VOL_CONNECTOR="provenance under_vol=0;under_info={};path=${DEV2_DIR}/stat-vfd-sim.yaml;level=2;format=" \
+  HDF5_VOL_CONNECTOR="provenance under_vol=0;under_info={};path=${LOG_DIR}/stat-prov-vfd-sim.yaml;level=2;format=" \
   HDF5_DRIVER=hermes \
   HDF5_PLUGIN_PATH=${HERMES_INSTALL_DIR}/lib/hermes_vfd:$PROV_VOL_DIR \
   HDF5_DRIVER_CONFIG="true 65536" HERMES_CONF=${HERMES_CONF} \
@@ -144,7 +144,7 @@ prov_vfd_agg(){
   
   HDF5_PLUGIN_PATH=${HERMES_INSTALL_DIR}/lib/hermes_vfd:$PROV_VOL_DIR \
   LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PROV_VOL_DIR \
-  HDF5_VOL_CONNECTOR="provenance under_vol=0;under_info={};path=${DEV2_DIR}/stat-vfd-agg.yaml;level=2;format=" \
+  HDF5_VOL_CONNECTOR="provenance under_vol=0;under_info={};path=${LOG_DIR}/stat-prov-vfd-agg.yaml;level=2;format=" \
   HDF5_DRIVER=hermes \
   HDF5_DRIVER_CONFIG="true 65536" HERMES_CONF=${HERMES_CONF} \
   LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/hermes_vfd/libhdf5_hermes_vfd.so \
