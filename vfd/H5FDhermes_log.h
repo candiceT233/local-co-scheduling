@@ -69,11 +69,6 @@ unsigned long get_time_usec(void) {
 char * get_ohdr_type(H5F_mem_t type);
 char * get_mem_type(H5F_mem_t type);
 
-void * print_read_write_info(const char* func_name, const char * filename,
-  H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr, 
-  size_t size, size_t blob_size, unsigned long t_start, unsigned long t_end);
-void * print_open_close_info(const char* func_name, const char * filename, unsigned long t_start, unsigned long t_end);
-
 /* candice added, print H5FD_mem_t H5FD_MEM_OHDR type more info */
 char * get_ohdr_type(H5F_mem_t type){
 
@@ -154,9 +149,9 @@ char * get_mem_type(H5F_mem_t type){
 }
 
 /* candice added, print/record info H5FD__hermes_open from */
-void * print_read_write_info(const char* func_name, const char * filename,
+void * print_read_write_info(const char* func_name, char * hm_bkt_name, void * obj,
   H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr,
-  size_t size, size_t blob_size, unsigned long t_start, unsigned long t_end){
+  size_t size, size_t blob_size, unsigned long t_start, unsigned long t_end, void * buf){
 
   size_t         start_page_index; /* First page index of tranfer buffer */
   size_t         end_page_index; /* End page index of tranfer buffer */
@@ -169,14 +164,22 @@ void * print_read_write_info(const char* func_name, const char * filename,
 
   printf("{hermes_vfd: ");
   printf("{func_name: %s, ", func_name);
-  // printf("obj: %p, ", obj);
+  printf("obj: %p, ", obj);
   printf("dxpl_id: %zu, ", dxpl_id);
+  printf("buf: %p, ", buf);
+  printf("buf_addr: %p, ", (void*)&buf);
+
+  // printf("buf+size: %p, ", buf + size);
+  printf("access_size: %ld, ", size);
+  // printf("buf_addr+size: %p, ", (void*)&buf + size);
+  // printf("buf_addr_zu+size: %ld, ", (void*)&buf + size);
   // printf("start_time(us): %ld, ", t_start);
   // printf("start_end(us): %ld, ", t_end);
   // printf("start_elapsed(us): %ld, ", (t_end - t_start));
   printf("time(us): %ld, ", t_end);
-  printf("filename: %s, ", filename);
-  printf("access_size: %ld, ", size);
+  printf("hm_bkt_name: %p, ", hm_bkt_name);
+  // printf("file_name_hex: %p, ", file_name);
+  
   printf("start_address: %ld, ", addr);
   printf("end_address: %ld, ", addr_end);
   printf("start_page: %ld, ", start_page_index);
@@ -189,15 +192,15 @@ void * print_read_write_info(const char* func_name, const char * filename,
   
 }
 
-void * print_open_close_info(const char* func_name, const char * filename, unsigned long t_start, unsigned long t_end)
+void * print_open_close_info(const char* func_name, void * obj, char * file_name, unsigned long t_start, unsigned long t_end)
 {
   printf("{hermes_vfd: ");
   printf("{func_name: %s, ", func_name);
   // printf("start_time(us): %ld, ", t_start);
   // printf("start_end(us): %ld, ", t_end);
   // printf("start_elapsed(us): %ld, ", (t_end - t_start));
-  // printf("obj: %p, ", obj);
+  printf("obj: %p, ", obj);
   printf("time(us): %ld, ", t_end);
-  printf("filename: %s, ", filename);
+  printf("file_name: %s, ", file_name);
   printf("}\n");
 }

@@ -541,8 +541,6 @@ H5FD__hermes_open(const char *name, unsigned flags, hid_t fapl_id,
   }
 
 
-
-
   if (name && *name) {
     file->bktname = strdup(name);
   }
@@ -559,13 +557,13 @@ H5FD__hermes_open(const char *name, unsigned flags, hid_t fapl_id,
   file->blob_in_bucket.end_pos = 0;
   file->flags = flags;
   file->eof = (haddr_t)sb.st_size;
-
-
+  
   /* Set return value */
   ret_value = (H5FD_t *)file;
 
 #ifdef ENABLE_HDF5_IO_LOGGING
-  print_open_close_info("H5FD__hermes_open", name, t_start, get_time_usec());
+  // file->bktname
+  print_open_close_info("H5FD__hermes_open", file, name, t_start, get_time_usec());
 #endif
   
 done:
@@ -647,7 +645,7 @@ static herr_t H5FD__hermes_close(H5FD_t *_file) {
 
 #ifdef ENABLE_HDF5_IO_LOGGING
   /* candice added prints H5FD__hermes_close start */
-  print_open_close_info("H5FD__hermes_close", file->bktname, t_start, get_time_usec());
+  print_open_close_info("H5FD__hermes_close", file, file->bktname, t_start, get_time_usec());
   /* candice added prints H5FD__hermes_close end */
 #endif
 
@@ -960,8 +958,8 @@ static herr_t H5FD__hermes_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type,
   /* candice added print section start */
   // printf("\nH5FD__hermes_read: \n"); 
   t_end = get_time_usec();
-  print_read_write_info("H5FD__hermes_read", file->bktname, 
-    type, dxpl_id, addr, size, file->buf_size, t_start, t_end);
+  print_read_write_info("H5FD__hermes_read", _file, file->bktname, 
+    type, dxpl_id, addr, size, file->buf_size, t_start, t_end, buf);
 
   /* candice added print section end */
 #endif
@@ -1031,7 +1029,6 @@ static herr_t H5FD__hermes_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type,
   for (k = start_page_index; k <= end_page_index; ++k) {
     char k_blob[LEN_BLOB_NAME];
     snprintf(k_blob, sizeof(k_blob), "%zu", k); // candice: removed newline "%zu\n"
-    // printf("- Blob : %s\n", k_blob);
 
     bool blob_exists = check_blob(&file->blob_in_bucket, k);
     size_t page_start = k * blob_size;
@@ -1116,8 +1113,8 @@ static herr_t H5FD__hermes_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type,
   /* candice added print section start */
   // printf("\nH5FD__hermes_write: \n");
   t_end = get_time_usec();
-  print_read_write_info("H5FD__hermes_write", file->bktname, 
-    type, dxpl_id, addr, size, file->buf_size, t_start, t_end);
+  print_read_write_info("H5FD__hermes_write", _file, file->bktname, 
+    type, dxpl_id, addr, size, file->buf_size, t_start, t_end, buf);
 
   /* candice added print section end */
 #endif
