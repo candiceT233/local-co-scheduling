@@ -3,7 +3,6 @@ import argparse
 import numpy as np
 import h5py
 from pathlib import Path
-import os
 # from adios_prodcons import AdiosProducerConsumer
 from multiprocessing import Pool
 import time
@@ -11,10 +10,16 @@ try:
     import MDAnalysis as mda
 except:
     mda = None
-
-# from mpi4py import MPI # import the 'MPI' module to work with Hermes
+    
+import os # for env vars
 import sys # for final output to ostderr
 
+# # add MPI for Hermes
+# from mpi4py import MPI
+# MPI.Init()
+# comm = MPI.COMM_WORLD
+# world_rank = MPI.COMM_WORLD.rank
+        
 # # SSD_PATH="/mnt/ssd/mtang11/"
 SSD_PATH=""
 if "DEV2_DIR" in os.environ:
@@ -99,7 +104,8 @@ class SimEmulator:
         
         if not os.path.exists(fname):
             mode = "w"
-
+        
+        # with h5py.File(fname, mode, swmr=False, driver="mpio", comm=MPI.COMM_WORLD) as h5_file: # VL data not support parallel
         with h5py.File(fname, mode, swmr=False) as h5_file: #swmr=False has async issue
             if ds_name in h5_file:
                 del h5_file[ds_name]
@@ -255,3 +261,5 @@ if __name__ == "__main__":
     # obj.adios.close_conn() if obj.adios_on else None
 
     # # print("Error", file = sys.stderr )
+    # # Add MPI for Hermes
+    # MPI.Finalize()

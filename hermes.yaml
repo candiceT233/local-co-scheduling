@@ -67,7 +67,7 @@ mount_points: ["", "./hermes_slabs"] # RAM and BurstBuffer # /mnt/ssd/mtang11/he
 is_shared_device: [0,0]
 # The mount point of a PFS or object store for swap space, in the event that
 # Hermes buffers become full.
-swap_mount: "./hermes_swap" # the PFS #/mnt/ssd/mtang11/hermes_slabs
+swap_mount: "./hermes_swaps" # the PFS # /mnt/ssd/mtang11/hermes_swaps
 # The number of times the buffer organizer will attempt to place a blob from
 # swap space into the hierarchy before giving up.
 num_buffer_organizer_retries: 3
@@ -134,7 +134,9 @@ path_exclusions: [
     "/bin/", "/boot/", "/dev/",  "/etc/",
     "/lib/", "/opt/",  "/proc/", "/sbin/",
     "/sys/", "/usr/",  "/var/",  "/run/",
-    "pipe", "socket:", "anon_inode:"
+    "pipe", "socket:", "anon_inode:",
+    "/mnt/common/mtang11/scripts/local-co-scheduling/ddmd_env/",
+    "h5py/"
 ]
 #Paths which are never ignored when buffering data
 path_inclusions: ["/var/opt/cray/dws/mounts/"]

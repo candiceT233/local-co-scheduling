@@ -4,13 +4,20 @@ import numpy as np
 from deepdrivemd.data.api import DeepDriveMD_API
 # from adios_prodcons import AdiosProducerConsumer
 
-# from mpi4py import MPI # import the 'MPI' module to work with Hermes
+import os # for env vars
 import sys # for final output to ostderr
 
+# # add MPI for Hermes
+# from mpi4py import MPI
+# MPI.Init()
+# world = MPI.COMM_WORLD
+# world_rank = MPI.COMM_WORLD.rank
 
-SSD_PATH="/mnt/ssd/mtang11/"
-# SSD_PATH=""
-
+# # SSD_PATH="/mnt/ssd/mtang11/"
+SSD_PATH=""
+if "DEV2_DIR" in os.environ:
+    SSD_PATH=os.environ.get('DEV2_DIR') + "/"
+    # print(f"Python Var : {SSD_PATH}")
 
 def concatenate_last_n_h5(args):
 
@@ -111,16 +118,12 @@ def parse_args() -> argparse.Namespace:
 
 
 if __name__ == "__main__":
-    # add MPI for Hermes
-    # MPI.Init()
-    # world = MPI.COMM_WORLD
-    # world_rank = MPI.COMM_WORLD.rank
 
     args = parse_args()
     concatenate_last_n_h5(args)
 
     print("aggregate.py finished ...", file=sys.stderr)
 
-    # Add MPI for Hermes
+    # # Add MPI for Hermes
     # MPI.Finalize()
     
