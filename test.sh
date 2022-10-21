@@ -76,42 +76,64 @@ hermes_aggregator(){
 hermes_sim_agg_posix(){
   # remove previous results
   rm -rf $DEV2_DIR/molecular_dynamics_runs
-  # rm -rf $DEV2_DIR/aggregate.h5
+  rm -rf $DEV2_DIR/aggregate.h5
   rm -rf $SCRIPT_DIR/molecular_dynamics_runs 
   rm -rf $SCRIPT_DIR/aggregate.h5
   # rm -rf hm-*.posix.*
+
+  # export GLOG_log_dir=$LOG_DIR
+  # export FLAGS_logtostderr=0
+  # export GLOG_minloglevel=0
+  #  --logtostderr=1
 
   cd $SCRIPT_DIR
   echo "HERMES_CONF=${HERMES_CONF}"
   echo "HERMES_INSTALL_DIR=${HERMES_INSTALL_DIR}"
 
+  set -x 
   # Start a daemon
-  HERMES_CONF=${HERMES_CONF} ${HERMES_INSTALL_DIR}/bin/hermes_daemon &
+  HERMES_CONF=$HERMES_CONF $HERMES_INSTALL_DIR/bin/hermes_daemon &
+  # mpirun -n 1 -ppn 1 -genv HERMES_CONF $HERMES_CONF \
+  #   $HERMES_INSTALL_DIR/bin/hermes_daemon &
   
   sleep 5
-
   echo "Running sim_emulator.py with hermes posix ..."
 
-  # HERMES_CLIENT=1 
-
-  LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/libhermes_posix.so \
-    HERMES_CONF=${HERMES_CONF} \
+  LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so \
+    HERMES_CONF=$HERMES_CONF \
     HERMES_STOP_DAEMON=0 \
-    ADAPTER_MODE=DEFAULT \
-    python3 sim_emulator.py --residue 100 -n 2 -a 1000 -f 1000 #> >(tee $LOG_DIR/hm-sim.posix.log) 2>$LOG_DIR/hm-sim.posix.err
-  
-  ls $DEV2_DIR/$HSLABS/molecular_dynamics_runs/*/* -hl
+    ADAPTER_MODE=SCRATCH \
+    python3 sim_emulator.py --residue 100 -n 2 -a 1000 -f 1000 \
+    > >(tee $LOG_DIR/hm-sim.posix.log) 2>$LOG_DIR/hm-sim.posix.err
+  # mpirun -n 1 -ppn 1 \
+  #   -genv LD_PRELOAD $HERMES_INSTALL_DIR/lib/libhermes_posix.so \
+  #   -genv HERMES_CONF $HERMES_CONF \
+  #   -genv HERMES_STOP_DAEMON 0 \
+  #   -genv ADAPTER_MODE SCRATCH \
+  #   python3 sim_emulator.py --residue 100 -n 2 -a 1000 -f 1000 \
+  #   > >(tee $LOG_DIR/hm-sim.posix.log) 2>$LOG_DIR/hm-sim.posix.err
+
   echo "Simulation finished..."
   ls $DEV2_DIR/molecular_dynamics_runs/*/* -hl # should not have file, buffered in hermes
   
   echo "Running aggregate.py with hermes posix ..."
-  LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/libhermes_posix.so \
-    HERMES_CONF=${HERMES_CONF} \
-    ADAPTER_MODE=DEFAULT \
-    python3 aggregate.py -no_rmsd -no_fnc --input_path $DEV2_DIR --output_path $DEV2_DIR/aggregate.h5 #> >(tee $LOG_DIR/hm-agg.posix.log) 2>$LOG_DIR/hm-agg.posix.err
+  LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so \
+    HERMES_CONF=$HERMES_CONF \
+    HERMES_STOP_DAEMON=1 \
+    ADAPTER_MODE=SCRATCH \
+    python3 aggregate.py -no_rmsd -no_fnc --input_path $DEV2_DIR --output_path $DEV2_DIR/aggregate.h5 \
+    > >(tee $LOG_DIR/hm-agg.posix.log) 2>$LOG_DIR/hm-agg.posix.err
+  # mpirun -n 1 -ppn 1 \
+  #   -genv LD_PRELOAD $HERMES_INSTALL_DIR/lib/libhermes_posix.so \
+  #   -genv HERMES_CONF $HERMES_CONF \
+  #   -genv HERMES_STOP_DAEMON 1 \
+  #   -genv ADAPTER_MODE DEFAULT \
+  #   python3 aggregate.py -no_rmsd -no_fnc --input_path $DEV2_DIR --output_path $DEV2_DIR/aggregate.h5 \
+  #   > >(tee $LOG_DIR/hm-sim.posix.log) 2>$LOG_DIR/hm-sim.posix.err
 
   ls -lrtah $DEV2_DIR | grep "aggregate.h5" # check file size for correctness
-  # ls -lrtah $DEV2_DIR/$HSLABS | grep "aggregate.h5" # check file size for correctness
+  # ls -lrtah | grep "aggregate.h5" # check file size for correctness
+  set +x
 
   killall hermes_daemon # clean up if daemon still alive
 
@@ -127,40 +149,37 @@ hermes_ior_posix(){
   echo "HERMES_CONF=${HERMES_CONF}"
   echo "HERMES_INSTALL_DIR=${HERMES_INSTALL_DIR}"
 
-  # Start a daemon
-  # mpirun -n 1 -ppn 1 \
-  # -genv \
   set -x
-  HERMES_CONF=${HERMES_CONF} \
-    ${HERMES_INSTALL_DIR}/bin/hermes_daemon &
-  
-  sleep 5
+  # Start a daemon
+  mpirun -n 1 -ppn 1 \
+  -genv \
+  HERMES_CONF=$HERMES_CONF $HERMES_INSTALL_DIR/bin/hermes_daemon &
+  sleep 3
 
   echo "Running IOR-Write with hermes posix ..."
 
   # HERMES_CLIENT=1 
-
-  LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/libhermes_posix.so \
-    HERMES_CONF=${HERMES_CONF} \
-    ADAPTER_MODE=SCRATCH \
-    HERMES_STOP_DAEMON=0 \
-    ior -w -k -o ${SCRIPT_DIR}/iortest/ior.out -t 1m -b 128m -s 2 -F -e -Y -O summaryFormat=CSV
+  mpirun -n 2 -ppn 1 \
+    -genv LD_PRELOAD $HERMES_INSTALL_DIR/lib/libhermes_posix.so \
+    -genv HERMES_CONF $HERMES_CONF \
+    -genv ADAPTER_MODE SCRATCH \
+    -genv HERMES_STOP_DAEMON 0 \
+    ior -w -k -o $SCRIPT_DIR/iortest/ior.out -t 1m -b 128m -F -e -Y -O summaryFormat=CSV
   
   echo "IOR-Write finished..."
   ls iortest/* -hl # should not have file, buffered in hermes
-  # ls $DEV2_DIR/$HSLABS/* -hl
-  # ls $DEV2_DIR/hermes_swaps/* -hl
   
-  echo "Running IOR-Read with hermes posix ..."
-  LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/libhermes_posix.so \
-    HERMES_CONF=${HERMES_CONF} \
-    ADAPTER_MODE=SCRATCH \
-    HERMES_STOP_DAEMON=1 \
-    ior -r -o ${SCRIPT_DIR}/iortest/ior.out -t 1m -b 128m -s 2 -F -e -O summaryFormat=CSV
+  # echo "Running IOR-Read with hermes posix ..."
+  mpirun -n 2 -ppn 1 \
+    -genv LD_PRELOAD $HERMES_INSTALL_DIR/lib/libhermes_posix.so \
+    -genv HERMES_CONF $HERMES_CONF \
+    -genv ADAPTER_MODE SCRATCH \
+    -genv HERMES_STOP_DAEMON 1 \
+    ior -r -o $SCRIPT_DIR/iortest/ior.out -t 1m -b 128m -F -e -O summaryFormat=CSV
   
   set +x
 
-
+  ls iortest/* -hl
   killall hermes_daemon # clean up if daemon still alive
 
 }
