@@ -3,6 +3,7 @@ hermes_ddmd/
 hermes_slabs/
 ddmd_env/
 .vscode/
+venv_ddmd/
 
 # other repos
 vol-log-passthrough/
