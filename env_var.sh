@@ -30,6 +30,7 @@ SCRIPT_DIR=$MNT_HOME/scripts/local-co-scheduling
 mkdir -p $SCRIPT_DIR/hermes_slabs
 
 # HERMES_INSTALL_DIR=`spack location -i hermes`
+# HERMES_INSTALL_DIR=/mnt/common/mtang11/spack/opt/spack/linux-centos7-skylake_avx512/gcc-7.3.0/hermes-master-lgiwsuq6ihmbs4qsklt4drd7h5hdemjj
 HERMES_INSTALL_DIR=$INSTALL_DIR/hermes
 
 HERMES_CONF=$SCRIPT_DIR/$CONF_NAME
@@ -40,10 +41,12 @@ HSLABS=hermes_slabs
 # System storage dirs -----------
 
 # DEV0_DIR="" # this is memory
-# export DEV1_DIR=/mnt/nvme/$USER # this is node local NVMe
-# export DEV2_DIR=/mnt/ssd/$USER # this is node local SSD
-export DEV1_DIR="." # current dir
-export DEV2_DIR="." # current dir
+export DEV1_DIR=/mnt/nvme/$USER # this is node local NVMe
+export DEV2_DIR=/mnt/ssd/$USER # this is node local SSD
+# export DEV1_DIR="." # current dir
+# export DEV2_DIR="." # current dir
+# export DEV1_DIR="/tmp" # current dir
+# export DEV2_DIR="/tmp" # current dir
 
 # Other tools dirs -----------
 HDF5_REPO=$DL_DIR/hdf5-hdf5-1_13_1
@@ -58,6 +61,7 @@ mkdir -p $LOG_DIR
 #conda activate /files0/oddite/conda/ddmd/ # original global env
 #conda activate hermes_ddmd # local
 
-PY_VENV=$SCRIPT_DIR/ddmd_env
+PY_VENV=$SCRIPT_DIR/venv_ddmd
 source $PY_VENV/bin/activate
 export HDF5_USE_FILE_LOCKING='FALSE' #'TRUE'
+# export MPICH_GNI_NDREG_ENTRIES=102
