@@ -16,15 +16,26 @@ import sys # for final output to ostderr
 
 # # add MPI for Hermes
 # from mpi4py import MPI
-# MPI.Init()
-# comm = MPI.COMM_WORLD
-# world_rank = MPI.COMM_WORLD.rank
-        
+# import mpi4py
+# mpi4py.rc(initialize=False, finalize=False)
+# mpi4py.MPI.Init()
+import ctypes
+c_mpi_lib = ctypes.CDLL('./cuctom_libs/c_mpi.so')
+c_mpi_lib.c_mpi_init(None , None)
+
+
 # # SSD_PATH="/mnt/ssd/mtang11/"
 SSD_PATH=""
 if "DEV2_DIR" in os.environ:
     SSD_PATH=os.environ.get('DEV2_DIR') + "/"
-    # print(f"Python Var : {SSD_PATH}")
+    print(f"sim_emulator.py putput path : {SSD_PATH}")
+    
+    # print(os.environ.get('LD_LIBRARY_PATH'))
+    # os.system('gcc -print-file-name=libmpi.so')
+    # os.system('which mpirun')
+    # print(os.environ.get('HERMES_CLIENT'))
+    # print(sys.argv)
+    # exit()
 
 class SimEmulator:
 
@@ -95,7 +106,7 @@ class SimEmulator:
         mode = "a"
 
         if fname is None:
-            fname = "{}.h5".format(self.output_filename)
+            fname = "{}.hdf5".format(self.output_filename) # original .h5
 
         if isinstance(data, list):
             dtype = data[0].dtype
@@ -105,6 +116,7 @@ class SimEmulator:
         if not os.path.exists(fname):
             mode = "w"
         
+        # with h5py.File(fname, mode, swmr=False, driver="sec2") as h5_file:
         # with h5py.File(fname, mode, swmr=False, driver="mpio", comm=MPI.COMM_WORLD) as h5_file: # VL data not support parallel
         with h5py.File(fname, mode, swmr=False) as h5_file: #swmr=False has async issue
             if ds_name in h5_file:
@@ -116,7 +128,6 @@ class SimEmulator:
                     # fletcher32=False,
                     # chunks=True
                     )
-
 
     def trajectory(self):
         coordinates = np.random.rand(self.n_atoms, 3)
@@ -179,8 +190,8 @@ def user_input():
     parser.add_argument('-n', '--number_of_jobs', default=1, type=int)
     parser.add_argument('--fnc', default=True)
     parser.add_argument('--rmsd', default=True)
-    parser.add_argument('--contact_map', default=True)
-    parser.add_argument('--point_cloud', default=True) # =False for Hermes VFD to work, default=True
+    parser.add_argument('--contact_map', default=True) # =False to try Hermes MPIIO to work, default=True
+    parser.add_argument('--point_cloud', default=True)
     parser.add_argument('--trajectory', default=False)
     parser.add_argument('--output_filename', default=None)
     parser.add_argument('--adios-sst', action='store_true', default=False)
@@ -207,14 +218,19 @@ if __name__ == "__main__":
             is_fnc = args.fnc)
 
     def runs(i):
-
+        times = []
         task_dir = SSD_PATH + "molecular_dynamics_runs/stage0000/task{:04d}/".format(i)
         Path(task_dir).mkdir(parents=True, exist_ok=True)
+        
         cms = obj.contact_maps()
+        if cms is not None:
+            obj.h5file(cms, 'contact_map', task_dir + obj.output_filename + ".h5")# + f"_ins_{i}.h5")
+            
         pcs = obj.point_clouds()
+        if pcs is not None:
+            obj.h5file(pcs, 'point_cloud', task_dir + obj.output_filename + ".h5")#f"_ins_{i}.h5")
 
-        times = []
-
+        
         # if obj.adios_on is True:
         #     # reset file open by task id
         #     obj.adios.close_conn()
@@ -228,10 +244,12 @@ if __name__ == "__main__":
         #         obj.adios.put({'point_cloud': pcs})
         #     times.append(time.time())
         # else:
-        if cms is not None:
-            obj.h5file(cms, 'contact_map', task_dir + obj.output_filename + ".h5")# + f"_ins_{i}.h5")
-        if pcs is not None:
-            obj.h5file(pcs, 'point_cloud', task_dir + obj.output_filename + ".h5")#f"_ins_{i}.h5")
+        
+        
+
+            
+            
+        
     #
         # if obj.adios_on is True:
         #     obj.adios.close_conn()
@@ -263,3 +281,4 @@ if __name__ == "__main__":
     # # print("Error", file = sys.stderr )
     # # Add MPI for Hermes
     # MPI.Finalize()
+    c_mpi_lib.c_mpi_finalize()

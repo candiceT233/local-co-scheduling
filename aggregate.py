@@ -7,11 +7,12 @@ from deepdrivemd.data.api import DeepDriveMD_API
 import os # for env vars
 import sys # for final output to ostderr
 
-# # add MPI for Hermes
+# add MPI for Hermes
 # from mpi4py import MPI
 # MPI.Init()
-# world = MPI.COMM_WORLD
-# world_rank = MPI.COMM_WORLD.rank
+import ctypes
+c_mpi_lib = ctypes.CDLL('./cuctom_libs/c_mpi.so')
+c_mpi_lib.c_mpi_init(None , None)
 
 # # SSD_PATH="/mnt/ssd/mtang11/"
 SSD_PATH=""
@@ -34,24 +35,24 @@ def concatenate_last_n_h5(args):
 
     # Get list of input h5 files
     api = DeepDriveMD_API(args.input_path)
+    # print(f"args.input_path = {args.input_path}")
     md_data = api.get_last_n_md_runs()
     files = md_data["data_files"]
+    # print(f"md_data = {md_data}")
+    # print(f"input files = {files}")
 
     if args.verbose:
         print(f"Collected {len(files)} h5 files.")
-
-    # Open output file
-    fout = h5py.File(args.output_path, "w", libver="latest")
 
     # Initialize data buffers
     data = {x: [] for x in fields}
 
     for in_file in files:
-
         if args.verbose:
             print("Reading", in_file)
 
         with h5py.File(in_file, "r") as fin:
+            # print(f"Datasetnames = {list(fin.keys())}")
             for field in fields:
                 data[field].append(fin[field][...])
 
@@ -69,7 +70,10 @@ def concatenate_last_n_h5(args):
         data["point_cloud"][:, 0:3, :] -= cms
         if args.dtype:
             data['point_cloud'] = data['point_cloud'].astype(args.dtype)
-
+    
+    # Open output file
+    fout = h5py.File(args.output_path, "w", libver="latest")
+    
     # Create new dsets from concatenated dataset
     for field, concat_dset in data.items():
         if field == "traj_file":
@@ -126,4 +130,5 @@ if __name__ == "__main__":
 
     # # Add MPI for Hermes
     # MPI.Finalize()
+    c_mpi_lib.c_mpi_finalize()
     
