@@ -1,13 +1,13 @@
-# Note
-* Object Reuse on contact_map (in VOL, without VFD): 
-    * On the HDF5 VOL layer, found a token type that seems is able to reveal pattern in subset data reuse
+# Note on Object Reuse on contact_map
+Object Reuse on contact_map (in VOL, without VFD): 
+* On the HDF5 VOL layer, found a [object token](https://forum.hdfgroup.org/t/hdf5-1-12-0-beta-release-is-available-for-testing/6637) type that seems is able to reveal pattern in subset data reuse
     * The object token type represent unique and permanent identifiers for referencing HDF5 objects within a container, designed to replace object address (where it may not be meaningful)
-    * A single operation must be called along with this token to reveal the unique blob_buffer address (e.g. a print statement must print token first then print the buffer)
-        * Observe some pattern shown in SIM and AGG.
-            * SIM: unique buffers is read with different number of times (VFD, there is no observation of address reuse)
+* A single operation must be called along with this token to reveal the unique blob_buffer address (e.g. a print statement must print token first then print the buffer)
+    * Observe some pattern shown in SIM and AGG.
+        * SIM: unique buffers is read with different number of times (VFD, there is no observation of address reuse)
 
-            * AGG: unique buffers is read/write different times, but the read and write times are the same
-                * There seems to be some access ordering in the read/write of a unique blob (On VFD, the file address are out-of-order, but does not show reuse)
+        * AGG: unique buffers is read/write different times, but the read and write times are the same
+            * There seems to be some access ordering in the read/write of a unique blob (On VFD, the file address are out-of-order, but does not show reuse)
 
 ## Unique object access example
 ```
