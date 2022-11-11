@@ -4,9 +4,9 @@ Object Reuse on contact_map (in VOL, without VFD):
     * The object token type represent unique and permanent identifiers for referencing HDF5 objects within a container, designed to replace object address (where it may not be meaningful)
 * A single operation must be called along with this token to reveal the unique blob_buffer address (e.g. a print statement must print token first then print the buffer)
     * Observe some pattern shown in SIM and AGG.
-        * SIM: unique buffers is read with different number of times (VFD, there is no observation of address reuse)
+        * SIM: some object is write multiple times (VFD, there is no observation of address reuse)
 
-        * AGG: unique buffers is read/write different times, but the read and write times are the same
+        * AGG: unique object is read/write different times, but the read and write times are the same
             * There seems to be some access ordering in the read/write of a unique blob (On VFD, the file address are out-of-order, but does not show reuse)
 
 ## Unique object access example
