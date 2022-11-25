@@ -55,7 +55,7 @@ IOR_INSTALL=$INSTALL_DIR/ior
 HDF5_INSTALL=$INSTALL_DIR/hdf5-1_13_1
 # RECORDER_REPO=$DL_DIR/Recorder-2.3.2
 # RECORDER_INSTALL=$INSTALL_DIR/recorder
-LOG_DIR=$SCRIPT_DIR/outputs
+LOG_DIR=$SCRIPT_DIR/tmp_outputs
 mkdir -p $LOG_DIR
 
 #conda activate /files0/oddite/conda/ddmd/ # original global env
@@ -63,5 +63,5 @@ mkdir -p $LOG_DIR
 
 PY_VENV=$SCRIPT_DIR/venv_ddmd
 source $PY_VENV/bin/activate
-export HDF5_USE_FILE_LOCKING='FALSE' #'TRUE'
-# export MPICH_GNI_NDREG_ENTRIES=102
+# export HDF5_USE_FILE_LOCKING='FALSE' #'TRUE'
+# export MPICH_GNI_NDREG_ENTRIES=1024

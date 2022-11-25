@@ -28,7 +28,7 @@ c_mpi_lib.c_mpi_init(None , None)
 SSD_PATH=""
 if "DEV2_DIR" in os.environ:
     SSD_PATH=os.environ.get('DEV2_DIR') + "/"
-    print(f"sim_emulator.py putput path : {SSD_PATH}")
+    # print(f"sim_emulator.py putput path : {SSD_PATH}")
     
     # print(os.environ.get('LD_LIBRARY_PATH'))
     # os.system('gcc -print-file-name=libmpi.so')

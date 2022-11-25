@@ -10,21 +10,28 @@ num_targets: 2
 
 # The maximum buffering capacity in MiB of each device. Here we say that all 4
 # devices get 50 MiB of buffering capacity.
-capacities_mb: [500, 500]
+# capacities_mb: [1000, 5000]
+capacities_gb: [4, 10]
 # The size of the smallest available buffer in KiB. In general this should be
 # the page size of your system for byte addressable storage, and the block size
 # of the storage device for block addressable storage.
-block_sizes_kb: [4, 4]
+block_sizes_kb: [4, 4] #[4, 4] [16, 16]
+# block_sizes_mb: [1, 1]
 # The nummber of size categories for each device. Here we say that each of our 4
 # devices should have 4 different sizes of buffers.
-num_slabs: [4, 4]
+num_slabs: [4, 4] #[1,1] #[4, 4]
 
 # The number of blocks (the size of which is chosen in block_sizes_kb) that each
 # device should contain for each slab (controlled by num_slabs). This allows for
 # precise control of the distibution of buffer sizes.
 slab_unit_sizes: [
+  # [32,4],
+  # [1,4],
+  # [4, 4, 4, 4, 4, 4, 4, 4, 4, 4,],
+  # [32, 16, 4, 1],
   [1, 4, 16, 32],
   [1, 4, 16, 32],
+
 ]
 
 # The percentage of buffering capacity per device to allocate for each slab.
@@ -33,6 +40,9 @@ slab_unit_sizes: [
 desired_slab_percentages: [
   [0.25, 0.25, 0.25, 0.25],
   [0.25, 0.25, 0.25, 0.25],
+  # [0.6, 0.1, 0.1, 0.2],
+  # [0.5, 0.5],
+  # [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
 ]
 
 # The maximum theoretical bandwidth (as advertised by the manufacturer) in
@@ -41,17 +51,16 @@ bandwidths_mbps: [6000, 300]
 # The latency in microseconds of each device (as advertised by the manufacturer).
 latencies_us: [15, 250000]
 
-
 # Hermes memory management. The following 4 values should add up to 1.
 # The percentage of Hermes memory to reserve for RAM buffers.
-buffer_pool_arena_percentage: 0.5
+buffer_pool_arena_percentage: 0.6
 # The percentage of Hermes memory to reserve for metadata.
-metadata_arena_percentage: 0.4
+metadata_arena_percentage: 0.35
 # The percentage of Hermes memory to reserve for short term storage.
-transient_arena_percentage: 0.1
+transient_arena_percentage: 0.05
 
 # The maxiumum number of buckets that can be created.
-max_buckets_per_node: 32
+max_buckets_per_node: 320 # 32
 # The maxiumum number of virtual buckets that can be created.
 max_vbuckets_per_node: 16
 # The interval in milliseconds at which to update the global system view.
@@ -60,14 +69,14 @@ system_view_state_update_interval_ms: 1000
 # The mount point of each device. RAM should be the empty string. For block
 # devices, this is the directory where Hermes will create buffering files. For
 # object storage or cloud targets, this will be a url.
-mount_points: ["", "./hermes_slabs"] # RAM and BurstBuffer # /mnt/ssd/mtang11/hermes_slabs
+mount_points: ["", "/mnt/ssd/mtang11/hermes_slabs"] # RAM and BurstBuffer # /mnt/ssd/mtang11/hermes_slabs
 # mount_points: ["", "/mnt/ssd/mtang11/hermes_slabs"]
 # For each device, indicate '1' if it is shared among nodes (e.g., burst
 # buffers), or '0' if it is per node (e.g., local NVMe).
 is_shared_device: [0,0]
 # The mount point of a PFS or object store for swap space, in the event that
 # Hermes buffers become full.
-swap_mount: "./hermes_swaps" # the PFS # /mnt/ssd/mtang11/hermes_swaps
+swap_mount: "/mnt/ssd/mtang11/hermes_swaps" # the PFS # /mnt/ssd/mtang11/hermes_swaps
 # The number of times the buffer organizer will attempt to place a blob from
 # swap space into the hierarchy before giving up.
 num_buffer_organizer_retries: 3
@@ -79,13 +88,13 @@ num_buffer_organizer_retries: 3
 rpc_server_host_file: ""
 
 # Base hostname for the RPC servers.
-rpc_server_base_name: "localhost"
+rpc_server_base_name: "localhost" #"172.25.1.1" #"localhost"
 # RPC server name suffix. This is appended to the the base name plus host
 # number.
 rpc_server_suffix: ""
 # The RPC protocol. This must come from the documentation of the specific RPC
 # library in use.
-rpc_protocol: "ofi+sockets"
+rpc_protocol: "ofi+sockets" #"ofi+shm" #"ofi+sockets"
 # RPC domain name for verbs transport. Blank for tcp.
 rpc_domain: ""
 # Desired RPC port number.
@@ -125,18 +134,34 @@ default_rr_split: 0
 bo_capacity_thresholds: [
   [0.0, 1.0],
   [0.0, 1.0],
-  [0.0, 1.0],
-  [0.0, 1.0]
 ]
+# bo_capacity_thresholds: [
+#   [0.0, 1.0],
+#   [0.0, 1.0],
+#   [0.0, 1.0],
+#   [0.0, 1.0]
+# ]
 
 #Paths which are ignored when buffering data
 path_exclusions: [
     "/bin/", "/boot/", "/dev/",  "/etc/",
-    "/lib/", "/opt/",  "/proc/", "/sbin/",
-    "/sys/", "/usr/",  "/var/",  "/run/",
+    "/opt/",  "/proc/", "/sbin/",
+    "/sys/", "/var/",  "/run/",
     "pipe", "socket:", "anon_inode:",
-    "/mnt/common/mtang11/scripts/local-co-scheduling/ddmd_env/",
-    "h5py/"
+    "/usr/",  "/lib/", 
+    "/home",
+    "h5py/",
+    # "/home/mtang11/spack/opt/spack/linux-centos7-skylake_avx512/gcc-7.3.0",
+    # "/mnt/common/mtang11/install/python-3.9.13/lib",
+    # "/mnt/common/mtang11/scripts/local-co-scheduling/ddmd_env/",
 ]
+# "/home/mtang11/spack",
 #Paths which are never ignored when buffering data
-path_inclusions: ["/var/opt/cray/dws/mounts/"]
+path_inclusions: [
+    "/var/opt/cray/dws/mounts/",
+    "molecular_dynamics_runs",
+    "aggregate.h5",
+]
+
+# "iortest",
+# "molecular_dynamics_runs",

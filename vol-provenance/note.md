@@ -43,4 +43,10 @@ Detail functions used in adding a dataset_prov_info_t object.
 * 1.3 _fake_obj_free \
     ```_fake_obj_free(fake_upper_o);```\
 
+2. H5VL_provenance_unwrap_object
+    Unwrap a wrapped data object \
+* 2.1 rm_dataset_node \
+``` rm_dataset_node(o->prov_helper, o->under_object, o->under_vol_id, (dataset_prov_info_t *)(o->generic_prov_info)); ```
+
+
 
