@@ -143,7 +143,7 @@ I1128 16:07:49.418799 180331 vbucket.cc:230] Attaching trait to VBucket /mnt/ssd
 I1128 16:07:49.418907 180331 buffer_organizer.cc:681] Flushing BlobID 4294968752 to file /mnt/ssd/mtang11/molecular_dynamics_runs/stage0000/task0000/residue_100.h5 at offset 0
 (hangs, the end of log)
 ```
-### (2)(4) ```ADAPTER_MODE=SCRATCH``` adjusting ```HERMES_PAGE_SIZE```
+### ```ADAPTER_MODE=SCRATCH``` adjusting ```HERMES_PAGE_SIZE```
 - (1) ```HERMES_PAGE_SIZE=128k``` reduces 50% IO time than default (1m)
 - (2) best Hermes performance about 3.5x slower than without using Hermes
 - Example stderr log:
