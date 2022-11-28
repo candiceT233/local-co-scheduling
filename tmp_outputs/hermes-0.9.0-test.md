@@ -79,7 +79,7 @@ I1128 15:36:59.823406 178367 posix.cc:329]
 I1128 15:36:59.823464 178367 bucket.cc:411] Destroying bucket '/mnt/ssd/mtang11/ior.out.00000000'
 I1128 15:36:59.859156 178367 posix.cc:62] MPI Finalize intercepted.
 ```
-### ```ADAPTER_MODE=SCRATCH``` performance note as expected
+### ```ADAPTER_MODE=SCRATCH``` performance not as expected
 - xfersize: 1 MiB, blocksize: 64 MiB, aggregate filesize: 4 GiB
 - First IOR write, then IOR read. Output file default location is in SSD.
 - Without Hermes, IOR finishes in ~30 sec. 
