@@ -1,15 +1,15 @@
 # Hermes Problem Summary
-- ```ADAPTER_MODE=WORKFLOW``` performance slow with small I/O transfer size in IOR
-- ```ADAPTER_MODE=WORKFLOW``` hangs with my python simulation-aggregator app.
-- Adjusting ```HERMES_PAGE_SIZE``` does improve Hermes performance, but when the size is small, metadata requires very large space.
-- With policy ```MinimizeIoTime```, the RAM reserved space for ```buffer_pool_arena_percentage``` needs to be at least ~3.6x larger than all the files involved in 1 program 
-    - example: must reserve 360MB if aggregator program read 50MB and write 50MB
+(1) Adjusting ```HERMES_PAGE_SIZE``` does improve Hermes performance, but when the size is small, metadata requires very large space.
+(2) Hermes performance slow with small I/O transfer size in IOR
+(3) ```ADAPTER_MODE=WORKFLOW``` hangs with my python simulation-aggregator app.
+(4) With policy ```MinimizeIoTime```, the RAM reserved space for ```buffer_pool_arena_percentage``` needs to be at least ~3.6x larger than all the files involved in 1 program 
+- example: must reserve 360MB if aggregator program read 50MB and write 50MB
 
 # Test Setup
 - w/ Hermes v0.9.0-beta
 - All test with ```default_placement_policy: "MinimizeIoTime"```
 - 2 tiers [RAM, SSD], ```capacities_gb: [1, 10]```
-- buffer_pool and metadata percentage:
+- (4) Usable buffer_pool is about 350m and metadata about 600m:
 ```
 # Hermes memory management. The following 4 values should add up to 1.
 # The percentage of Hermes memory to reserve for RAM buffers.
@@ -23,8 +23,8 @@ transient_arena_percentage: 0.05
 ## IOR
 - total IO 16m, transfer size 2k
 ### ```ADAPTER_MODE=WORKFLOW``` adjusting ```HERMES_PAGE_SIZE```
-- ```HERMES_PAGE_SIZE=8192``` (8k) reduces 50% IO time than default (1m)
-- best Hermes performance about 2x slower than without using Hermes
+- (1) ```HERMES_PAGE_SIZE=8192``` (8k) reduces 50% IO time than default (1m)
+- (2) best Hermes performance about 2x slower than without using Hermes
 - Example stderr log:
 ``` 
 WARNING: Logging before InitGoogleLogging() is written to STDERR
@@ -78,7 +78,7 @@ I1128 15:36:59.859156 178367 posix.cc:62] MPI Finalize intercepted.
 
 ## My App: simulation-aggregator
 - total IO 98M
-### ```ADAPTER_MODE=WORKFLOW``` hangs when blob being flushed
+### (3) ```ADAPTER_MODE=WORKFLOW``` hangs when blob being flushed
 - HERMES_PAGE_SIZE is default 1m
 - Example stderr log:
 ```
@@ -143,9 +143,9 @@ I1128 16:07:49.418799 180331 vbucket.cc:230] Attaching trait to VBucket /mnt/ssd
 I1128 16:07:49.418907 180331 buffer_organizer.cc:681] Flushing BlobID 4294968752 to file /mnt/ssd/mtang11/molecular_dynamics_runs/stage0000/task0000/residue_100.h5 at offset 0
 (hangs, the end of log)
 ```
-### ```ADAPTER_MODE=SCRATCH``` adjusting ```HERMES_PAGE_SIZE```
-- ```HERMES_PAGE_SIZE=128k``` reduces 50% IO time than default (1m)
-- best Hermes performance about 3.5x slower than without using Hermes
+### (2)(4) ```ADAPTER_MODE=SCRATCH``` adjusting ```HERMES_PAGE_SIZE```
+- (1) ```HERMES_PAGE_SIZE=128k``` reduces 50% IO time than default (1m)
+- (2) best Hermes performance about 3.5x slower than without using Hermes
 - Example stderr log:
 ```
 WARNING: Logging before InitGoogleLogging() is written to STDERR
