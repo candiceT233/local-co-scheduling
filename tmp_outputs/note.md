@@ -21,10 +21,13 @@ transient_arena_percentage: 0.05
 ```
 
 ## IOR
-- total IO 16m, transfer size 2k
+- total IO 64 MiB, transfer size 2k
 ### ```ADAPTER_MODE=WORKFLOW``` adjusting ```HERMES_PAGE_SIZE```
 - (1) ```HERMES_PAGE_SIZE=8192``` (8k) reduces 50% IO time than default (1m)
 - (2) best Hermes performance about 2x slower than without using Hermes
+    - IOR segmentation fault with I/O transfer size set to 1k, but okay with 2k, 4k, 8k, ...
+    - Small transfer size is slow, for 16M total IO, ```-t 4k``` finishes in 44 sec, ```-t 1m``` finishes in 4 sec (includes 3 sec hermes daemon start time).
+    - IOR segmentation fault when total IO size larger than 256 MiB.
 - Example stderr log:
 ``` 
 WARNING: Logging before InitGoogleLogging() is written to STDERR
@@ -75,6 +78,10 @@ I1128 15:36:59.823406 178367 posix.cc:329]
 I1128 15:36:59.823464 178367 bucket.cc:411] Destroying bucket '/mnt/ssd/mtang11/ior.out.00000000'
 I1128 15:36:59.859156 178367 posix.cc:62] MPI Finalize intercepted.
 ```
+### ```ADAPTER_MODE=SCRATCH``` hangs when I/O size is larger than 64m
+- xfersize: 1 MiB, blocksize: 64 MiB, aggregate filesize: 4 GiB
+- Without Hermes, IOR finishes in ~27 sec. With Hermes, IOR finishes in ~29 sec (with 3 sec for starting hermes_daemon).
+
 
 ## My App: simulation-aggregator
 - total IO 98M
