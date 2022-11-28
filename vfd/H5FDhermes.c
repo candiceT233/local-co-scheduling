@@ -46,7 +46,7 @@
 
 /* candice added functions for I/O traces start */
 #include <time.h>       // for struct timespec, clock_gettime(CLOCK_MONOTONIC, &end);
-#include "H5FDhermes_log.h"
+#include "/mnt/common/mtang11/scripts/local-co-scheduling/vol-provenance/H5FDhermes_log.h"
 /* candice added functions for I/O traces end */
 
 #define H5FD_HERMES (H5FD_hermes_init())
@@ -60,8 +60,8 @@
       H5FD_HERMES_g = H5FD_HERMES;              \
   } while (0)
 
-/* The driver identification number, initialized at runtime */
-static hid_t H5FD_HERMES_g = H5I_INVALID_HID;
+// /* The driver identification number, initialized at runtime */
+// static hid_t H5FD_HERMES_g = H5I_INVALID_HID;
 
 /* Identifiers for HDF5's error API */
 hid_t H5FDhermes_err_stack_g = H5I_INVALID_HID;
@@ -958,7 +958,7 @@ static herr_t H5FD__hermes_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type,
   /* candice added print section start */
   // printf("\nH5FD__hermes_read: \n"); 
   t_end = get_time_usec();
-  print_read_write_info("H5FD__hermes_read", _file, file->bktname, 
+  print_read_write_info("H5FD__hermes_read", file->bktname, _file,
     type, dxpl_id, addr, size, file->buf_size, t_start, t_end, buf);
 
   /* candice added print section end */
@@ -1113,7 +1113,7 @@ static herr_t H5FD__hermes_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type,
   /* candice added print section start */
   // printf("\nH5FD__hermes_write: \n");
   t_end = get_time_usec();
-  print_read_write_info("H5FD__hermes_write", _file, file->bktname, 
+  print_read_write_info("H5FD__hermes_write", file->bktname, _file,
     type, dxpl_id, addr, size, file->buf_size, t_start, t_end, buf);
 
   /* candice added print section end */

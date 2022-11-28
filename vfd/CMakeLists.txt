@@ -31,7 +31,6 @@ endif()
 
 set(HDF5_HERMES_VFD_SRCS
   ${CMAKE_CURRENT_SOURCE_DIR}/H5FDhermes.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/H5FDhermes_log.h
   ${CMAKE_CURRENT_SOURCE_DIR}/H5FDhermes.c
   )
 
