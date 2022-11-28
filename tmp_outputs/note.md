@@ -1,9 +1,9 @@
 # Hermes Problem Summary
-(1) Adjusting ```HERMES_PAGE_SIZE``` does improve Hermes performance, but when the size is small, metadata requires very large space.
-(2) Hermes performance slow with small I/O transfer size in IOR
-(3) ```ADAPTER_MODE=WORKFLOW``` hangs with my python simulation-aggregator app.
-(4) With policy ```MinimizeIoTime```, the RAM reserved space for ```buffer_pool_arena_percentage``` needs to be at least ~3.6x larger than all the files involved in 1 program 
-- example: must reserve 360MB if aggregator program read 50MB and write 50MB
+- (1) Adjusting ```HERMES_PAGE_SIZE``` does improve Hermes performance, but when the size is small, metadata requires very large space.
+- (2) Hermes performance slow with small I/O transfer size in IOR
+- (3) ```ADAPTER_MODE=WORKFLOW``` hangs with my python simulation-aggregator app.
+- (4) With policy ```MinimizeIoTime```, the RAM reserved space for ```buffer_pool_arena_percentage``` needs to be at least ~3.6x larger than all the files involved in 1 program 
+    - example: must reserve 360MB if aggregator program read 50MB and write 50MB
 
 # Test Setup
 - w/ Hermes v0.9.0-beta
