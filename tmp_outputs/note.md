@@ -27,7 +27,7 @@ transient_arena_percentage: 0.05
 - (2) best Hermes performance about 2x slower than without using Hermes
     - IOR segmentation fault with I/O transfer size set to 1k, but okay with 2k, 4k, 8k, ...
     - Small transfer size is slow, for 16M total IO, ```-t 4k``` finishes in 44 sec, ```-t 1m``` finishes in 4 sec (includes 3 sec hermes daemon start time).
-    - IOR segmentation fault when total IO size larger than 256 MiB.
+    - IOR segmentation fault when total IO size larger than 256 MiB, same as below (My App Log) failed at output ```Flushing BlobID xxx to file```
 - Example stderr log:
 ``` 
 WARNING: Logging before InitGoogleLogging() is written to STDERR
