@@ -383,6 +383,10 @@ H5Pset_fapl_hermes(hid_t fapl_id, hbool_t persistence, size_t page_size) {
   H5FD_hermes_fapl_t fa; /* Hermes VFD info */
   herr_t ret_value = SUCCEED; /* Return value */
 
+#ifdef ENABLE_HDF5_IO_LOGGING
+  print_H5Pset_fapl_info("H5Pset_fapl_hermes", persistence, page_size);
+#endif
+
   /* Check argument */
   if (H5I_GENPROP_LST != H5Iget_type(fapl_id) ||
       TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS)) {
@@ -563,7 +567,8 @@ H5FD__hermes_open(const char *name, unsigned flags, hid_t fapl_id,
 
 #ifdef ENABLE_HDF5_IO_LOGGING
   // file->bktname
-  print_open_close_info("H5FD__hermes_open", file, name, t_start, get_time_usec());
+  print_H5Pset_fapl_info("H5FD_hermes_fapl_t", fa->persistence, fa->page_size);
+  print_open_close_info("H5FD__hermes_open", file, name, t_start, get_time_usec(), file->eof, file->flags);
 #endif
   
 done:
@@ -645,7 +650,7 @@ static herr_t H5FD__hermes_close(H5FD_t *_file) {
 
 #ifdef ENABLE_HDF5_IO_LOGGING
   /* candice added prints H5FD__hermes_close start */
-  print_open_close_info("H5FD__hermes_close", file, file->bktname, t_start, get_time_usec());
+  print_open_close_info("H5FD__hermes_close", file, file->bktname, t_start, get_time_usec(), file->eof, file->flags);
   /* candice added prints H5FD__hermes_close end */
 #endif
 
