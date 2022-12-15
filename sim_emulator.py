@@ -122,12 +122,14 @@ class SimEmulator:
             if ds_name in h5_file:
                 del h5_file[ds_name]
             h5_file.create_dataset(
-                    ds_name,
-                    data=data,
-                    dtype=dtype,
-                    # fletcher32=False,
-                    # chunks=True
-                    )
+                        ds_name,
+                        data=data,
+                        dtype=dtype,
+                        # chunks=True,
+                        # fletcher32=False,
+                        # chunks=True
+                        )
+                
 
     def trajectory(self):
         coordinates = np.random.rand(self.n_atoms, 3)

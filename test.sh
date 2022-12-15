@@ -281,42 +281,26 @@ hermes_ior_posix(){
   #  -t 1m -b 128m
 
   export GLOG_minloglevel=0
+  # export HERMES_PAGE_SIZE=4096
 
   LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so \
     HERMES_CONF=$HERMES_CONF \
     HERMES_STOP_DAEMON=0 \
-    ADAPTER_MODE=SCRATCH \
+    ADAPTER_MODE=WORKFLOW \
     HERMES_CLIENT=1 \
-    HERMES_PAGE_SIZE=32768 \
-    mpirun ior -a POSIX -w -k -o $DEV2_DIR/ior.out -t 32k -b 64m -F -e -Y \
+    mpirun ior -a POSIX -w -k -o $DEV2_DIR/ior.out -t 1k -b 32m -F -e -Y \
     > >(tee ${LOG_DIR}/ior-write.posix.log) 2>${LOG_DIR}/ior-write.posix.err
-
-  # mpiexec -n 2 \
-  #   -genv LD_PRELOAD ${HERMES_INSTALL_DIR}/lib/libhermes_posix.so \
-  #   -genv HERMES_CONF ${HERMES_CONF} \
-  #   -genv ADAPTER_MODE SCRATCH \
-  #   -genv HERMES_STOP_DAEMON 0 \
-  #   ior -w -k -o $DEV2_DIR/ior.out -t 4k -b 64m -F -e -Y \
-  #   > >(tee ${LOG_DIR}/ior-write.posix.log) 2>${LOG_DIR}/ior-write.posix.err
   
   echo "IOR-Write finished..."
   ls $DEV2_DIR/ior.out.* -hl > >(tee -a ${LOG_DIR}/ior-write.posix.log) 2>&1 # should not have file, buffered in hermes
   
+  # echo "Running IOR-Read with hermes posix ..."
   # LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so \
   #   HERMES_CONF=$HERMES_CONF \
   #   HERMES_STOP_DAEMON=1 \
   #   ADAPTER_MODE=SCRATCH \
   #   HERMES_CLIENT=1 \
   #   mpirun ior -a POSIX -r -k -o $DEV2_DIR/ior.out -t 4k -b 64m -F -e -Y \
-  #   > >(tee ${LOG_DIR}/ior-read.posix.log) 2>${LOG_DIR}/ior-read.posix.err
-
-  echo "Running IOR-Read with hermes posix ..."
-  # mpiexec -n 2 \
-  #   -genv LD_PRELOAD ${HERMES_INSTALL_DIR}/lib/libhermes_posix.so \
-  #   -genv HERMES_CONF ${HERMES_CONF} \
-  #   -genv ADAPTER_MODE SCRATCH \
-  #   -genv HERMES_STOP_DAEMON 1 \
-  #   ior -r -k -o $DEV2_DIR/ior.out -t 4k -b 64m -F -e \
   #   > >(tee ${LOG_DIR}/ior-read.posix.log) 2>${LOG_DIR}/ior-read.posix.err
   
   set +x

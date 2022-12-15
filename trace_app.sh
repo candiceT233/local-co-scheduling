@@ -27,7 +27,9 @@ rm -rf ${DEV1_DIR}/$HSLABS/*
 rm -rf ${DEV2_DIR}/$HSLABS/*
 rm -rf /mnt/hdd/$USER/hermes_swap/*
 
-sim_param="--residue 100 -n 4 -a 1000 -f 1000"
+SIM_CMD="--residue 200 -n 1 -a 1000 -f 1000"
+HERMES_PAGESIZE=4194304
+# page size : 65536 131072 262144 524288 1048576 4194304 8388608
 
 
 build_hermes(){
@@ -77,9 +79,9 @@ hermes_vfd_simulation(){
 
   HDF5_DRIVER=hermes \
     HDF5_PLUGIN_PATH=${HERMES_INSTALL_DIR}/lib/hermes_vfd \
-    HDF5_DRIVER_CONFIG="true 65536" HERMES_CONF=${HERMES_CONF} \
+    HDF5_DRIVER_CONFIG="true ${HERMES_PAGESIZE}" HERMES_CONF=${HERMES_CONF} \
     LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/hermes_vfd/libhdf5_hermes_vfd.so \
-    python3 sim_emulator.py $sim_param > >(tee $LOG_DIR/vfd-sim.log) 2>$LOG_DIR/vfd-sim.err
+    python3 sim_emulator.py $SIM_CMD > >(tee $LOG_DIR/vfd-sim.log) 2>$LOG_DIR/vfd-sim.err
 
   ls $DEV2_DIR/molecular_dynamics_runs/*/* -hl
 }
@@ -95,9 +97,11 @@ hermes_vfd_aggregator(){
 
   echo "Running aggregation with hermes ..."
 
+  
+
   HDF5_DRIVER=hermes \
     HDF5_PLUGIN_PATH=${HERMES_INSTALL_DIR}/lib/hermes_vfd \
-    HDF5_DRIVER_CONFIG="true 65536" HERMES_CONF=${HERMES_CONF} \
+    HDF5_DRIVER_CONFIG="true ${HERMES_PAGESIZE}" HERMES_CONF=${HERMES_CONF} \
     LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/hermes_vfd/libhdf5_hermes_vfd.so \
     python3 aggregate.py -no_rmsd -no_fnc --input_path $DEV2_DIR --output_path ./aggregate.h5 > >(tee $LOG_DIR/vfd-agg.log) 2>$LOG_DIR/vfd-agg.err
 
@@ -122,9 +126,9 @@ prov_vfd_sim(){
   HDF5_VOL_CONNECTOR="provenance under_vol=0;under_info={};path=${DEV2_DIR}/stat-prov-vfd-sim.yaml;level=2;format=" \
   HDF5_DRIVER=hermes \
   HDF5_PLUGIN_PATH=${HERMES_INSTALL_DIR}/lib/hermes_vfd:$PROV_VOL_DIR \
-  HDF5_DRIVER_CONFIG="true 65536" HERMES_CONF=${HERMES_CONF} \
+  HDF5_DRIVER_CONFIG="true ${HERMES_PAGESIZE}" HERMES_CONF=${HERMES_CONF} \
   LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/hermes_vfd/libhdf5_hermes_vfd.so \
-  python3 sim_emulator.py $sim_param > >(tee $LOG_DIR/prov-vfd-sim.log) 2>$LOG_DIR/prov-vfd-sim.err
+  python3 sim_emulator.py $SIM_CMD > >(tee $LOG_DIR/prov-vfd-sim.log) 2>$LOG_DIR/prov-vfd-sim.err
   
   set +x
   ls $DEV2_DIR/molecular_dynamics_runs/*/* -hl
@@ -148,7 +152,7 @@ prov_vfd_agg(){
   LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PROV_VOL_DIR \
   HDF5_VOL_CONNECTOR="provenance under_vol=0;under_info={};path=${DEV2_DIR}/stat-prov-vfd-agg.yaml;level=2;format=" \
   HDF5_DRIVER=hermes \
-  HDF5_DRIVER_CONFIG="true 65536" HERMES_CONF=${HERMES_CONF} \
+  HDF5_DRIVER_CONFIG="true ${HERMES_PAGESIZE}" HERMES_CONF=${HERMES_CONF} \
   LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/hermes_vfd/libhdf5_hermes_vfd.so \
   python3 aggregate.py -no_rmsd -no_fnc --input_path $DEV2_DIR --output_path $DEV2_DIR/aggregate.h5 \
   > >(tee $LOG_DIR/prov-vfd-agg.log) 2>$LOG_DIR/prov-vfd-agg.err
@@ -173,7 +177,7 @@ prov_simulation(){
   LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PROV_VOL_DIR \
   HDF5_VOL_CONNECTOR="provenance under_vol=0;under_info={};path=${DEV2_DIR}/stat-sim.yaml;level=2;format=" \
   HDF5_PLUGIN_PATH=$PROV_VOL_DIR \
-  python3 sim_emulator.py $sim_param > >(tee $LOG_DIR/prov-sim.log) 2>$LOG_DIR/prov-sim.err
+  python3 sim_emulator.py $SIM_CMD > >(tee $LOG_DIR/prov-sim.log) 2>$LOG_DIR/prov-sim.err
 
   ls $DEV2_DIR/molecular_dynamics_runs/*/* -hl
   mv $DEV2_DIR/stat-sim.yaml $LOG_DIR/

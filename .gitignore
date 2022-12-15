@@ -18,13 +18,15 @@ diagrams/
 save_log/
 save_job_log/
 old_save_jog_log/
+curr_outputs/
 
 *.err
 *.log
 !prov-sim.log
 !prov-agg.log
 
-# output files
+# runtime/test output
+iortest/
 molecular_dynamics_runs/  
 molecular_dynamics_runs/
 aggregate.h5

@@ -85,14 +85,16 @@ def concatenate_last_n_h5(args):
         chunkshape = (1,) + shape[1:]
         # Create dataset
         if concat_dset.dtype != np.object:
+            # point_cloud-chunkshape : (1, 3, 200)
             if np.any(np.isnan(concat_dset)):
                 raise ValueError("NaN detected in concat_dset.")
             dset = fout.create_dataset(
-                field, shape, chunks=chunkshape, dtype=concat_dset.dtype
+                field, shape, dtype=concat_dset.dtype, chunks=chunkshape
             )
         else:
+            # contact_map-chunkshape : (1,)
             dset = fout.create_dataset(
-                field, shape, chunks=chunkshape, dtype=h5py.vlen_dtype(np.int16)
+                field, shape, dtype=h5py.vlen_dtype(np.int16), chunks=chunkshape
             )
         # write data
         dset[...] = concat_dset[...]
