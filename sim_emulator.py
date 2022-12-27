@@ -14,27 +14,27 @@ except:
 import os # for env vars
 import sys # for final output to ostderr
 
+# clear cache for test 
+# import streamlit as st
+# st.experimental_memo.clear()
+# st.experimental_singleton.clear()
+
 # # add MPI for Hermes
 # from mpi4py import MPI
 # import mpi4py
 # mpi4py.rc(initialize=False, finalize=False)
 # mpi4py.MPI.Init()
-import ctypes
-c_mpi_lib = ctypes.CDLL('./cuctom_libs/c_mpi.so')
-c_mpi_lib.c_mpi_init(None , None)
 
+# import ctypes
+# c_mpi_lib = ctypes.CDLL('./cuctom_libs/c_mpi.so')
+# c_mpi_lib.c_mpi_init(None , None)
 
 # # SSD_PATH="/mnt/ssd/mtang11/"
 SSD_PATH=""
 if "DEV2_DIR" in os.environ:
-    SSD_PATH=os.environ.get('DEV2_DIR') + "/"
-    # print(f"sim_emulator.py putput path : {SSD_PATH}")
-    
-    # print(os.environ.get('LD_LIBRARY_PATH'))
+    SSD_PATH=os.environ.get('DEV2_DIR') + "/"    
     # os.system('gcc -print-file-name=libmpi.so')
-    # os.system('which mpirun')
     # print(os.environ.get('HERMES_CLIENT'))
-    # print(sys.argv)
     # exit()
 
 class SimEmulator:
@@ -83,6 +83,9 @@ class SimEmulator:
         return [row, col]
 
     def contact_maps(self):
+        if not self.is_contact_map :
+            return None
+        
         cms = [ self.contact_map() for x in range(self.n_frames) ] 
         r = [np.concatenate(x) for x in cms]
         ret = np.empty(len(r), dtype=object)
@@ -114,10 +117,9 @@ class SimEmulator:
             dtype = h5py.vlen_dtype(np.dtype(data[0].dtype))
         
         if not os.path.exists(fname):
-            mode = "w"
-        
-        # with h5py.File(fname, mode, swmr=False, driver="sec2") as h5_file:
-        # with h5py.File(fname, mode, swmr=False, driver="mpio", comm=MPI.COMM_WORLD) as h5_file: # VL data not support parallel
+            mode = "w" # problem using append
+
+        # TODO: change data creation layout
         with h5py.File(fname, mode, swmr=False) as h5_file: #swmr=False has async issue
             if ds_name in h5_file:
                 del h5_file[ds_name]
@@ -126,8 +128,9 @@ class SimEmulator:
                         data=data,
                         dtype=dtype,
                         # chunks=True,
+                        # shuffle=True,
+                        # compression="lzf",
                         # fletcher32=False,
-                        # chunks=True
                         )
                 
 
@@ -283,4 +286,4 @@ if __name__ == "__main__":
     # # print("Error", file = sys.stderr )
     # # Add MPI for Hermes
     # MPI.Finalize()
-    c_mpi_lib.c_mpi_finalize()
+    # c_mpi_lib.c_mpi_finalize()
