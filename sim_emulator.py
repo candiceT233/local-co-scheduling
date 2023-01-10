@@ -118,7 +118,16 @@ class SimEmulator:
         
         if not os.path.exists(fname):
             mode = "w" # problem using append
+        
+        chunkshape = (1,)
+        if ds_name == 'point_cloud':
+            chunkshape = (1, 3, 200)
 
+        # chunks sizes
+        dims = (100,)
+        if ds_name == 'point_cloud':
+            dims = (100,3,200)
+            
         # TODO: change data creation layout
         with h5py.File(fname, mode, swmr=False) as h5_file: #swmr=False has async issue
             if ds_name in h5_file:

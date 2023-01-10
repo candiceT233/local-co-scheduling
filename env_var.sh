@@ -42,7 +42,7 @@ HSLABS=hermes_slabs
 
 # DEV0_DIR="" # this is memory
 export DEV1_DIR=/mnt/nvme/$USER # this is node local NVMe
-export DEV2_DIR=/mnt/ssd/$USER # this is node local SSD
+export DEV2_DIR=/mnt/hdd/$USER # this is node local HDD
 # export DEV1_DIR="." # current dir
 # export DEV2_DIR="." # current dir
 # export DEV1_DIR="/tmp" # current dir

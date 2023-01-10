@@ -28,8 +28,10 @@ rm -rf ${DEV2_DIR}/$HSLABS/*
 rm -rf /mnt/hdd/$USER/hermes_swap/*
 
 SIM_CMD="--residue 200 -n 1 -a 1000 -f 1000"
-HERMES_PAGESIZE=4194304
-# page size : 65536 131072 262144 524288 1048576 4194304 8388608
+AGG_CMD="-no_rmsd -no_fnc --input_path ${DEV2_DIR} --output_path ${DEV2_DIR}/aggregate.h5"
+
+HERMES_PAGESIZE=65536
+# page size : 4096 8192 32768 65536 131072 262144 524288 1048576 4194304 8388608
 
 
 build_hermes(){
@@ -76,14 +78,24 @@ hermes_vfd_simulation(){
   # 65536 16384 131072
 
   # export LD_LIBRARY_PATH
+  export GLOG_minloglevel=2
+
+  start_time="$(date -u +%s.%N)"
 
   HDF5_DRIVER=hermes \
     HDF5_PLUGIN_PATH=${HERMES_INSTALL_DIR}/lib/hermes_vfd \
     HDF5_DRIVER_CONFIG="true ${HERMES_PAGESIZE}" HERMES_CONF=${HERMES_CONF} \
     LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/hermes_vfd/libhdf5_hermes_vfd.so \
     python3 sim_emulator.py $SIM_CMD > >(tee $LOG_DIR/vfd-sim.log) 2>$LOG_DIR/vfd-sim.err
+  
+  mid_time="$(date -u +%s.%N)"
+  sim_time="$(bc <<<"$mid_time-$start_time")"
 
   ls $DEV2_DIR/molecular_dynamics_runs/*/* -hl
+
+  echo "Trial at $(hostname) Simulation Times (sec): $sim_time" | tee -a $LOG_DIR/vfd-sim.log
+
+  
 }
 
 hermes_vfd_aggregator(){
@@ -96,14 +108,19 @@ hermes_vfd_aggregator(){
   rm -rf $DEV2_DIR/aggregate.h5
 
   echo "Running aggregation with hermes ..."
+  export GLOG_minloglevel=2
 
-  
+  mid_time="$(date -u +%s.%N)"
 
   HDF5_DRIVER=hermes \
     HDF5_PLUGIN_PATH=${HERMES_INSTALL_DIR}/lib/hermes_vfd \
     HDF5_DRIVER_CONFIG="true ${HERMES_PAGESIZE}" HERMES_CONF=${HERMES_CONF} \
     LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/hermes_vfd/libhdf5_hermes_vfd.so \
     python3 aggregate.py -no_rmsd -no_fnc --input_path $DEV2_DIR --output_path ./aggregate.h5 > >(tee $LOG_DIR/vfd-agg.log) 2>$LOG_DIR/vfd-agg.err
+  
+  end_time="$(date -u +%s.%N)"
+  agg_time="$(bc <<<"$end_time-$mid_time")"
+  echo "Trial at $(hostname) Aggregation Times (sec): $agg_time" | tee -a $LOG_DIR/vfd-agg.log
 
   ls -lrtah $DEV2_DIR | grep "aggregate.h5"
 }
@@ -154,7 +171,7 @@ prov_vfd_agg(){
   HDF5_DRIVER=hermes \
   HDF5_DRIVER_CONFIG="true ${HERMES_PAGESIZE}" HERMES_CONF=${HERMES_CONF} \
   LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/hermes_vfd/libhdf5_hermes_vfd.so \
-  python3 aggregate.py -no_rmsd -no_fnc --input_path $DEV2_DIR --output_path $DEV2_DIR/aggregate.h5 \
+  python3 aggregate.py $AGG_CMD \
   > >(tee $LOG_DIR/prov-vfd-agg.log) 2>$LOG_DIR/prov-vfd-agg.err
   set +x
   wait
@@ -200,6 +217,50 @@ prov_aggregation(){
 
   ls -lrtah $DEV2_DIR | grep "aggregate.h5"
   mv $DEV2_DIR/stat-agg.yaml $LOG_DIR/
+
+}
+
+sim_agg_vfd_test(){
+
+  build_hermes
+
+  echo "Test: sim_agg_vfd_test "
+
+  cd $SCRIPT_DIR
+  rm -rf $DEV2_DIR/molecular_dynamics_runs
+  rm -rf $DEV2_DIR/aggregate.h5
+
+  echo "Running single process sim-agg with hermes vfd ..."
+
+  export GLOG_minloglevel=2
+
+  start_time="$(date -u +%s.%N)"
+
+  HDF5_DRIVER=hermes \
+    HDF5_PLUGIN_PATH=${HERMES_INSTALL_DIR}/lib/hermes_vfd \
+    HDF5_DRIVER_CONFIG="true ${HERMES_PAGESIZE}" HERMES_CONF=${HERMES_CONF} \
+    LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/hermes_vfd/libhdf5_hermes_vfd.so \
+    python3 sim_emulator.py $SIM_CMD
+  
+  mid_time="$(date -u +%s.%N)"
+
+  HDF5_DRIVER=hermes \
+    HDF5_PLUGIN_PATH=${HERMES_INSTALL_DIR}/lib/hermes_vfd \
+    HDF5_DRIVER_CONFIG="true ${HERMES_PAGESIZE}" HERMES_CONF=${HERMES_CONF} \
+    LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/hermes_vfd/libhdf5_hermes_vfd.so \
+    python3 aggregate.py -no_rmsd -no_fnc --input_path $DEV2_DIR --output_path $DEV2_DIR/aggregate.h5
+  # python3 aggregate.py -no_rmsd -no_fnc --input_path $DEV2_DIR --output_path ./aggregate.h5
+  
+
+  end_time="$(date -u +%s.%N)"
+  sim_time="$(bc <<<"$mid_time-$start_time")"
+  agg_time="$(bc <<<"$end_time-$mid_time")"
+  elapsed="$(bc <<<"$end_time-$start_time")"
+
+  echo -e "Trial at $(hostname) Times (sec): $sim_time, $agg_time, $elapsed" | tee -a $LOG_DIR/vfd-sim-agg.log
+
+  ls $DEV2_DIR/molecular_dynamics_runs/*/* -hl
+  ls -lrtah $DEV2_DIR | grep "aggregate.h5"
 
 }
 
@@ -257,3 +318,8 @@ then
   exit 0
 fi
 
+if [ "$OPT" == "perf-test" ]
+then 
+  sim_agg_vfd_test
+  exit 0
+fi

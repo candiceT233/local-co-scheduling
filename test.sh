@@ -30,7 +30,7 @@ mkdir -p $DEV2_DIR/$HSLABS
 # rm -rf /mnt/hdd/$USER/hermes_swap/*
 mkdir -p $SCRIPT_DIR/iortest
 
-sim_cmd="--residue 100 -n 2 -a 1000 -f 1000"
+sim_cmd="--residue 200 -n 1 -a 1000 -f 10000"
 
 hermes_simulation(){
   echo "Test: hermes_simulation "
@@ -442,6 +442,40 @@ aggregator_only(){
     ls -lrtah $DEV2_DIR | grep "aggregate.h5"
 }
 
+sim_agg_test(){
+    cd $SCRIPT_DIR
+
+
+    timeArr=()
+
+    for i in 1 #2 3 4 5
+    do
+      rm -rf $DEV2_DIR/molecular_dynamics_runs
+      rm -rf $DEV2_DIR/aggregate.h5
+      free; sync; echo 3 > /proc/sys/vm/drop_caches
+      sleep 5
+
+      echo "Running trial at $(hostname)"
+      start_time="$(date -u +%s.%N)"
+
+      python3 sim_emulator.py $sim_cmd
+      python3 aggregate.py -no_rmsd -no_fnc --input_path $DEV2_DIR --output_path $DEV2_DIR/aggregate.h5
+
+      end_time="$(date -u +%s.%N)"
+      elapsed="$(bc <<<"$end_time-$start_time")"
+      timeArr=(${timeArr[@]} "$elapsed")
+
+      echo "Trial $i Time Elapsed (sec): $elapsed"
+      ls $DEV2_DIR/molecular_dynamics_runs/*/* -hl
+      ls -lrtah $DEV2_DIR | grep "aggregate.h5"
+      sync; echo 3 > /proc/sys/vm/drop_caches
+    done
+
+    printf -v joined '%s, ' "${timeArr[@]}"
+    echo "All Time Elapsed (sec): ${joined%,}"
+    
+}
+
 aggregator_nocm_only(){
     cd $SCRIPT_DIR
     rm -rf ./aggregate.no_cm.h5
@@ -677,6 +711,12 @@ fi
 if [ "$OPT" == "cln-log" ]
 then 
   cleanup_logs
+  exit 0
+fi
+
+if [ "$OPT" == "perf-test" ]
+then 
+  sim_agg_test
   exit 0
 fi
 

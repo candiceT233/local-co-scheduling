@@ -10,9 +10,9 @@ import sys # for final output to ostderr
 # add MPI for Hermes
 # from mpi4py import MPI
 # MPI.Init()
-import ctypes
-c_mpi_lib = ctypes.CDLL('./cuctom_libs/c_mpi.so')
-c_mpi_lib.c_mpi_init(None , None)
+# import ctypes
+# c_mpi_lib = ctypes.CDLL('./cuctom_libs/c_mpi.so')
+# c_mpi_lib.c_mpi_init(None , None)
 
 # # SSD_PATH="/mnt/ssd/mtang11/"
 SSD_PATH=""
@@ -53,6 +53,7 @@ def concatenate_last_n_h5(args):
 
         with h5py.File(in_file, "r") as fin:
             # print(f"Datasetnames = {list(fin.keys())}")
+            # TODO: change readin style?
             for field in fields:
                 data[field].append(fin[field][...])
 
@@ -71,6 +72,7 @@ def concatenate_last_n_h5(args):
         if args.dtype:
             data['point_cloud'] = data['point_cloud'].astype(args.dtype)
     
+    # TODO: change output dataset
     # Open output file
     fout = h5py.File(args.output_path, "w", libver="latest")
     
@@ -80,21 +82,22 @@ def concatenate_last_n_h5(args):
             utf8_type = h5py.string_dtype("utf-8")
             fout.create_dataset("traj_file", data=concat_dset, dtype=utf8_type)
             continue
-
+        cm_chunk=(100,)
+        pc_chunk=(100,3,200)
         shape = concat_dset.shape
         chunkshape = (1,) + shape[1:]
         # Create dataset
-        if concat_dset.dtype != np.object:
+        if concat_dset.dtype != object: #np.object:
             # point_cloud-chunkshape : (1, 3, 200)
             if np.any(np.isnan(concat_dset)):
                 raise ValueError("NaN detected in concat_dset.")
             dset = fout.create_dataset(
-                field, shape, dtype=concat_dset.dtype, chunks=chunkshape
+                field, shape, dtype=concat_dset.dtype, chunks=pc_chunk
             )
         else:
             # contact_map-chunkshape : (1,)
             dset = fout.create_dataset(
-                field, shape, dtype=h5py.vlen_dtype(np.int16), chunks=chunkshape
+                field, shape, dtype=h5py.vlen_dtype(np.int16), #chunks=cm_chunk
             )
         # write data
         dset[...] = concat_dset[...]
@@ -132,5 +135,5 @@ if __name__ == "__main__":
 
     # # Add MPI for Hermes
     # MPI.Finalize()
-    c_mpi_lib.c_mpi_finalize()
+    # c_mpi_lib.c_mpi_finalize()
     

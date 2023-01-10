@@ -1,5 +1,5 @@
 - file-1_0:
-	name: /mnt/ssd/mtang11/molecular_dynamics_runs/stage0000/task0000/residue_200.h5
+	name: /mnt/hdd/mtang11/molecular_dynamics_runs/stage0000/task0000/residue_200.h5
 	dset-1_0-1_0:
 		name: contact_map
 		layout: H5D_CONTIGUOUS
@@ -12,13 +12,13 @@
 		dimensions: [1000,]
 		read_cnt: 1
 		blob_get_cnt: 1000
-		read_io_size: 37220748
+		read_io_size: 37215612
 - file-1_0:
-	name: /mnt/ssd/mtang11/molecular_dynamics_runs/stage0000/task0000/residue_200.h5
+	name: /mnt/hdd/mtang11/molecular_dynamics_runs/stage0000/task0000/residue_200.h5
 	dset-1_0-2_0:
 		name: point_cloud
 		layout: H5D_CONTIGUOUS
-		offset: 37256336
+		offset: 37251320
 		data_type_class: 1
 		type_size: 4
 		n_elements: 600000
@@ -28,15 +28,15 @@
 		read_cnt: 1
 		read_io_size: 2400000
 - file-1_0:
-	name: /mnt/ssd/mtang11/molecular_dynamics_runs/stage0000/task0000/residue_200.h5
-	size: 39656336
+	name: /mnt/hdd/mtang11/molecular_dynamics_runs/stage0000/task0000/residue_200.h5
+	size: 39651320
 	intent: H5F_ACC_RDONLY
 - file-2_0:
-	name: /mnt/ssd/mtang11/aggregate.h5
+	name: /mnt/hdd/mtang11/aggregate.h5
 	dset-2_0-3_0:
 		name: contact_map
-		layout: H5D_CHUNKED
-		offset: -1
+		layout: H5D_CONTIGUOUS
+		offset: 39651515
 		data_type_class: 9
 		type_size: 16
 		n_elements: 1000
@@ -45,9 +45,9 @@
 		dimensions: [1000,]
 		write_cnt: 1
 		blob_put_cnt: 1000
-		write_io_size: 37220748
+		write_io_size: 37215612
 - file-2_0:
-	name: /mnt/ssd/mtang11/aggregate.h5
+	name: /mnt/hdd/mtang11/aggregate.h5
 	dset-2_0-4_0:
 		name: point_cloud
 		layout: H5D_CHUNKED
@@ -61,6 +61,6 @@
 		write_cnt: 1
 		write_io_size: 2400000
 - file-2_0:
-	name: /mnt/ssd/mtang11/aggregate.h5
-	size: 39671487
+	name: /mnt/hdd/mtang11/aggregate.h5
+	size: 39650505
 	intent: H5F_ACC_RDWR
