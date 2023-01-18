@@ -1,9 +1,38 @@
+# env
+hermes_ddmd/
+hermes_slabs/
+ddmd_env/
+.vscode/
+venv_ddmd/
+
+# other repos
+vol-log-passthrough/
+vol-provenance/
+
+# saved logs
 1job_log/  
 2job_log/  
-diagrams/  
 HermesBufferProblem/  
-molecular_dynamics_runs/  
-old_log/  
+old_log/
+diagrams/  
 save_log/
-aggregate.h5
+save_job_log/
+old_save_jog_log/
+curr_outputs/
 
+*.err
+*.log
+!prov-sim.log
+!prov-agg.log
+
+# runtime/test output
+iortest/
+molecular_dynamics_runs/  
+molecular_dynamics_runs/
+aggregate.h5
+hermes_swap/
+device*_slab*.hermes
+swap*.hermes
+*.csv
+*.log
+*.txt
