@@ -10,9 +10,9 @@
 USER=$(whoami)
 
 # User directories
-MNT_HOME=/mnt/common/$USER
-INSTALL_DIR=$MNT_HOME/install
-DL_DIR=$MNT_HOME/download
+MNT_HOME=/qfs/people/$USER
+INSTALL_DIR=$HOME/install
+DL_DIR=$HOME/download
 
 # Hermes running dirs -----------
 STAGE_DIR=$MNT_HOME/hermes_stage
@@ -41,8 +41,8 @@ HSLABS=hermes_slabs
 # System storage dirs -----------
 
 # DEV0_DIR="" # this is memory
-export DEV1_DIR=/mnt/nvme/$USER # this is node local NVMe
-export DEV2_DIR=/mnt/hdd/$USER # this is node local HDD
+export DEV1_DIR=/state/partition1 # this is BurstBuffer
+export DEV2_DIR=/files0/oddite # this is Parallel File System
 # export DEV1_DIR="." # current dir
 # export DEV2_DIR="." # current dir
 # export DEV1_DIR="/tmp" # current dir
