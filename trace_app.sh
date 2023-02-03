@@ -323,3 +323,11 @@ then
   sim_agg_vfd_test
   exit 0
 fi
+
+
+if [ "$OPT" == "b-hm" ]
+then 
+  build_hermes
+  exit 0
+fi
+
