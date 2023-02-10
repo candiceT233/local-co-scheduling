@@ -25,14 +25,13 @@ import sys # for final output to ostderr
 # mpi4py.rc(initialize=False, finalize=False)
 # mpi4py.MPI.Init()
 
-# import ctypes
-# c_mpi_lib = ctypes.CDLL('./cuctom_libs/c_mpi.so')
-# c_mpi_lib.c_mpi_init(None , None)
+import ctypes
+c_mpi_lib = ctypes.CDLL('/people/tang584/scripts/local-co-scheduling/cuctom_libs/c_mpi.so')
+c_mpi_lib.c_mpi_init(None , None)
 
-# # SSD_PATH="/mnt/ssd/mtang11/"
-SSD_PATH=""
+OUTPUT_PATH=""
 if "DEV2_DIR" in os.environ:
-    SSD_PATH=os.environ.get('DEV2_DIR') + "/"    
+    OUTPUT_PATH=os.environ.get('DEV2_DIR') + "/"    
     # os.system('gcc -print-file-name=libmpi.so')
     # print(os.environ.get('HERMES_CLIENT'))
     # exit()
@@ -51,20 +50,8 @@ class SimEmulator:
         self.n_jobs = n_jobs
         self.nbytes = 0
         self.universe = None
-
-    # def set_adios(self, sst, bp):
-
-    #     self.adios_on = sst or bp
-    #     if self.adios_on is True:
-    #         self.adios_init(sst, bp)
-
-    # def adios_init(self, sst=True, bp=True):
-
-    #     adios = AdiosProducerConsumer()
-    #     adios.set_engine({"sst":sst})
-    #     adios.set_engine({"bp":bp})
-    #     adios.setup_conn()
-    #     self.adios = adios
+        # self.output_filename = output_filename
+        self.output_task = None
 
     def contact_map(self, density=None, dtype='int16'):
 
@@ -137,8 +124,6 @@ class SimEmulator:
                         data=data,
                         dtype=dtype,
                         # chunks=True,
-                        # shuffle=True,
-                        # compression="lzf",
                         # fletcher32=False,
                         )
                 
@@ -183,17 +168,21 @@ class SimEmulator:
         Path(fname).touch()
 
     def output_settings(self, 
-            output_filename=None, 
+            output_filename=None,
+            output_task=None, 
             is_contact_map=True, 
             is_point_cloud=True,
             is_rmsd=True, 
             is_fnc=True):
         if output_filename is None:
            self.output_filename = "residue_{}".format(self.n_residues)
+        else:
+            self.output_filename = output_filename
         self.is_contact_map = is_contact_map
         self.is_point_cloud = is_point_cloud
         self.is_rmsd = is_rmsd
         self.is_fnc = is_fnc
+        self.output_task = output_task
 
 
 def user_input():
@@ -207,6 +196,7 @@ def user_input():
     parser.add_argument('--contact_map', default=True) # =False to try Hermes MPIIO to work, default=True
     parser.add_argument('--point_cloud', default=True)
     parser.add_argument('--trajectory', default=False)
+    parser.add_argument('--output_task', default=None)
     parser.add_argument('--output_filename', default=None)
     parser.add_argument('--adios-sst', action='store_true', default=False)
     parser.add_argument('--adios-bp', action='store_true', default=False)
@@ -223,17 +213,25 @@ if __name__ == "__main__":
             n_frames = args.frame,
             n_jobs= args.number_of_jobs)
 
-    # obj.set_adios(args.adios_sst, args.adios_bp)
-
+    # print(f"obj.output_filename = {obj.output_filename}")
     obj.output_settings(output_filename = args.output_filename,
+            output_task= args.output_task,
             is_contact_map = args.contact_map,
             is_point_cloud = args.point_cloud,
             is_rmsd = args.rmsd,
             is_fnc = args.fnc)
+    print(f"obj.output_filename = {obj.output_filename}")
+    print(f"obj.output_task = {obj.output_task}")
 
     def runs(i):
         times = []
-        task_dir = SSD_PATH + "molecular_dynamics_runs/stage0000/task{:04d}/".format(i)
+        if obj.output_task is not None:
+            task_dir = OUTPUT_PATH + f"molecular_dynamics_runs/stage0000/task{obj.output_task}/"
+        else:
+            task_dir = OUTPUT_PATH + "molecular_dynamics_runs/stage0000/task{:04d}/".format(i)
+        
+        print(f"task_dir = {task_dir}")
+        
         Path(task_dir).mkdir(parents=True, exist_ok=True)
         
         cms = obj.contact_maps()
@@ -244,29 +242,6 @@ if __name__ == "__main__":
         if pcs is not None:
             obj.h5file(pcs, 'point_cloud', task_dir + obj.output_filename + ".h5")#f"_ins_{i}.h5")
 
-        
-        # if obj.adios_on is True:
-        #     # reset file open by task id
-        #     obj.adios.close_conn()
-        #     obj.adios.file_path = task_dir + os.path.basename(obj.adios.file_path)
-        #     obj.adios.stream_path = task_dir + os.path.basename(obj.adios.stream_path)
-        #     obj.adios.setup_conn()
-        #     times.append(time.time())
-        #     if cms is not None:
-        #         obj.adios.put({'contact_map': cms})
-        #     if pcs is not None:
-        #         obj.adios.put({'point_cloud': pcs})
-        #     times.append(time.time())
-        # else:
-        
-        
-
-            
-            
-        
-    #
-        # if obj.adios_on is True:
-        #     obj.adios.close_conn()
         dcd = obj.trajectories()
         if dcd is not None:
             obj.dcdfile(dcd, task_dir + obj.output_filename + ".dcd")#f"_ins_{i}.dcd")
@@ -295,4 +270,4 @@ if __name__ == "__main__":
     # # print("Error", file = sys.stderr )
     # # Add MPI for Hermes
     # MPI.Finalize()
-    # c_mpi_lib.c_mpi_finalize()
+    c_mpi_lib.c_mpi_finalize()
