@@ -1,0 +1,97 @@
+node27
+cd /qfs/projects/oddite/tang584/ddmd_runs/test_1600ps/molecular_dynamics_runs/stage0000/task0000
+node27
+cd /qfs/projects/oddite/tang584/ddmd_runs/test_1600ps/molecular_dynamics_runs/stage0000/task0001
+node27
+cd /qfs/projects/oddite/tang584/ddmd_runs/test_1600ps/molecular_dynamics_runs/stage0000/task0002
+node27
+cd /qfs/projects/oddite/tang584/ddmd_runs/test_1600ps/molecular_dynamics_runs/stage0000/task0003
+node27
+cd /qfs/projects/oddite/tang584/ddmd_runs/test_1600ps/molecular_dynamics_runs/stage0000/task0004
+node27
+cd /qfs/projects/oddite/tang584/ddmd_runs/test_1600ps/molecular_dynamics_runs/stage0000/task0005
+node37
+cd /qfs/projects/oddite/tang584/ddmd_runs/test_1600ps/molecular_dynamics_runs/stage0000/task0006
+node37
+cd /qfs/projects/oddite/tang584/ddmd_runs/test_1600ps/molecular_dynamics_runs/stage0000/task0007
+node37
+cd /qfs/projects/oddite/tang584/ddmd_runs/test_1600ps/molecular_dynamics_runs/stage0000/task0008
+node37
+cd /qfs/projects/oddite/tang584/ddmd_runs/test_1600ps/molecular_dynamics_runs/stage0000/task0009
+node37
+cd /qfs/projects/oddite/tang584/ddmd_runs/test_1600ps/molecular_dynamics_runs/stage0000/task0010
+node37
+cd /qfs/projects/oddite/tang584/ddmd_runs/test_1600ps/molecular_dynamics_runs/stage0000/task0011
+OpenMM done...
+/qfs/projects/oddite/tang584/ddmd_runs/test_1600ps/molecular_dynamics_runs/stage0000/task0000:
+total 8.0K
+-rw-r--r-- 1 tang584 oddite 784 Feb 10  2023 molecular_dynamics_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 263 Feb 10  2023 task0000_OPENMM.log
+
+/qfs/projects/oddite/tang584/ddmd_runs/test_1600ps/molecular_dynamics_runs/stage0000/task0001:
+total 8.0K
+-rw-r--r-- 1 tang584 oddite 784 Feb 10  2023 molecular_dynamics_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 263 Feb 10  2023 task0001_OPENMM.log
+
+/qfs/projects/oddite/tang584/ddmd_runs/test_1600ps/molecular_dynamics_runs/stage0000/task0002:
+total 8.0K
+-rw-r--r-- 1 tang584 oddite 784 Feb 10  2023 molecular_dynamics_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 263 Feb 10  2023 task0002_OPENMM.log
+
+/qfs/projects/oddite/tang584/ddmd_runs/test_1600ps/molecular_dynamics_runs/stage0000/task0003:
+total 8.0K
+-rw-r--r-- 1 tang584 oddite 784 Feb 10  2023 molecular_dynamics_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 263 Feb 10  2023 task0003_OPENMM.log
+
+/qfs/projects/oddite/tang584/ddmd_runs/test_1600ps/molecular_dynamics_runs/stage0000/task0004:
+total 8.0K
+-rw-r--r-- 1 tang584 oddite 784 Feb 10  2023 molecular_dynamics_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 263 Feb 10  2023 task0004_OPENMM.log
+
+/qfs/projects/oddite/tang584/ddmd_runs/test_1600ps/molecular_dynamics_runs/stage0000/task0005:
+total 8.0K
+-rw-r--r-- 1 tang584 oddite 784 Feb 10  2023 molecular_dynamics_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 263 Feb 10  2023 task0005_OPENMM.log
+
+/qfs/projects/oddite/tang584/ddmd_runs/test_1600ps/molecular_dynamics_runs/stage0000/task0006:
+total 8.0K
+-rw-r--r-- 1 tang584 oddite 784 Feb 10  2023 molecular_dynamics_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 263 Feb 10  2023 task0006_OPENMM.log
+
+/qfs/projects/oddite/tang584/ddmd_runs/test_1600ps/molecular_dynamics_runs/stage0000/task0007:
+total 8.0K
+-rw-r--r-- 1 tang584 oddite 784 Feb 10  2023 molecular_dynamics_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 263 Feb 10  2023 task0007_OPENMM.log
+
+/qfs/projects/oddite/tang584/ddmd_runs/test_1600ps/molecular_dynamics_runs/stage0000/task0008:
+total 8.0K
+-rw-r--r-- 1 tang584 oddite 784 Feb 10  2023 molecular_dynamics_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 263 Feb 10  2023 task0008_OPENMM.log
+
+/qfs/projects/oddite/tang584/ddmd_runs/test_1600ps/molecular_dynamics_runs/stage0000/task0009:
+total 8.0K
+-rw-r--r-- 1 tang584 oddite 784 Feb 10  2023 molecular_dynamics_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 263 Feb 10  2023 task0009_OPENMM.log
+
+/qfs/projects/oddite/tang584/ddmd_runs/test_1600ps/molecular_dynamics_runs/stage0000/task0010:
+total 8.0K
+-rw-r--r-- 1 tang584 oddite 784 Feb 10  2023 molecular_dynamics_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 263 Feb 10  2023 task0010_OPENMM.log
+
+/qfs/projects/oddite/tang584/ddmd_runs/test_1600ps/molecular_dynamics_runs/stage0000/task0011:
+total 8.0K
+-rw-r--r-- 1 tang584 oddite 784 Feb 10  2023 molecular_dynamics_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 263 Feb 10  2023 task0011_OPENMM.log
+Aggregate done...
+total 12K
+-rw-r--r-- 1 tang584 oddite  784 Feb 10  2023 molecular_dynamics_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 1.2K Feb 10  2023 task0000_AGGREGATE.log
+-rw-r--r-- 1 tang584 oddite  263 Feb 10  2023 task0011_OPENMM.log
+Training done...
+total 8.0K
+-rw-r--r-- 1 tang584 oddite 195 Feb 10  2023 task0000_TRAINING.log
+-rw-r--r-- 1 tang584 oddite 876 Feb 10  2023 training_stage_test.yaml
+Inference done...
+total 8.0K
+-rw-r--r-- 1 tang584 oddite 471 Feb 10  2023 inference_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 231 Feb 10  2023 task0000_INFERENCE.log
