@@ -25,7 +25,7 @@ import sys # for final output to ostderr
 # mpi4py.rc(initialize=False, finalize=False)
 # mpi4py.MPI.Init()
 # import ctypes
-# c_mpi_lib = ctypes.CDLL('./cuctom_libs/c_mpi.so')
+# c_mpi_lib = ctypes.CDLL('./my_libs/c_mpi.so')
 # c_mpi_lib.c_mpi_init(None , None)
 
 # # SSD_PATH="/mnt/ssd/mtang11/"

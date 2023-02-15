@@ -10,15 +10,14 @@ import sys # for final output to ostderr
 # add MPI for Hermes
 # from mpi4py import MPI
 # MPI.Init()
-# import ctypes
-# c_mpi_lib = ctypes.CDLL('./cuctom_libs/c_mpi.so')
-# c_mpi_lib.c_mpi_init(None , None)
+import ctypes
+c_mpi_lib = ctypes.CDLL('/people/tang584/scripts/local-co-scheduling/my_libs/c_mpi.so')
+c_mpi_lib.c_mpi_init(None , None)
 
-# # SSD_PATH="/mnt/ssd/mtang11/"
-SSD_PATH=""
+OUTPUT_PATH=""
 if "DEV2_DIR" in os.environ:
-    SSD_PATH=os.environ.get('DEV2_DIR') + "/"
-    # print(f"Python Var : {SSD_PATH}")
+    OUTPUT_PATH=os.environ.get('DEV2_DIR') + "/"
+    # print(f"Python Var : {OUTPUT_PATH}")
 
 def concatenate_last_n_h5(args):
 
@@ -135,5 +134,5 @@ if __name__ == "__main__":
 
     # # Add MPI for Hermes
     # MPI.Finalize()
-    # c_mpi_lib.c_mpi_finalize()
+    c_mpi_lib.c_mpi_finalize()
     

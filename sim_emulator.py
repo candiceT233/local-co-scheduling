@@ -26,7 +26,7 @@ import sys # for final output to ostderr
 # mpi4py.MPI.Init()
 
 import ctypes
-c_mpi_lib = ctypes.CDLL('/people/tang584/scripts/local-co-scheduling/cuctom_libs/c_mpi.so')
+c_mpi_lib = ctypes.CDLL('/people/tang584/scripts/local-co-scheduling/my_libs/c_mpi.so')
 c_mpi_lib.c_mpi_init(None , None)
 
 OUTPUT_PATH=""
@@ -220,8 +220,8 @@ if __name__ == "__main__":
             is_point_cloud = args.point_cloud,
             is_rmsd = args.rmsd,
             is_fnc = args.fnc)
-    print(f"obj.output_filename = {obj.output_filename}")
-    print(f"obj.output_task = {obj.output_task}")
+    # print(f"obj.output_filename = {obj.output_filename}")
+    # print(f"obj.output_task = {obj.output_task}")
 
     def runs(i):
         times = []
@@ -230,7 +230,7 @@ if __name__ == "__main__":
         else:
             task_dir = OUTPUT_PATH + "molecular_dynamics_runs/stage0000/task{:04d}/".format(i)
         
-        print(f"task_dir = {task_dir}")
+        # print(f"task_dir = {task_dir}")
         
         Path(task_dir).mkdir(parents=True, exist_ok=True)
         
@@ -245,6 +245,7 @@ if __name__ == "__main__":
         dcd = obj.trajectories()
         if dcd is not None:
             obj.dcdfile(dcd, task_dir + obj.output_filename + ".dcd")#f"_ins_{i}.dcd")
+            
         obj.pdbfile(None, task_dir + "dummy.pdb")#obj.output_filename + ".pdb")
 
         #print (max(times) - min(times), min(times), max(times) ) 
