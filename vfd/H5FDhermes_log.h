@@ -39,9 +39,12 @@
 #include "H5PLextern.h"
 
 // #include "H5FDhermes.h"     /* Hermes file driver     */
-#include "/home/mtang11/hermes_stage/hermes/adapter/vfd/H5FDhermes.h"     /* Hermes file driver     */
+#include "H5FDhermes.h"     /* Hermes file driver     */
 // #include "H5FDhermes_err.h" /* error handling         */
-#include "H5VLprovnc_types.h" /* Connecting to vol         */
+
+#ifdef ENABLE_HDF5_IO_LOGGING
+#include "/qfs/people/tang584/scripts/local-co-scheduling/vol-provenance/H5VLprovnc_types.h" /* Connecting to vol         */
+#endif
 
 #include <time.h>       // for struct timespec, clock_gettime(CLOCK_MONOTONIC, &end);
 /* candice added functions for I/O traces end */
