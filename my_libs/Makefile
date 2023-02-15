@@ -1,5 +1,6 @@
 #Your MPI install path
-MPI_DIR=/opt/ohpc/pub/software/hdevarajan/mpich/3.3.2
+MPI_DIR=/share/apps/openmpi/4.1.3/gcc/9.1.0
+#/opt/ohpc/pub/software/hdevarajan/mpich/3.3.2
 
 CC=mpicc
 #CC=gcc-10
