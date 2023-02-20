@@ -11,7 +11,8 @@ num_targets: 2
 # The maximum buffering capacity in MiB of each device. Here we say that all 4
 # devices get 50 MiB of buffering capacity.
 # capacities_mb: [1000, 5000]
-capacities_gb: [4, 10]
+capacities_gb: [2, 4]
+
 # The size of the smallest available buffer in KiB. In general this should be
 # the page size of your system for byte addressable storage, and the block size
 # of the storage device for block addressable storage.
@@ -25,13 +26,8 @@ num_slabs: [4, 4] #[1,1] #[4, 4]
 # device should contain for each slab (controlled by num_slabs). This allows for
 # precise control of the distibution of buffer sizes.
 slab_unit_sizes: [
-  # [32,4],
-  # [1,4],
-  # [4, 4, 4, 4, 4, 4, 4, 4, 4, 4,],
-  # [32, 16, 4, 1],
   [1, 4, 16, 32],
   [1, 4, 16, 32],
-
 ]
 
 # The percentage of buffering capacity per device to allocate for each slab.
@@ -59,7 +55,7 @@ metadata_arena_percentage: 0.35
 # The percentage of Hermes memory to reserve for short term storage.
 transient_arena_percentage: 0.05
 
-# The maxiumum number of buckets that can be created.
+# The maxiumum number of buckets(=files) that can be created.
 max_buckets_per_node: 320 # 32
 # The maxiumum number of virtual buckets that can be created.
 max_vbuckets_per_node: 16
@@ -69,14 +65,14 @@ system_view_state_update_interval_ms: 1000
 # The mount point of each device. RAM should be the empty string. For block
 # devices, this is the directory where Hermes will create buffering files. For
 # object storage or cloud targets, this will be a url.
-mount_points: ["", "/mnt/ssd/mtang11/hermes_slabs"] # RAM and BurstBuffer # /mnt/ssd/mtang11/hermes_slabs
+mount_points: ["", "/state/partition1/tang584/hermes_slabs"] # RAM and BurstBuffer # /mnt/ssd/mtang11/hermes_slabs
 # mount_points: ["", "/mnt/ssd/mtang11/hermes_slabs"]
 # For each device, indicate '1' if it is shared among nodes (e.g., burst
 # buffers), or '0' if it is per node (e.g., local NVMe).
-is_shared_device: [0,0]
+is_shared_device: [0,1]
 # The mount point of a PFS or object store for swap space, in the event that
 # Hermes buffers become full.
-swap_mount: "/mnt/ssd/mtang11/hermes_swaps" # the PFS # /mnt/ssd/mtang11/hermes_swaps
+swap_mount: "/files0/oddite/tang584/hermes_swaps" # the PFS # /mnt/ssd/mtang11/hermes_swaps
 # The number of times the buffer organizer will attempt to place a blob from
 # swap space into the hierarchy before giving up.
 num_buffer_organizer_retries: 3
@@ -88,7 +84,7 @@ num_buffer_organizer_retries: 3
 rpc_server_host_file: ""
 
 # Base hostname for the RPC servers.
-rpc_server_base_name: "localhost" #"172.25.1.1" #"localhost"
+rpc_server_base_name: "node" #"172.25.1.1" #"localhost"
 # RPC server name suffix. This is appended to the the base name plus host
 # number.
 rpc_server_suffix: ""
@@ -149,18 +145,33 @@ path_exclusions: [
     "/sys/", "/var/",  "/run/",
     "pipe", "socket:", "anon_inode:",
     "/usr/",  "/lib/", 
-    "/home",
-    "h5py/",
-    # "/home/mtang11/spack/opt/spack/linux-centos7-skylake_avx512/gcc-7.3.0",
+    "/spack/", "/venv_ddmd/","/__pycache__/",
+    "/ompi.",
+    "/.conda/", "/scripts/",
+    " /share/",
+    "/home/files0/oddite/deepdrivemd/",
+    "/people/tang584/.local/lib/python3.7/",
+    "/projects/oddite/tang584/git/",
+    # "/state/partition1/tang584/hermes_slabs",
+    # "/files0/oddite/tang584/hermes_swaps",
+    # "aggregate_stage_test.yaml"
+    # "/qfs/projects/oddite/tang584/ddmd_runs/test_1600ps",
+    # "amber99sbildn.xml",
+    # "/qfs/projects/oddite/tang584/ddmd_runs/test_1600ps/molecular_dynamics_runs/stage0000/task0000/aggregate_stage_test.yaml",
+    # "/people/tang584/scripts",
+    # "/hermes_slabs", "/hermes_swaps"
+    # "/home", 
+    # "h5py/",
     # "/mnt/common/mtang11/install/python-3.9.13/lib",
     # "/mnt/common/mtang11/scripts/local-co-scheduling/ddmd_env/",
 ]
 # "/home/mtang11/spack",
-#Paths which are never ignored when buffering data
+# Paths which are never ignored when buffering data
 path_inclusions: [
-    "/var/opt/cray/dws/mounts/",
-    "molecular_dynamics_runs",
-    "aggregate.h5",
+    # "/var/opt/cray/dws/mounts/",
+    "/qfs/projects/oddite/tang584/ddmd_runs/test_1600ps/molecular_dynamics_runs",
+    # "aggregate.h5",
+    # ".dcd",".h5",".pdb",
 ]
 
 # "iortest",

@@ -2,7 +2,7 @@
 #SBATCH -A oddite
 #SBATCH --job-name="hm_co"
 #SBATCH -N 2
-#SBATCH -n 12
+#SBATCH -n 6
 #SBATCH --time=01:30:00
 #SBATCH --output=R_%x.out                                        
 #SBATCH --error=R_%x.err
@@ -15,12 +15,13 @@ ulimit -c unlimited
 . $HOME/spack/share/spack/setup-env.sh
 
 source /qfs/people/tang584/scripts/local-co-scheduling/env_var.sh
+
 # source /qfs/people/tang584/scripts/local-co-scheduling/load_hermes_deps.sh
 
 set -x
 
 NODE_COUNT=$SLURM_JOB_NUM_NODES
-MD_RUNS=12
+MD_RUNS=6
 ITER_COUNT=1 # TBD
 # GPU_PER_NODE=6
 MD_START=0
@@ -33,7 +34,7 @@ echo "SLURM_JOB_NODELIST = $SLURM_JOB_NODELIST"
 hostlist=$(echo -e "$NODE_NAMES" | xargs | sed -e 's/ /,/g')
 echo "hostlist = $hostlist"
 
-# cleanup dir
+# setup  dir
 mkdir -p $DEV1_DIR/hermes_slabs
 mkdir -p $DEV2_DIR/hermes_swaps
 
@@ -49,9 +50,10 @@ SIMULATION (){
 
     SIM_CMD="--residue 100 -n 1 -a 100 -f 100 --output_task $task_id"
 
+    source $PY_VENV/bin/activate
     srun -w $node_id -n1 -N1 --exclusive \
         mpirun -np 1 \
-        -x LD_PRELOAD=/qfs$HERMES_INSTALL_DIR/lib/libhermes_posix.so \
+        -x LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so \
         -x HERMES_CONF=$HERMES_CONF \
         -x ADAPTER_MODE=SCRATCH \
         -x HERMES_STOP_DAEMON=0 \
@@ -65,6 +67,7 @@ AGGREGATE (){
     # task_id=task0000
     AGG_CMD="-no_rmsd -no_fnc --input_path $DEV2_DIR --output_path $DEV2_DIR/aggregate.h5"
 
+    source $PY_VENV/bin/activate
     srun -N1 mpirun -np 1 \
         -x LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so \
         -x HERMES_CONF=$HERMES_CONF \
@@ -83,7 +86,8 @@ mpirun -np $NODE_COUNT --map-by ppr:1:node --host $hostlist killall hermes_daemo
 
 mpirun -np $NODE_COUNT --map-by ppr:1:node --host $hostlist -x HERMES_CONF=${HERMES_CONF} ${HERMES_INSTALL_DIR}/bin/hermes_daemon &
 
-mpirun -np $NODE_COUNT --map-by ppr:1:node --host $hostlist sleep 3
+# mpirun -np $NODE_COUNT --map-by ppr:1:node --host $hostlist sleep 3
+sleep 3
 
 for iter in $(seq $ITER_COUNT)
 do
