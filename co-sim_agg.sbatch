@@ -1,8 +1,8 @@
 #!/bin/bash  
 #SBATCH -A oddite
-#SBATCH --job-name="hm_co"
+#SBATCH --job-name="co"
 #SBATCH -N 2
-#SBATCH -n 12
+#SBATCH -n 6
 #SBATCH --nodelist=node[39,40]
 #SBATCH --time=01:30:00
 #SBATCH --output=R_%x.out                                        
@@ -22,6 +22,8 @@ source /qfs/people/tang584/scripts/local-co-scheduling/load_hermes_deps.sh
 # load environment variables for Hermes
 source /qfs/people/tang584/scripts/local-co-scheduling/env_var.sh 
 # source /qfs/people/tang584/scripts/local-co-scheduling/load_hermes_deps.sh
+export GLOG_minloglevel=0
+export FLAGS_logtostderr=0
 
 
 NODE_COUNT=$SLURM_JOB_NUM_NODES
@@ -55,33 +57,17 @@ SIMULATION (){
     node_id=$2
 
     SIM_CMD="--residue 100 -n 1 -a 400 -f 400 --output_task ${task_id}"
-        # -genv HERMES_CLIENT_CONF=${HERMES_CLIENT_CONF} \
 
     source $PY_VENV/bin/activate
-    srun -w $node_id -n1 -N1 --exclusive \
-        mpirun -np 1 \
-        -genv LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/libhermes_posix.so \
-        -genv HERMES_CONF=${HERMES_CONF} \
-        -genv ADAPTER_MODE=SCRATCH \
-        -genv HERMES_STOP_DAEMON=0 \
-        -genv HERMES_CLIENT=1 \
-        python ${SCRIPT_DIR}/sim_emulator.py ${SIM_CMD} &
-
+    python ${SCRIPT_DIR}/sim_emulator.py ${SIM_CMD} &
 }
 
 AGGREGATE (){
     # task_id=task0000
     AGG_CMD="-no_rmsd -no_fnc --input_path ${DEV2_DIR} --output_path ${DEV2_DIR}/aggregate.h5"
-            # -genv HERMES_CLIENT_CONF=${HERMES_CLIENT_CONF} \
 
     source $PY_VENV/bin/activate
-    mpirun -np 1 \
-        -genv LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/libhermes_posix.so \
-        -genv HERMES_CONF=${HERMES_CONF} \
-        -genv ADAPTER_MODE=SCRATCH \
-        -genv HERMES_STOP_DAEMON=1 \
-        -genv HERMES_CLIENT=1 \
-        python ${SCRIPT_DIR}/aggregate.py ${AGG_CMD}
+    python ${SCRIPT_DIR}/aggregate.py ${AGG_CMD}
     
 }
 
@@ -106,16 +92,6 @@ STOP_HERMES_DAEMON(){
 # mpirun -np 2 --map-by ppr:1:node --host $hostlist
 
 hostname;date;
-# Start a daemon
-# START_HERMES_DAEMON
-# mpirun -np $NODE_COUNT --map-by ppr:1:node --host $hostlist killall hermes_daemon
-# mpirun -np $NODE_COUNT --map-by ppr:1:node --host $hostlist -x HERMES_CONF=${HERMES_CONF} ${HERMES_INSTALL_DIR}/bin/hermes_daemon &
-
-mpirun -np $NODE_COUNT -ppn 1 -host $hostlist killall hermes_daemon
-set -x
-mpirun -np $NODE_COUNT -ppn 1 -host $hostlist -genv HERMES_CONF=${HERMES_CONF} ${HERMES_INSTALL_DIR}/bin/hermes_daemon &
-sleep 3
-set +x
 
 # export GLOG_minloglevel=0
 # export FLAGS_logtostderr=0
@@ -155,7 +131,6 @@ do
 
     ls -lrtah $DEV2_DIR | grep "aggregate.h5" # check file size for correctness
     
-
 done
 
 hostname;date;
