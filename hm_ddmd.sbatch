@@ -2,15 +2,15 @@
 #SBATCH --job-name=hm_deepdrivemd
 #SBATCH --account=oddite
 #SBATCH --time=01:30:00
-#SBATCH -N 6
-#SBATCH -n 24
-#SBATCH --nodelist=node[37,39-43]
+#SBATCH -N 4
+#SBATCH -n 18
+#SBATCH  --exclude=node[01-25]
 #SBATCH --output=R_%x.out                                        
 #SBATCH --error=R_%x.err
 
-# --output=R_%x.%j.out
+# --output=R_%x.%j.out --nodelist=node[36,43]
 
-MD_RUNS=24
+MD_RUNS=12
 ITER_COUNT=1 # TBD
 SIM_LENGTH=0.1 #1.6
 STAGE_IDX=0
@@ -37,11 +37,20 @@ source /qfs/people/tang584/scripts/local-co-scheduling/env_var.sh
 GPU_PER_NODE=6
 MD_START=0
 MD_SLICE=$(($MD_RUNS/$NODE_COUNT))
-NODE_NAMES=`echo $SLURM_JOB_NODELIST|scontrol show hostnames`
+
+# get nodelist to hermes config file
+if [ "$NODE_COUNT" = "1" ]; then
+    sed "s/\$HOST_BASE_NAME/\"localhost\"/" $HERMES_DEFAULT_CONF  > $HERMES_CONF
+    sed -i "s/\$HOST_NUMBER_RANGE/ /" $HERMES_CONF
+else
+    sed "s/\$HOST_BASE_NAME/\"node\"/" $HERMES_DEFAULT_CONF  > $HERMES_CONF
+    rpc_host_number_range=$(echo "$SLURM_JOB_NODELIST" | grep -Po '[\[].*[\]]')
+    sed -i "s/\$HOST_NUMBER_RANGE/${rpc_host_number_range}/" $HERMES_CONF
+fi
 
 # OPENMM_PYTHON=~/.conda/envs/hermes_openmm_ddmd/bin/python
 # PYTORCH_PYTHON=~/.conda/envs/hermes_pytorch_ddmd/bin/python
-
+NODE_NAMES=`echo $SLURM_JOB_NODELIST|scontrol show hostnames`
 hostlist=$(echo -e "$NODE_NAMES" | xargs | sed -e 's/ /,/g')
 echo "hostlist=$hostlist"
 
@@ -238,16 +247,12 @@ hostname;date;
 # mpirun -np $NODE_COUNT --map-by ppr:1:node --host $hostlist killall hermes_daemon
 # mpirun -np $NODE_COUNT --map-by ppr:1:node --host $hostlist -x HERMES_CONF=${HERMES_CONF} ${HERMES_INSTALL_DIR}/bin/hermes_daemon &
 
-# hostlist="172.16.205.41,172.16.205.42,172.16.205.43"
 set -x
 mpirun -np $NODE_COUNT -ppn 1 -host $hostlist killall hermes_daemon
-mpirun -np $NODE_COUNT -ppn 1 -host $hostlist -genv HERMES_CONF=${HERMES_CONF} ${HERMES_INSTALL_DIR}/bin/hermes_daemon &
-
-# STOP_HERMES_DAEMON; wait
-# START_HERMES_DAEMON
-
 sleep 3
-
+mpirun -np $NODE_COUNT -ppn 1 -host $hostlist -genv HERMES_CONF=${HERMES_CONF} ${HERMES_INSTALL_DIR}/bin/hermes_daemon &
+sleep 3
+ls -l /state/partition1/tang584/hermes_slabs
 set +x
 
 # ls -l /state/partition1/tang584/hermes_slabs

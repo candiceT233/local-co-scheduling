@@ -1,5 +1,7 @@
 #Your MPI install path
-MPI_DIR=/share/apps/openmpi/4.1.3/gcc/9.1.0
+# MPI_DIR=/share/apps/openmpi/4.1.3/gcc/9.1.0
+# MPI_DIR="$(spack find -p mpich | sed -n '2p' | cut -d ' ' -f3)"
+MPI_DIR:=$(shell which mpicc | rev | cut -c 11- | rev)
 #/opt/ohpc/pub/software/hdevarajan/mpich/3.3.2
 
 CC=mpicc

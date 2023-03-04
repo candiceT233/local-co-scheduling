@@ -1,0 +1,325 @@
+node20
+cd /qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0000
+node20
+cd /qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0001
+node20
+cd /qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0002
+node20
+cd /qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0003
+node23
+cd /qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0004
+node23
+cd /qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0005
+node23
+cd /qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0006
+node23
+cd /qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0007
+node24
+cd /qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0008
+node24
+cd /qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0009
+node24
+cd /qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0010
+node24
+cd /qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0011
+node25
+cd /qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0012
+node25
+cd /qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0013
+node25
+cd /qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0014
+node25
+cd /qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0015
+node26
+cd /qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0016
+node26
+cd /qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0017
+node26
+cd /qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0018
+node26
+cd /qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0019
+node27
+cd /qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0020
+node27
+cd /qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0021
+node27
+cd /qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0022
+node27
+cd /qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0023
+OpenMM done... 2 minutes and 25 seconds elapsed.
+/qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0000:
+total 844K
+-rw-r--r-- 1 tang584 oddite  783 Feb 28 18:37 molecular_dynamics_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 599K Feb 28  2023 stage0000_task0000.dcd
+-rw-r--r-- 1 tang584 oddite 164K Feb 28  2023 stage0000_task0000.h5
+-rw-r--r-- 1 tang584 oddite 8.5K Feb 28  2023 stage0000_task0000.log
+-rw-r--r-- 1 tang584 oddite  39K Feb 28 18:37 system__1FME-unfolded.pdb
+-rw-r--r-- 1 tang584 oddite 2.1K Feb 28  2023 task0000_OPENMM.log
+
+/qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0001:
+total 844K
+-rw-r--r-- 1 tang584 oddite  783 Feb 28 18:37 molecular_dynamics_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 599K Feb 28  2023 stage0000_task0001.dcd
+-rw-r--r-- 1 tang584 oddite 164K Feb 28  2023 stage0000_task0001.h5
+-rw-r--r-- 1 tang584 oddite 8.5K Feb 28  2023 stage0000_task0001.log
+-rw-r--r-- 1 tang584 oddite  39K Feb 28 18:37 system__1FME-unfolded.pdb
+-rw-r--r-- 1 tang584 oddite 2.1K Feb 28  2023 task0001_OPENMM.log
+
+/qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0002:
+total 844K
+-rw-r--r-- 1 tang584 oddite  783 Feb 28 18:37 molecular_dynamics_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 599K Feb 28  2023 stage0000_task0002.dcd
+-rw-r--r-- 1 tang584 oddite 164K Feb 28  2023 stage0000_task0002.h5
+-rw-r--r-- 1 tang584 oddite 8.5K Feb 28  2023 stage0000_task0002.log
+-rw-r--r-- 1 tang584 oddite  39K Feb 28 18:37 system__1FME-unfolded.pdb
+-rw-r--r-- 1 tang584 oddite 2.1K Feb 28  2023 task0002_OPENMM.log
+
+/qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0003:
+total 844K
+-rw-r--r-- 1 tang584 oddite  783 Feb 28 18:37 molecular_dynamics_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 599K Feb 28  2023 stage0000_task0003.dcd
+-rw-r--r-- 1 tang584 oddite 164K Feb 28  2023 stage0000_task0003.h5
+-rw-r--r-- 1 tang584 oddite 8.5K Feb 28  2023 stage0000_task0003.log
+-rw-r--r-- 1 tang584 oddite  39K Feb 28 18:37 system__1FME-unfolded.pdb
+-rw-r--r-- 1 tang584 oddite 2.1K Feb 28  2023 task0003_OPENMM.log
+
+/qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0004:
+total 844K
+-rw-r--r-- 1 tang584 oddite  783 Feb 28 18:37 molecular_dynamics_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 599K Feb 28  2023 stage0000_task0004.dcd
+-rw-r--r-- 1 tang584 oddite 164K Feb 28  2023 stage0000_task0004.h5
+-rw-r--r-- 1 tang584 oddite 8.5K Feb 28  2023 stage0000_task0004.log
+-rw-r--r-- 1 tang584 oddite  39K Feb 28 18:37 system__1FME-unfolded.pdb
+-rw-r--r-- 1 tang584 oddite 2.1K Feb 28  2023 task0004_OPENMM.log
+
+/qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0005:
+total 844K
+-rw-r--r-- 1 tang584 oddite  783 Feb 28 18:37 molecular_dynamics_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 599K Feb 28  2023 stage0000_task0005.dcd
+-rw-r--r-- 1 tang584 oddite 164K Feb 28  2023 stage0000_task0005.h5
+-rw-r--r-- 1 tang584 oddite 8.5K Feb 28  2023 stage0000_task0005.log
+-rw-r--r-- 1 tang584 oddite  39K Feb 28 18:37 system__1FME-unfolded.pdb
+-rw-r--r-- 1 tang584 oddite 2.1K Feb 28  2023 task0005_OPENMM.log
+
+/qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0006:
+total 844K
+-rw-r--r-- 1 tang584 oddite  783 Feb 28 18:37 molecular_dynamics_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 599K Feb 28  2023 stage0000_task0006.dcd
+-rw-r--r-- 1 tang584 oddite 164K Feb 28  2023 stage0000_task0006.h5
+-rw-r--r-- 1 tang584 oddite 8.5K Feb 28  2023 stage0000_task0006.log
+-rw-r--r-- 1 tang584 oddite  39K Feb 28 18:37 system__1FME-unfolded.pdb
+-rw-r--r-- 1 tang584 oddite 2.1K Feb 28  2023 task0006_OPENMM.log
+
+/qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0007:
+total 844K
+-rw-r--r-- 1 tang584 oddite  783 Feb 28 18:37 molecular_dynamics_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 599K Feb 28  2023 stage0000_task0007.dcd
+-rw-r--r-- 1 tang584 oddite 164K Feb 28  2023 stage0000_task0007.h5
+-rw-r--r-- 1 tang584 oddite 8.4K Feb 28  2023 stage0000_task0007.log
+-rw-r--r-- 1 tang584 oddite  39K Feb 28 18:37 system__1FME-unfolded.pdb
+-rw-r--r-- 1 tang584 oddite 2.1K Feb 28  2023 task0007_OPENMM.log
+
+/qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0008:
+total 844K
+-rw-r--r-- 1 tang584 oddite  783 Feb 28 18:37 molecular_dynamics_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 599K Feb 28  2023 stage0000_task0008.dcd
+-rw-r--r-- 1 tang584 oddite 164K Feb 28  2023 stage0000_task0008.h5
+-rw-r--r-- 1 tang584 oddite 8.5K Feb 28  2023 stage0000_task0008.log
+-rw-r--r-- 1 tang584 oddite  39K Feb 28 18:37 system__1FME-unfolded.pdb
+-rw-r--r-- 1 tang584 oddite 2.1K Feb 28  2023 task0008_OPENMM.log
+
+/qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0009:
+total 844K
+-rw-r--r-- 1 tang584 oddite  783 Feb 28 18:37 molecular_dynamics_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 599K Feb 28  2023 stage0000_task0009.dcd
+-rw-r--r-- 1 tang584 oddite 164K Feb 28  2023 stage0000_task0009.h5
+-rw-r--r-- 1 tang584 oddite 8.5K Feb 28  2023 stage0000_task0009.log
+-rw-r--r-- 1 tang584 oddite  39K Feb 28 18:37 system__1FME-unfolded.pdb
+-rw-r--r-- 1 tang584 oddite 2.1K Feb 28  2023 task0009_OPENMM.log
+
+/qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0010:
+total 844K
+-rw-r--r-- 1 tang584 oddite  783 Feb 28 18:37 molecular_dynamics_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 599K Feb 28  2023 stage0000_task0010.dcd
+-rw-r--r-- 1 tang584 oddite 164K Feb 28  2023 stage0000_task0010.h5
+-rw-r--r-- 1 tang584 oddite 8.5K Feb 28  2023 stage0000_task0010.log
+-rw-r--r-- 1 tang584 oddite  39K Feb 28 18:37 system__1FME-unfolded.pdb
+-rw-r--r-- 1 tang584 oddite 2.1K Feb 28  2023 task0010_OPENMM.log
+
+/qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0011:
+total 828K
+-rw-r--r-- 1 tang584 oddite  783 Feb 28 18:37 molecular_dynamics_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 599K Feb 28  2023 stage0000_task0011.dcd
+-rw-r--r-- 1 tang584 oddite 148K Feb 28  2023 stage0000_task0011.h5
+-rw-r--r-- 1 tang584 oddite 8.5K Feb 28  2023 stage0000_task0011.log
+-rw-r--r-- 1 tang584 oddite  39K Feb 28 18:37 system__1FME-unfolded.pdb
+-rw-r--r-- 1 tang584 oddite 2.1K Feb 28  2023 task0011_OPENMM.log
+
+/qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0012:
+total 844K
+-rw-r--r-- 1 tang584 oddite  783 Feb 28 18:37 molecular_dynamics_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 599K Feb 28  2023 stage0000_task0012.dcd
+-rw-r--r-- 1 tang584 oddite 164K Feb 28  2023 stage0000_task0012.h5
+-rw-r--r-- 1 tang584 oddite 8.4K Feb 28  2023 stage0000_task0012.log
+-rw-r--r-- 1 tang584 oddite  39K Feb 28 18:37 system__1FME-unfolded.pdb
+-rw-r--r-- 1 tang584 oddite 2.1K Feb 28  2023 task0012_OPENMM.log
+
+/qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0013:
+total 844K
+-rw-r--r-- 1 tang584 oddite  783 Feb 28 18:37 molecular_dynamics_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 599K Feb 28  2023 stage0000_task0013.dcd
+-rw-r--r-- 1 tang584 oddite 164K Feb 28  2023 stage0000_task0013.h5
+-rw-r--r-- 1 tang584 oddite 8.5K Feb 28  2023 stage0000_task0013.log
+-rw-r--r-- 1 tang584 oddite  39K Feb 28 18:37 system__1FME-unfolded.pdb
+-rw-r--r-- 1 tang584 oddite 2.1K Feb 28  2023 task0013_OPENMM.log
+
+/qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0014:
+total 844K
+-rw-r--r-- 1 tang584 oddite  783 Feb 28 18:37 molecular_dynamics_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 599K Feb 28  2023 stage0000_task0014.dcd
+-rw-r--r-- 1 tang584 oddite 164K Feb 28  2023 stage0000_task0014.h5
+-rw-r--r-- 1 tang584 oddite 8.4K Feb 28  2023 stage0000_task0014.log
+-rw-r--r-- 1 tang584 oddite  39K Feb 28 18:37 system__1FME-unfolded.pdb
+-rw-r--r-- 1 tang584 oddite 2.1K Feb 28  2023 task0014_OPENMM.log
+
+/qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0015:
+total 844K
+-rw-r--r-- 1 tang584 oddite  783 Feb 28 18:37 molecular_dynamics_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 599K Feb 28  2023 stage0000_task0015.dcd
+-rw-r--r-- 1 tang584 oddite 164K Feb 28  2023 stage0000_task0015.h5
+-rw-r--r-- 1 tang584 oddite 8.5K Feb 28  2023 stage0000_task0015.log
+-rw-r--r-- 1 tang584 oddite  39K Feb 28 18:37 system__1FME-unfolded.pdb
+-rw-r--r-- 1 tang584 oddite 2.1K Feb 28  2023 task0015_OPENMM.log
+
+/qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0016:
+total 844K
+-rw-r--r-- 1 tang584 oddite  783 Feb 28 18:37 molecular_dynamics_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 599K Feb 28  2023 stage0000_task0016.dcd
+-rw-r--r-- 1 tang584 oddite 164K Feb 28  2023 stage0000_task0016.h5
+-rw-r--r-- 1 tang584 oddite 8.4K Feb 28  2023 stage0000_task0016.log
+-rw-r--r-- 1 tang584 oddite  39K Feb 28 18:37 system__1FME-unfolded.pdb
+-rw-r--r-- 1 tang584 oddite 2.1K Feb 28  2023 task0016_OPENMM.log
+
+/qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0017:
+total 844K
+-rw-r--r-- 1 tang584 oddite  783 Feb 28 18:37 molecular_dynamics_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 599K Feb 28  2023 stage0000_task0017.dcd
+-rw-r--r-- 1 tang584 oddite 164K Feb 28  2023 stage0000_task0017.h5
+-rw-r--r-- 1 tang584 oddite 8.5K Feb 28  2023 stage0000_task0017.log
+-rw-r--r-- 1 tang584 oddite  39K Feb 28 18:37 system__1FME-unfolded.pdb
+-rw-r--r-- 1 tang584 oddite 2.1K Feb 28  2023 task0017_OPENMM.log
+
+/qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0018:
+total 844K
+-rw-r--r-- 1 tang584 oddite  783 Feb 28 18:37 molecular_dynamics_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 599K Feb 28  2023 stage0000_task0018.dcd
+-rw-r--r-- 1 tang584 oddite 164K Feb 28  2023 stage0000_task0018.h5
+-rw-r--r-- 1 tang584 oddite 8.5K Feb 28  2023 stage0000_task0018.log
+-rw-r--r-- 1 tang584 oddite  39K Feb 28 18:37 system__1FME-unfolded.pdb
+-rw-r--r-- 1 tang584 oddite 2.1K Feb 28  2023 task0018_OPENMM.log
+
+/qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0019:
+total 844K
+-rw-r--r-- 1 tang584 oddite  783 Feb 28 18:37 molecular_dynamics_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 599K Feb 28  2023 stage0000_task0019.dcd
+-rw-r--r-- 1 tang584 oddite 164K Feb 28  2023 stage0000_task0019.h5
+-rw-r--r-- 1 tang584 oddite 8.4K Feb 28  2023 stage0000_task0019.log
+-rw-r--r-- 1 tang584 oddite  39K Feb 28 18:37 system__1FME-unfolded.pdb
+-rw-r--r-- 1 tang584 oddite 2.1K Feb 28  2023 task0019_OPENMM.log
+
+/qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0020:
+total 844K
+-rw-r--r-- 1 tang584 oddite  783 Feb 28 18:37 molecular_dynamics_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 599K Feb 28  2023 stage0000_task0020.dcd
+-rw-r--r-- 1 tang584 oddite 164K Feb 28  2023 stage0000_task0020.h5
+-rw-r--r-- 1 tang584 oddite 8.4K Feb 28  2023 stage0000_task0020.log
+-rw-r--r-- 1 tang584 oddite  39K Feb 28 18:37 system__1FME-unfolded.pdb
+-rw-r--r-- 1 tang584 oddite 2.1K Feb 28  2023 task0020_OPENMM.log
+
+/qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0021:
+total 844K
+-rw-r--r-- 1 tang584 oddite  783 Feb 28 18:37 molecular_dynamics_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 599K Feb 28  2023 stage0000_task0021.dcd
+-rw-r--r-- 1 tang584 oddite 164K Feb 28  2023 stage0000_task0021.h5
+-rw-r--r-- 1 tang584 oddite 8.5K Feb 28  2023 stage0000_task0021.log
+-rw-r--r-- 1 tang584 oddite  39K Feb 28 18:37 system__1FME-unfolded.pdb
+-rw-r--r-- 1 tang584 oddite 2.1K Feb 28  2023 task0021_OPENMM.log
+
+/qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0022:
+total 844K
+-rw-r--r-- 1 tang584 oddite  783 Feb 28 18:37 molecular_dynamics_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 599K Feb 28  2023 stage0000_task0022.dcd
+-rw-r--r-- 1 tang584 oddite 164K Feb 28  2023 stage0000_task0022.h5
+-rw-r--r-- 1 tang584 oddite 8.5K Feb 28  2023 stage0000_task0022.log
+-rw-r--r-- 1 tang584 oddite  39K Feb 28 18:37 system__1FME-unfolded.pdb
+-rw-r--r-- 1 tang584 oddite 2.1K Feb 28  2023 task0022_OPENMM.log
+
+/qfs/projects/oddite/tang584/ddmd_runs/test_100ps/molecular_dynamics_runs/stage0000/task0023:
+total 844K
+-rw-r--r-- 1 tang584 oddite  783 Feb 28 18:37 molecular_dynamics_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 599K Feb 28  2023 stage0000_task0023.dcd
+-rw-r--r-- 1 tang584 oddite 164K Feb 28  2023 stage0000_task0023.h5
+-rw-r--r-- 1 tang584 oddite 8.5K Feb 28  2023 stage0000_task0023.log
+-rw-r--r-- 1 tang584 oddite  39K Feb 28 18:38 system__1FME-unfolded.pdb
+-rw-r--r-- 1 tang584 oddite 2.1K Feb 28  2023 task0023_OPENMM.log
+Aggregate done... 0 minutes and 4 seconds elapsed.
+total 4.0M
+-rw-r--r-- 1 tang584 oddite 3.1M Feb 28  2023 aggregated.h5
+-rw-r--r-- 1 tang584 oddite  712 Feb 28  2023 aggregate_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite  783 Feb 28 18:37 molecular_dynamics_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 599K Feb 28  2023 stage0000_task0000.dcd
+-rw-r--r-- 1 tang584 oddite 164K Feb 28  2023 stage0000_task0000.h5
+-rw-r--r-- 1 tang584 oddite 8.5K Feb 28  2023 stage0000_task0000.log
+-rw-r--r-- 1 tang584 oddite  39K Feb 28 18:37 system__1FME-unfolded.pdb
+-rw-r--r-- 1 tang584 oddite 3.8K Feb 28  2023 task0000_AGGREGATE.log
+-rw-r--r-- 1 tang584 oddite 2.1K Feb 28  2023 task0000_OPENMM.log
+Training done... 0 minutes and 19 seconds elapsed.
+total 5.9M
+drwxr-sr-x 2 tang584 oddite 5.0K Feb 28  2023 checkpoint
+-rw-r--r-- 1 tang584 oddite 1.4M Feb 28  2023 discriminator-weights.pt
+drwxr-sr-x 2 tang584 oddite 5.0K Feb 28  2023 embeddings
+-rw-r--r-- 1 tang584 oddite 1.9M Feb 28  2023 encoder-weights.pt
+-rw-r--r-- 1 tang584 oddite 2.7M Feb 28  2023 generator-weights.pt
+-rw-r--r-- 1 tang584 oddite 1.2K Feb 28  2023 loss.json
+-rw-r--r-- 1 tang584 oddite  495 Feb 28  2023 model-hparams.json
+-rw-r--r-- 1 tang584 oddite   82 Feb 28  2023 optimizer-hparams.json
+-rw-r--r-- 1 tang584 oddite  23K Feb 28  2023 task0000_TRAINING.log
+-rw-r--r-- 1 tang584 oddite  874 Feb 28  2023 training_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 1.2K Feb 28  2023 virtual-h5-metadata.json
+-rw-r--r-- 1 tang584 oddite  10K Feb 28  2023 virtual_stage0000_task0000.h5
+Inference done... 0 minutes and 5 seconds elapsed.
+total 44K
+-rw-r--r-- 1 tang584 oddite  469 Feb 28  2023 inference_stage_test.yaml
+-rw-r--r-- 1 tang584 oddite 3.1K Feb 28  2023 task0000_INFERENCE.log
+-rw-r--r-- 1 tang584 oddite 2.8K Feb 28  2023 virtual-h5-metadata.json
+-rw-r--r-- 1 tang584 oddite  18K Feb 28  2023 virtual_stage0000_task0000.h5
+       JobID              Submit               Start                 End      State 
+------------ ------------------- ------------------- ------------------- ---------- 
+437569       2023-02-28T18:35:46 2023-02-28T18:35:46             Unknown    RUNNING 
+437569.0     2023-02-28T18:35:50 2023-02-28T18:35:50 2023-02-28T18:37:50  COMPLETED 
+437569.1     2023-02-28T18:35:51 2023-02-28T18:35:51 2023-02-28T18:37:52  COMPLETED 
+437569.2     2023-02-28T18:35:52 2023-02-28T18:35:52 2023-02-28T18:37:52  COMPLETED 
+437569.3     2023-02-28T18:35:53 2023-02-28T18:35:53 2023-02-28T18:37:53  COMPLETED 
+437569.4     2023-02-28T18:35:54 2023-02-28T18:35:54 2023-02-28T18:37:56  COMPLETED 
+437569.5     2023-02-28T18:35:55 2023-02-28T18:35:55 2023-02-28T18:37:57  COMPLETED 
+437569.6     2023-02-28T18:35:56 2023-02-28T18:35:56 2023-02-28T18:37:57  COMPLETED 
+437569.7     2023-02-28T18:35:57 2023-02-28T18:35:57 2023-02-28T18:37:57  COMPLETED 
+437569.8     2023-02-28T18:35:58 2023-02-28T18:35:58 2023-02-28T18:37:58  COMPLETED 
+437569.9     2023-02-28T18:35:59 2023-02-28T18:35:59 2023-02-28T18:38:01  COMPLETED 
+437569.10    2023-02-28T18:36:00 2023-02-28T18:36:00 2023-02-28T18:37:56  COMPLETED 
+437569.11    2023-02-28T18:36:01 2023-02-28T18:36:01 2023-02-28T18:37:59  COMPLETED 
+437569.12    2023-02-28T18:36:03 2023-02-28T18:36:03 2023-02-28T18:38:05  COMPLETED 
+437569.13    2023-02-28T18:36:04 2023-02-28T18:36:04 2023-02-28T18:38:03  COMPLETED 
+437569.14    2023-02-28T18:36:05 2023-02-28T18:36:05 2023-02-28T18:37:58  COMPLETED 
+437569.15    2023-02-28T18:36:06 2023-02-28T18:36:06 2023-02-28T18:38:01  COMPLETED 
+437569.16    2023-02-28T18:36:07 2023-02-28T18:36:07 2023-02-28T18:38:09  COMPLETED 
+437569.17    2023-02-28T18:36:08 2023-02-28T18:36:08 2023-02-28T18:38:09  COMPLETED 
+437569.18    2023-02-28T18:36:09 2023-02-28T18:36:09 2023-02-28T18:38:08  COMPLETED 
+437569.19    2023-02-28T18:36:10 2023-02-28T18:36:10 2023-02-28T18:38:09  COMPLETED 
+437569.20    2023-02-28T18:36:11 2023-02-28T18:36:11 2023-02-28T18:38:06  COMPLETED 
+437569.21    2023-02-28T18:36:12 2023-02-28T18:36:12 2023-02-28T18:38:11  COMPLETED 
+437569.22    2023-02-28T18:36:13 2023-02-28T18:36:13 2023-02-28T18:38:09  COMPLETED 
+437569.23    2023-02-28T18:36:15 2023-02-28T18:36:15 2023-02-28T18:38:14  COMPLETED 
+437569.24    2023-02-28T18:38:17 2023-02-28T18:38:17 2023-02-28T18:38:17  COMPLETED 
+437569.25    2023-02-28T18:38:36 2023-02-28T18:38:36 2023-02-28T18:38:36  COMPLETED 
+437569.26    2023-02-28T18:38:41 2023-02-28T18:38:41 2023-02-28T18:38:41  COMPLETED 

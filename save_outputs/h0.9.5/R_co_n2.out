@@ -1,0 +1,95 @@
+SLURM_JOB_NODELIST = node[32,35]
+hostlist = node32,node35
+node32.local
+Fri Mar  3 15:30:46 PST 2023
+node32
+node32
+node32
+node32
+node32
+node32
+node35
+node35
+node35
+node35
+node35
+node35
+Simulation finished... 0 minutes and 2 seconds elapsed.
+/files0/oddite/tang584/molecular_dynamics_runs/stage0000/task0000:
+total 6.5M
+-rw-r--r-- 1 tang584 users    0 Mar  3 15:30 dummy.pdb
+-rw-r--r-- 1 tang584 users 1.9M Mar  3 15:30 residue_100.dcd
+-rw-r--r-- 1 tang584 users 4.2M Mar  3 15:29 residue_100.h5
+
+/files0/oddite/tang584/molecular_dynamics_runs/stage0000/task0001:
+total 6.5M
+-rw-r--r-- 1 tang584 users    0 Mar  3 15:30 dummy.pdb
+-rw-r--r-- 1 tang584 users 1.9M Mar  3 15:29 residue_100.dcd
+-rw-r--r-- 1 tang584 users 4.1M Mar  3 15:29 residue_100.h5
+
+/files0/oddite/tang584/molecular_dynamics_runs/stage0000/task0002:
+total 6.5M
+-rw-r--r-- 1 tang584 users    0 Mar  3 15:30 dummy.pdb
+-rw-r--r-- 1 tang584 users 1.9M Mar  3 15:29 residue_100.dcd
+-rw-r--r-- 1 tang584 users 4.1M Mar  3 15:29 residue_100.h5
+
+/files0/oddite/tang584/molecular_dynamics_runs/stage0000/task0003:
+total 6.5M
+-rw-r--r-- 1 tang584 users    0 Mar  3 15:29 dummy.pdb
+-rw-r--r-- 1 tang584 users 1.9M Mar  3 15:29 residue_100.dcd
+-rw-r--r-- 1 tang584 users 4.2M Mar  3 15:29 residue_100.h5
+
+/files0/oddite/tang584/molecular_dynamics_runs/stage0000/task0004:
+total 6.5M
+-rw-r--r-- 1 tang584 users    0 Mar  3 15:30 dummy.pdb
+-rw-r--r-- 1 tang584 users 1.9M Mar  3 15:29 residue_100.dcd
+-rw-r--r-- 1 tang584 users 4.2M Mar  3 15:29 residue_100.h5
+
+/files0/oddite/tang584/molecular_dynamics_runs/stage0000/task0005:
+total 6.5M
+-rw-r--r-- 1 tang584 users    0 Mar  3 15:30 dummy.pdb
+-rw-r--r-- 1 tang584 users 1.9M Mar  3 15:29 residue_100.dcd
+-rw-r--r-- 1 tang584 users 4.2M Mar  3 15:29 residue_100.h5
+
+/files0/oddite/tang584/molecular_dynamics_runs/stage0000/task0006:
+total 6.5M
+-rw-r--r-- 1 tang584 users    0 Mar  3 15:30 dummy.pdb
+-rw-r--r-- 1 tang584 users 1.9M Mar  3 15:29 residue_100.dcd
+-rw-r--r-- 1 tang584 users 4.1M Mar  3 15:29 residue_100.h5
+
+/files0/oddite/tang584/molecular_dynamics_runs/stage0000/task0007:
+total 6.5M
+-rw-r--r-- 1 tang584 users    0 Mar  3 15:30 dummy.pdb
+-rw-r--r-- 1 tang584 users 1.9M Mar  3 15:29 residue_100.dcd
+-rw-r--r-- 1 tang584 users 4.2M Mar  3 15:29 residue_100.h5
+
+/files0/oddite/tang584/molecular_dynamics_runs/stage0000/task0008:
+total 6.5M
+-rw-r--r-- 1 tang584 users    0 Mar  3 15:30 dummy.pdb
+-rw-r--r-- 1 tang584 users 1.9M Mar  3 15:30 residue_100.dcd
+-rw-r--r-- 1 tang584 users 4.2M Mar  3 15:29 residue_100.h5
+
+/files0/oddite/tang584/molecular_dynamics_runs/stage0000/task0009:
+total 6.5M
+-rw-r--r-- 1 tang584 users    0 Mar  3 15:30 dummy.pdb
+-rw-r--r-- 1 tang584 users 1.9M Mar  3 15:29 residue_100.dcd
+-rw-r--r-- 1 tang584 users 4.1M Mar  3 15:29 residue_100.h5
+
+/files0/oddite/tang584/molecular_dynamics_runs/stage0000/task0010:
+total 6.5M
+-rw-r--r-- 1 tang584 users    0 Mar  3 15:30 dummy.pdb
+-rw-r--r-- 1 tang584 users 1.9M Mar  3 15:29 residue_100.dcd
+-rw-r--r-- 1 tang584 users 4.1M Mar  3 15:29 residue_100.h5
+
+/files0/oddite/tang584/molecular_dynamics_runs/stage0000/task0011:
+total 6.5M
+-rw-r--r-- 1 tang584 users    0 Mar  3 15:30 dummy.pdb
+-rw-r--r-- 1 tang584 users 1.9M Mar  3 15:30 residue_100.dcd
+-rw-r--r-- 1 tang584 users 4.1M Mar  3 15:29 residue_100.h5
+Aggregation finished... 0 minutes and 2 seconds elapsed.
+-rw-r--r-- 1 tang584 users 49M Mar  3 15:30 aggregate.h5
+node32.local
+Fri Mar  3 15:30:50 PST 2023
+       JobID              Submit               Start                 End      State 
+------------ ------------------- ------------------- ------------------- ---------- 
+437828       2023-03-03T15:29:49 2023-03-03T15:29:49             Unknown    RUNNING 

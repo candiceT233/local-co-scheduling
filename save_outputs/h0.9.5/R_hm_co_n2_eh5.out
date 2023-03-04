@@ -1,0 +1,121 @@
+hostlist = node32,node35
+node32.local
+Fri Mar  3 15:28:23 PST 2023
+node32
+node32
+node32
+node32
+node32
+node32
+node35
+node35
+node35
+node35
+node35
+node35
+Simulation finished... 0 minutes and 17 seconds elapsed.
+/files0/oddite/tang584/molecular_dynamics_runs/stage0000/task0000:
+total 4.7M
+-rw-r--r-- 1 tang584 users    0 Mar  3 15:27 dummy.pdb
+-rw-r--r-- 1 tang584 users    0 Mar  3 15:27 residue_100.dcd
+-rw-r--r-- 1 tang584 users 4.2M Mar  3 15:27 residue_100.h5
+
+/files0/oddite/tang584/molecular_dynamics_runs/stage0000/task0001:
+total 4.6M
+-rw-r--r-- 1 tang584 users    0 Mar  3 15:27 dummy.pdb
+-rw-r--r-- 1 tang584 users    0 Mar  3 15:27 residue_100.dcd
+-rw-r--r-- 1 tang584 users 4.1M Mar  3 15:27 residue_100.h5
+
+/files0/oddite/tang584/molecular_dynamics_runs/stage0000/task0002:
+total 4.7M
+-rw-r--r-- 1 tang584 users    0 Mar  3 15:27 dummy.pdb
+-rw-r--r-- 1 tang584 users    0 Mar  3 15:27 residue_100.dcd
+-rw-r--r-- 1 tang584 users 4.2M Mar  3 15:27 residue_100.h5
+
+/files0/oddite/tang584/molecular_dynamics_runs/stage0000/task0003:
+total 4.7M
+-rw-r--r-- 1 tang584 users    0 Mar  3 15:27 dummy.pdb
+-rw-r--r-- 1 tang584 users    0 Mar  3 15:27 residue_100.dcd
+-rw-r--r-- 1 tang584 users 4.1M Mar  3 15:27 residue_100.h5
+
+/files0/oddite/tang584/molecular_dynamics_runs/stage0000/task0004:
+total 4.7M
+-rw-r--r-- 1 tang584 users    0 Mar  3 15:27 dummy.pdb
+-rw-r--r-- 1 tang584 users    0 Mar  3 15:27 residue_100.dcd
+-rw-r--r-- 1 tang584 users 4.2M Mar  3 15:27 residue_100.h5
+
+/files0/oddite/tang584/molecular_dynamics_runs/stage0000/task0005:
+total 4.7M
+-rw-r--r-- 1 tang584 users    0 Mar  3 15:27 dummy.pdb
+-rw-r--r-- 1 tang584 users    0 Mar  3 15:27 residue_100.dcd
+-rw-r--r-- 1 tang584 users 4.2M Mar  3 15:27 residue_100.h5
+
+/files0/oddite/tang584/molecular_dynamics_runs/stage0000/task0006:
+total 4.7M
+-rw-r--r-- 1 tang584 users    0 Mar  3 15:27 dummy.pdb
+-rw-r--r-- 1 tang584 users    0 Mar  3 15:27 residue_100.dcd
+-rw-r--r-- 1 tang584 users 4.1M Mar  3 15:27 residue_100.h5
+
+/files0/oddite/tang584/molecular_dynamics_runs/stage0000/task0007:
+total 4.7M
+-rw-r--r-- 1 tang584 users    0 Mar  3 15:27 dummy.pdb
+-rw-r--r-- 1 tang584 users    0 Mar  3 15:27 residue_100.dcd
+-rw-r--r-- 1 tang584 users 4.2M Mar  3 15:27 residue_100.h5
+
+/files0/oddite/tang584/molecular_dynamics_runs/stage0000/task0008:
+total 4.7M
+-rw-r--r-- 1 tang584 users    0 Mar  3 15:27 dummy.pdb
+-rw-r--r-- 1 tang584 users    0 Mar  3 15:27 residue_100.dcd
+-rw-r--r-- 1 tang584 users 4.2M Mar  3 15:27 residue_100.h5
+
+/files0/oddite/tang584/molecular_dynamics_runs/stage0000/task0009:
+total 4.7M
+-rw-r--r-- 1 tang584 users    0 Mar  3 15:27 dummy.pdb
+-rw-r--r-- 1 tang584 users    0 Mar  3 15:27 residue_100.dcd
+-rw-r--r-- 1 tang584 users 4.2M Mar  3 15:27 residue_100.h5
+
+/files0/oddite/tang584/molecular_dynamics_runs/stage0000/task0010:
+total 4.7M
+-rw-r--r-- 1 tang584 users    0 Mar  3 15:27 dummy.pdb
+-rw-r--r-- 1 tang584 users    0 Mar  3 15:27 residue_100.dcd
+-rw-r--r-- 1 tang584 users 4.1M Mar  3 15:27 residue_100.h5
+
+/files0/oddite/tang584/molecular_dynamics_runs/stage0000/task0011:
+total 4.7M
+-rw-r--r-- 1 tang584 users    0 Mar  3 15:27 dummy.pdb
+-rw-r--r-- 1 tang584 users    0 Mar  3 15:27 residue_100.dcd
+-rw-r--r-- 1 tang584 users 4.2M Mar  3 15:27 residue_100.h5
+Aggregation finished... 0 minutes and 8 seconds elapsed.
+-rw-r--r-- 1 tang584 users 49M Mar  3 15:28 aggregate.h5
+node32.local
+Fri Mar  3 15:28:53 PST 2023
+       JobID              Submit               Start                 End      State 
+------------ ------------------- ------------------- ------------------- ---------- 
+437827       2023-03-03T15:27:26 2023-03-03T15:27:27             Unknown    RUNNING 
+437827.0     2023-03-03T15:27:35 2023-03-03T15:27:35 2023-03-03T15:27:36  COMPLETED 
+437827.1     2023-03-03T15:27:36 2023-03-03T15:27:36             Unknown    RUNNING 
+437827.2     2023-03-03T15:27:39 2023-03-03T15:27:39 2023-03-03T15:27:56  COMPLETED 
+437827.3     2023-03-03T15:27:39 2023-03-03T15:27:39 2023-03-03T15:27:56  COMPLETED 
+437827.4     2023-03-03T15:27:39 2023-03-03T15:27:39 2023-03-03T15:27:56  COMPLETED 
+437827.5     2023-03-03T15:27:39 2023-03-03T15:27:39 2023-03-03T15:27:56  COMPLETED 
+437827.6     2023-03-03T15:27:39 2023-03-03T15:27:39 2023-03-03T15:27:53  COMPLETED 
+437827.7     2023-03-03T15:27:39 2023-03-03T15:27:39 2023-03-03T15:27:56  COMPLETED 
+437827.8     2023-03-03T15:27:39 2023-03-03T15:27:39 2023-03-03T15:27:56  COMPLETED 
+437827.9     2023-03-03T15:27:39 2023-03-03T15:27:39 2023-03-03T15:27:56  COMPLETED 
+437827.10    2023-03-03T15:27:39 2023-03-03T15:27:39 2023-03-03T15:27:56  COMPLETED 
+437827.11    2023-03-03T15:27:39 2023-03-03T15:27:39 2023-03-03T15:27:56  COMPLETED 
+437827.12    2023-03-03T15:27:39 2023-03-03T15:27:39 2023-03-03T15:27:55  COMPLETED 
+437827.13    2023-03-03T15:27:39 2023-03-03T15:27:39 2023-03-03T15:27:56  COMPLETED 
+437827.14    2023-03-03T15:27:39 2023-03-03T15:27:39 2023-03-03T15:27:56  COMPLETED 
+437827.15    2023-03-03T15:27:39 2023-03-03T15:27:39 2023-03-03T15:27:53  COMPLETED 
+437827.16    2023-03-03T15:27:39 2023-03-03T15:27:39 2023-03-03T15:27:51  COMPLETED 
+437827.17    2023-03-03T15:27:39 2023-03-03T15:27:39 2023-03-03T15:27:56  COMPLETED 
+437827.18    2023-03-03T15:27:39 2023-03-03T15:27:39 2023-03-03T15:27:56  COMPLETED 
+437827.19    2023-03-03T15:27:39 2023-03-03T15:27:39 2023-03-03T15:27:56  COMPLETED 
+437827.20    2023-03-03T15:27:39 2023-03-03T15:27:39 2023-03-03T15:27:55  COMPLETED 
+437827.21    2023-03-03T15:27:39 2023-03-03T15:27:39 2023-03-03T15:27:56  COMPLETED 
+437827.22    2023-03-03T15:27:39 2023-03-03T15:27:39 2023-03-03T15:27:56  COMPLETED 
+437827.23    2023-03-03T15:27:39 2023-03-03T15:27:39 2023-03-03T15:27:51  COMPLETED 
+437827.24    2023-03-03T15:27:39 2023-03-03T15:27:39 2023-03-03T15:27:56  COMPLETED 
+437827.25    2023-03-03T15:27:39 2023-03-03T15:27:39 2023-03-03T15:27:56  COMPLETED 
+437827.26    2023-03-03T15:27:56 2023-03-03T15:27:56 2023-03-03T15:28:05  COMPLETED 

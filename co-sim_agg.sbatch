@@ -1,15 +1,14 @@
 #!/bin/bash  
 #SBATCH -A oddite
-#SBATCH --job-name="co"
-#SBATCH -N 2
-#SBATCH -n 6
-#SBATCH --nodelist=node[39,40]
+#SBATCH --job-name="co_n1"
+#SBATCH -N 1
+#SBATCH -n 12
+#SBATCH  --exclude=node[01-25]
 #SBATCH --time=01:30:00
 #SBATCH --output=R_%x.out                                        
 #SBATCH --error=R_%x.err
 
-
-### params --nodelist=node[39,40]
+### params --nodelist=node[43]
 
 module purge
 module load python/miniconda3.7 gcc/9.1.0 git/2.31.1 cmake/3.21.4 #openmpi/4.1.3
