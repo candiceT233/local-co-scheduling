@@ -1,0 +1,122 @@
+SLURM_JOB_NODELIST = node[39-40]
+hostlist = node39,node40
+node39.local
+Thu Mar  2 16:10:31 PST 2023
+node39
+node39
+node39
+node39
+node39
+node39
+node40
+node40
+node40
+node40
+node40
+node40
+Simulation finished... 0 minutes and 17 seconds elapsed.
+/files0/oddite/tang584/molecular_dynamics_runs/stage0000/task0000:
+total 4.7M
+-rw-r--r-- 1 tang584 users    0 Mar  2 16:09 dummy.pdb
+-rw-r--r-- 1 tang584 users    0 Mar  2 16:09 residue_100.dcd
+-rw-r--r-- 1 tang584 users 4.2M Mar  2 16:09 residue_100.h5
+
+/files0/oddite/tang584/molecular_dynamics_runs/stage0000/task0001:
+total 4.7M
+-rw-r--r-- 1 tang584 users    0 Mar  2 16:09 dummy.pdb
+-rw-r--r-- 1 tang584 users    0 Mar  2 16:09 residue_100.dcd
+-rw-r--r-- 1 tang584 users 4.1M Mar  2 16:09 residue_100.h5
+
+/files0/oddite/tang584/molecular_dynamics_runs/stage0000/task0002:
+total 4.7M
+-rw-r--r-- 1 tang584 users    0 Mar  2 16:09 dummy.pdb
+-rw-r--r-- 1 tang584 users    0 Mar  2 16:09 residue_100.dcd
+-rw-r--r-- 1 tang584 users 4.1M Mar  2 16:09 residue_100.h5
+
+/files0/oddite/tang584/molecular_dynamics_runs/stage0000/task0003:
+total 4.7M
+-rw-r--r-- 1 tang584 users    0 Mar  2 16:09 dummy.pdb
+-rw-r--r-- 1 tang584 users    0 Mar  2 16:09 residue_100.dcd
+-rw-r--r-- 1 tang584 users 4.2M Mar  2 16:09 residue_100.h5
+
+/files0/oddite/tang584/molecular_dynamics_runs/stage0000/task0004:
+total 4.6M
+-rw-r--r-- 1 tang584 users    0 Mar  2 16:09 dummy.pdb
+-rw-r--r-- 1 tang584 users    0 Mar  2 16:09 residue_100.dcd
+-rw-r--r-- 1 tang584 users 4.1M Mar  2 16:09 residue_100.h5
+
+/files0/oddite/tang584/molecular_dynamics_runs/stage0000/task0005:
+total 4.7M
+-rw-r--r-- 1 tang584 users    0 Mar  2 16:09 dummy.pdb
+-rw-r--r-- 1 tang584 users    0 Mar  2 16:09 residue_100.dcd
+-rw-r--r-- 1 tang584 users 4.1M Mar  2 16:09 residue_100.h5
+
+/files0/oddite/tang584/molecular_dynamics_runs/stage0000/task0006:
+total 4.7M
+-rw-r--r-- 1 tang584 users    0 Mar  2 16:09 dummy.pdb
+-rw-r--r-- 1 tang584 users    0 Mar  2 16:09 residue_100.dcd
+-rw-r--r-- 1 tang584 users 4.2M Mar  2 16:09 residue_100.h5
+
+/files0/oddite/tang584/molecular_dynamics_runs/stage0000/task0007:
+total 4.7M
+-rw-r--r-- 1 tang584 users    0 Mar  2 16:09 dummy.pdb
+-rw-r--r-- 1 tang584 users    0 Mar  2 16:09 residue_100.dcd
+-rw-r--r-- 1 tang584 users 4.2M Mar  2 16:09 residue_100.h5
+
+/files0/oddite/tang584/molecular_dynamics_runs/stage0000/task0008:
+total 4.7M
+-rw-r--r-- 1 tang584 users    0 Mar  2 16:09 dummy.pdb
+-rw-r--r-- 1 tang584 users    0 Mar  2 16:09 residue_100.dcd
+-rw-r--r-- 1 tang584 users 4.2M Mar  2 16:09 residue_100.h5
+
+/files0/oddite/tang584/molecular_dynamics_runs/stage0000/task0009:
+total 4.6M
+-rw-r--r-- 1 tang584 users    0 Mar  2 16:09 dummy.pdb
+-rw-r--r-- 1 tang584 users    0 Mar  2 16:09 residue_100.dcd
+-rw-r--r-- 1 tang584 users 4.1M Mar  2 16:09 residue_100.h5
+
+/files0/oddite/tang584/molecular_dynamics_runs/stage0000/task0010:
+total 4.6M
+-rw-r--r-- 1 tang584 users    0 Mar  2 16:09 dummy.pdb
+-rw-r--r-- 1 tang584 users    0 Mar  2 16:09 residue_100.dcd
+-rw-r--r-- 1 tang584 users 4.1M Mar  2 16:09 residue_100.h5
+
+/files0/oddite/tang584/molecular_dynamics_runs/stage0000/task0011:
+total 4.7M
+-rw-r--r-- 1 tang584 users    0 Mar  2 16:09 dummy.pdb
+-rw-r--r-- 1 tang584 users    0 Mar  2 16:09 residue_100.dcd
+-rw-r--r-- 1 tang584 users 4.1M Mar  2 16:09 residue_100.h5
+Aggregation finished... 0 minutes and 7 seconds elapsed.
+-rw-r--r-- 1 tang584 users 49M Mar  2 16:09 aggregate.h5
+node39.local
+Thu Mar  2 16:11:00 PST 2023
+       JobID              Submit               Start                 End      State 
+------------ ------------------- ------------------- ------------------- ---------- 
+437704       2023-03-02T16:09:22 2023-03-02T16:09:22             Unknown    RUNNING 
+437704.0     2023-03-02T16:09:30 2023-03-02T16:09:30 2023-03-02T16:09:31  COMPLETED 
+437704.1     2023-03-02T16:09:31 2023-03-02T16:09:31             Unknown    RUNNING 
+437704.2     2023-03-02T16:09:34 2023-03-02T16:09:34 2023-03-02T16:09:48  COMPLETED 
+437704.3     2023-03-02T16:09:34 2023-03-02T16:09:34 2023-03-02T16:09:46  COMPLETED 
+437704.4     2023-03-02T16:09:35 2023-03-02T16:09:35 2023-03-02T16:09:51  COMPLETED 
+437704.5     2023-03-02T16:09:35 2023-03-02T16:09:35 2023-03-02T16:09:51  COMPLETED 
+437704.6     2023-03-02T16:09:35 2023-03-02T16:09:35 2023-03-02T16:09:51  COMPLETED 
+437704.7     2023-03-02T16:09:35 2023-03-02T16:09:35 2023-03-02T16:09:48  COMPLETED 
+437704.8     2023-03-02T16:09:35 2023-03-02T16:09:35 2023-03-02T16:09:51  COMPLETED 
+437704.9     2023-03-02T16:09:35 2023-03-02T16:09:35 2023-03-02T16:09:51  COMPLETED 
+437704.10    2023-03-02T16:09:35 2023-03-02T16:09:35 2023-03-02T16:09:46  COMPLETED 
+437704.11    2023-03-02T16:09:35 2023-03-02T16:09:35 2023-03-02T16:09:51  COMPLETED 
+437704.12    2023-03-02T16:09:35 2023-03-02T16:09:35 2023-03-02T16:09:51  COMPLETED 
+437704.13    2023-03-02T16:09:35 2023-03-02T16:09:35 2023-03-02T16:09:51  COMPLETED 
+437704.14    2023-03-02T16:09:35 2023-03-02T16:09:35 2023-03-02T16:09:51  COMPLETED 
+437704.15    2023-03-02T16:09:35 2023-03-02T16:09:35 2023-03-02T16:09:47  COMPLETED 
+437704.16    2023-03-02T16:09:35 2023-03-02T16:09:35 2023-03-02T16:09:51  COMPLETED 
+437704.17    2023-03-02T16:09:35 2023-03-02T16:09:35 2023-03-02T16:09:50  COMPLETED 
+437704.18    2023-03-02T16:09:35 2023-03-02T16:09:35 2023-03-02T16:09:51  COMPLETED 
+437704.19    2023-03-02T16:09:35 2023-03-02T16:09:35 2023-03-02T16:09:51  COMPLETED 
+437704.20    2023-03-02T16:09:35 2023-03-02T16:09:35 2023-03-02T16:09:51  COMPLETED 
+437704.21    2023-03-02T16:09:35 2023-03-02T16:09:35 2023-03-02T16:09:51  COMPLETED 
+437704.22    2023-03-02T16:09:35 2023-03-02T16:09:35 2023-03-02T16:09:51  COMPLETED 
+437704.23    2023-03-02T16:09:35 2023-03-02T16:09:35 2023-03-02T16:09:47  COMPLETED 
+437704.24    2023-03-02T16:09:35 2023-03-02T16:09:35 2023-03-02T16:09:50  COMPLETED 
+437704.25    2023-03-02T16:09:35 2023-03-02T16:09:35 2023-03-02T16:09:51  COMPLETED 
+437704.26    2023-03-02T16:09:51 2023-03-02T16:09:51 2023-03-02T16:09:58  COMPLETED 

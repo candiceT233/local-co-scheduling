@@ -1,9 +1,9 @@
 #!/bin/bash  
 #SBATCH -A oddite
-#SBATCH --job-name="hm_co"
-#SBATCH -N 2
+#SBATCH --job-name="hm_co_n1_all"
+#SBATCH  --exclude=node[01-25]
+#SBATCH -N 1
 #SBATCH -n 12
-#SBATCH --nodelist=node[39,40]
 #SBATCH --time=01:30:00
 #SBATCH --output=R_%x.out                                        
 #SBATCH --error=R_%x.err
@@ -30,11 +30,19 @@ ITER_COUNT=1 # TBD
 # GPU_PER_NODE=6
 MD_START=0
 MD_SLICE=$(($MD_RUNS/$NODE_COUNT))
-NODE_NAMES=`echo $SLURM_JOB_NODELIST|scontrol show hostnames`
 
 # echo "SLURM_STEP_NUM_TASKS = $SLURM_STEP_NUM_TASKS"
-# echo "NODE_NAMES = $NODE_NAMES"
-echo "SLURM_JOB_NODELIST = $SLURM_JOB_NODELIST"
+# get nodelist to hermes config file
+if [ "$NODE_COUNT" = "1" ]; then
+    sed "s/\$HOST_BASE_NAME/\"localhost\"/" $HERMES_DEFAULT_CONF  > $HERMES_CONF
+    sed -i "s/\$HOST_NUMBER_RANGE/ /" $HERMES_CONF
+else
+    sed "s/\$HOST_BASE_NAME/\"node\"/" $HERMES_DEFAULT_CONF  > $HERMES_CONF
+    rpc_host_number_range=$(echo "$SLURM_JOB_NODELIST" | grep -Po '[\[].*[\]]')
+    sed -i "s/\$HOST_NUMBER_RANGE/${rpc_host_number_range}/" $HERMES_CONF
+fi
+
+NODE_NAMES=`echo $SLURM_JOB_NODELIST|scontrol show hostnames`
 hostlist=$(echo -e "$NODE_NAMES" | xargs | sed -e 's/ /,/g')
 echo "hostlist = $hostlist"
 
@@ -111,6 +119,7 @@ hostname;date;
 # mpirun -np $NODE_COUNT --map-by ppr:1:node --host $hostlist killall hermes_daemon
 # mpirun -np $NODE_COUNT --map-by ppr:1:node --host $hostlist -x HERMES_CONF=${HERMES_CONF} ${HERMES_INSTALL_DIR}/bin/hermes_daemon &
 
+
 mpirun -np $NODE_COUNT -ppn 1 -host $hostlist killall hermes_daemon
 set -x
 mpirun -np $NODE_COUNT -ppn 1 -host $hostlist -genv HERMES_CONF=${HERMES_CONF} ${HERMES_INSTALL_DIR}/bin/hermes_daemon &
@@ -137,6 +146,8 @@ do
     done
 
     wait)
+
+    
 
     duration=$(($SECONDS - $start_time))
     echo "Simulation finished... $(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed."
