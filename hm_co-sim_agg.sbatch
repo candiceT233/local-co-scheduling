@@ -1,9 +1,9 @@
 #!/bin/bash  
 #SBATCH -A oddite
-#SBATCH --job-name="hm_co_n1_all"
+#SBATCH --job-name="hm_co"
 #SBATCH  --exclude=node[01-25]
 #SBATCH -N 1
-#SBATCH -n 12
+#SBATCH -n 4
 #SBATCH --time=01:30:00
 #SBATCH --output=R_%x.out                                        
 #SBATCH --error=R_%x.err
@@ -25,7 +25,7 @@ source /qfs/people/tang584/scripts/local-co-scheduling/env_var.sh
 
 
 NODE_COUNT=$SLURM_JOB_NUM_NODES
-MD_RUNS=12
+MD_RUNS=4
 ITER_COUNT=1 # TBD
 # GPU_PER_NODE=6
 MD_START=0
@@ -38,7 +38,8 @@ if [ "$NODE_COUNT" = "1" ]; then
     sed -i "s/\$HOST_NUMBER_RANGE/ /" $HERMES_CONF
 else
     sed "s/\$HOST_BASE_NAME/\"node\"/" $HERMES_DEFAULT_CONF  > $HERMES_CONF
-    rpc_host_number_range=$(echo "$SLURM_JOB_NODELIST" | grep -Po '[\[].*[\]]')
+    rpc_host_number_range=$(echo "$SLURM_JOB_NODELIST" | grep -Po "(?<=\[).*?(?=\])")
+    rpc_host_number_range="{$rpc_host_number_range}"
     sed -i "s/\$HOST_NUMBER_RANGE/${rpc_host_number_range}/" $HERMES_CONF
 fi
 
@@ -62,17 +63,16 @@ SIMULATION (){
     task_id=$(seq -f "%04g" $1 $1)
     node_id=$2
 
-    SIM_CMD="--residue 100 -n 1 -a 400 -f 400 --output_task ${task_id}"
-        # -genv HERMES_CLIENT_CONF=${HERMES_CLIENT_CONF} \
+    SIM_CMD="--residue 100 -n 1 -a 100 -f 10 --output_task ${task_id}"
 
     source $PY_VENV/bin/activate
     srun -w $node_id -n1 -N1 --exclusive \
         mpirun -np 1 \
         -genv LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/libhermes_posix.so \
         -genv HERMES_CONF=${HERMES_CONF} \
-        -genv ADAPTER_MODE=SCRATCH \
+        -genv HERMES_CLIENT_CONF=${HERMES_CLIENT_CONF} \
+        -genv HERMES_ADAPTER_MODE=kDefault \
         -genv HERMES_STOP_DAEMON=0 \
-        -genv HERMES_CLIENT=1 \
         python ${SCRIPT_DIR}/sim_emulator.py ${SIM_CMD} &
 
 }
@@ -81,16 +81,17 @@ AGGREGATE (){
     # task_id=task0000
     AGG_CMD="-no_rmsd -no_fnc --input_path ${DEV2_DIR} --output_path ${DEV2_DIR}/aggregate.h5"
             # -genv HERMES_CLIENT_CONF=${HERMES_CLIENT_CONF} \
-
+    
+    # -genv HERMES_CLIENT=1 \
     source $PY_VENV/bin/activate
     mpirun -np 1 \
-        -genv LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/libhermes_posix.so \
-        -genv HERMES_CONF=${HERMES_CONF} \
-        -genv ADAPTER_MODE=SCRATCH \
-        -genv HERMES_STOP_DAEMON=1 \
-        -genv HERMES_CLIENT=1 \
-        python ${SCRIPT_DIR}/aggregate.py ${AGG_CMD}
-    
+        -genv LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so \
+        -genv HERMES_CONF=$HERMES_CONF \
+        -genv HERMES_CLIENT_CONF=$HERMES_CLIENT_CONF \
+        -genv HERMES_ADAPTER_MODE=kDefault \
+        -genv HERMES_STOP_DAEMON=0 \
+        python $SCRIPT_DIR/aggregate.py $AGG_CMD
+
 }
 
 START_HERMES_DAEMON (){
@@ -123,6 +124,7 @@ hostname;date;
 mpirun -np $NODE_COUNT -ppn 1 -host $hostlist killall hermes_daemon
 set -x
 mpirun -np $NODE_COUNT -ppn 1 -host $hostlist -genv HERMES_CONF=${HERMES_CONF} ${HERMES_INSTALL_DIR}/bin/hermes_daemon &
+srun -N$
 sleep 3
 set +x
 
@@ -147,8 +149,6 @@ do
 
     wait)
 
-    
-
     duration=$(($SECONDS - $start_time))
     echo "Simulation finished... $(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed."
     # stage out
@@ -158,6 +158,8 @@ do
     # STAGE 2: Aggregate
     start_time=$SECONDS
     srun -N1 $( AGGREGATE )
+    # (AGGREGATE; wait)
+
     duration=$(($SECONDS - $start_time))
     echo "Aggregation finished... $(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed."
 
@@ -165,7 +167,11 @@ do
     # srun -N1 mpirun -np 1 $HERMES_INSTALL_DIR/stage-out $DEV2_DIR/aggregate.h5
 
     ls -lrtah $DEV2_DIR | grep "aggregate.h5" # check file size for correctness
-    
+
+    set -x
+    # srun -N$NODE_COUNT ${HERMES_INSTALL_DIR}/bin/finalize_hermes
+    mpirun -np $NODE_COUNT -ppn 1 -host $hostlist -genv HERMES_CONF=${HERMES_CONF} ${HERMES_INSTALL_DIR}/bin/finalize_hermes
+    set +x
 
 done
 

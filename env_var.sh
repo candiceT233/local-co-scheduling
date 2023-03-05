@@ -2,47 +2,45 @@
 
 #CWD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-# source /share/apps/python/miniconda3.7/etc/profile.d/conda.sh
-
 #spack load hdf5 mochi-thallium catch2 glpk gflags glog
 #spack find --loaded
 
 USER=$(whoami)
 
 # User directories
-MNT_HOME=/qfs/people/$USER
+MNT_HOME=$HOME #/people/$USER
 INSTALL_DIR=$HOME/install
 DL_DIR=$HOME/download
+SCRIPT_DIR=$MNT_HOME/scripts/local-co-scheduling
 
 # Hermes running dirs -----------
 STAGE_DIR=$MNT_HOME/hermes_stage
 HERMES_REPO=$STAGE_DIR/hermes
 MOCHI_REPO=$STAGE_DIR/mochi
 SPACK_DIR=$MNT_HOME/spack
+HERMES_INSTALL_DIR=$INSTALL_DIR/hermes
 
-# Hermes running dirs -----------
-# CONF_NAME=hermes_single3.conf
-# CONF_NAME=hermes_single2.yaml
-CONF_NAME=hermes.yaml
-# CONF_NAME=hermes.conf
-# CONF_NAME=hermes_single2.conf
-SCRIPT_DIR=$MNT_HOME/scripts/local-co-scheduling
+# Hermes config files -----------
+DEFAULT_CONF_NAME=hermes_server_default.yaml
+HERMES_DEFAULT_CONF=$SCRIPT_DIR/$DEFAULT_CONF_NAME
+
+CONF_NAME=hermes_server.yaml
+HERMES_CONF=$SCRIPT_DIR/$CONF_NAME
+
+CLIENT_CONF_NAME=hermes_client.yaml
+HERMES_CLIENT_CONF=$SCRIPT_DIR/$CLIENT_CONF_NAME
+
 mkdir -p $SCRIPT_DIR/hermes_slabs
 
 # HERMES_INSTALL_DIR=`spack location -i hermes`
-# HERMES_INSTALL_DIR=/mnt/common/mtang11/spack/opt/spack/linux-centos7-skylake_avx512/gcc-7.3.0/hermes-master-lgiwsuq6ihmbs4qsklt4drd7h5hdemjj
-HERMES_INSTALL_DIR=$INSTALL_DIR/hermes
-
-HERMES_CONF=$SCRIPT_DIR/$CONF_NAME
-HERMES_DEFAULT_CONF=$HERMES_REPO/test/data/hermes.conf
-BENCHMARKS_DIR=$HERMES_REPO/benchmarks
-HSLABS=hermes_slabs
+# BENCHMARKS_DIR=$HERMES_REPO/benchmarks
+LIBASAN=`gcc -print-file-name=libasan.so` # for address sanitizer
 
 # System storage dirs -----------
 
 # DEV0_DIR="" # this is memory
-export DEV1_DIR=/state/partition1 # this is BurstBuffer
-export DEV2_DIR=/files0/oddite # this is Parallel File System
+export DEV1_DIR=/state/partition1/$USER # this is BurstBuffer
+export DEV2_DIR=/files0/oddite/$USER # this is Parallel File System
 # export DEV1_DIR="." # current dir
 # export DEV2_DIR="." # current dir
 # export DEV1_DIR="/tmp" # current dir
@@ -62,6 +60,9 @@ mkdir -p $LOG_DIR
 #conda activate hermes_ddmd # local
 
 PY_VENV=$SCRIPT_DIR/venv_ddmd
-source $PY_VENV/bin/activate
-# export HDF5_USE_FILE_LOCKING='FALSE' #'TRUE'
+
+export GLOG_minloglevel=0
+export FLAGS_logtostderr=0
+
+export HDF5_USE_FILE_LOCKING='FALSE' #'TRUE'
 # export MPICH_GNI_NDREG_ENTRIES=1024

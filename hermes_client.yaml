@@ -1,0 +1,24 @@
+stop_daemon: false
+path_inclusions: [
+  # "/files0/oddite/tang584/aggregate.h5",
+
+  "/files0/oddite/tang584/molecular_dynamics_runs",
+  "/files0/oddite/tang584/aggregate.h5",
+  # "/files0/oddite/tang584/molecular_dynamics_runs/stage0000/task0000/residue_100.dcd",
+  # "/files0/oddite/tang584/molecular_dynamics_runs/stage0000/task0000/dummy.pdb",
+  # "/files0/oddite/tang584/aggregate.h5",
+  # "/qfs/people/tang584/scripts/local-co-scheduling/venv_ddmd/lib/python3.7/site-packages/h5py/_hl/files.py",
+  # "/qfs/people/tang584/scripts/local-co-scheduling/venv_ddmd/lib/python3.7/site-packages",
+  # "/people/tang584/scripts/local-co-scheduling"
+  # "/qfs/people/tang584/scripts/local-co-scheduling/venv_ddmd/lib/python3.7/site-packages/deepdrivemd",
+]
+path_exclusions: [
+  # "/files0/oddite/tang584/molecular_dynamics_runs/stage0000/task0000/residue_100.h5",
+  # "/files0/oddite/tang584/aggregate.h5",
+  ]
+file_page_size: 1024KB
+base_adapter_mode: kDefault
+# file_adapter_configs:
+#   - path: "/"
+#     page_size: 1MB
+#     mode: kDefault
