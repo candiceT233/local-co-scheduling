@@ -72,7 +72,6 @@ def concatenate_last_n_h5(args):
             data['point_cloud'] = data['point_cloud'].astype(args.dtype)
     
     # TODO: change output dataset
-    # Open output file
     fout = h5py.File(args.output_path, "w", libver="latest")
     
     # Create new dsets from concatenated dataset
@@ -91,12 +90,12 @@ def concatenate_last_n_h5(args):
             if np.any(np.isnan(concat_dset)):
                 raise ValueError("NaN detected in concat_dset.")
             dset = fout.create_dataset(
-                field, shape, dtype=concat_dset.dtype, chunks=pc_chunk
+                field, shape, dtype=concat_dset.dtype, chunks=chunkshape
             )
         else:
             # contact_map-chunkshape : (1,)
             dset = fout.create_dataset(
-                field, shape, dtype=h5py.vlen_dtype(np.int16), #chunks=cm_chunk
+                field, shape, dtype=h5py.vlen_dtype(np.int16), chunks=chunkshape
             )
         # write data
         dset[...] = concat_dset[...]
@@ -134,5 +133,5 @@ if __name__ == "__main__":
 
     # # Add MPI for Hermes
     # MPI.Finalize()
-    c_mpi_lib.c_mpi_finalize()
+    # c_mpi_lib.c_mpi_finalize()
     

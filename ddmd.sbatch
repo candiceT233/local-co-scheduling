@@ -22,8 +22,8 @@ STAGE_IDX=0
 STAGE_IDX_FORMAT=$(seq -f "stage%04g" $STAGE_IDX $STAGE_IDX)
 
 
-# EXPERIMENT_PATH=/qfs/projects/oddite/tang584/ddmd_runs/test_100ps
-EXPERIMENT_PATH=/files0/oddite/tang584/ddmd_runs/test_100ps
+# EXPERIMENT_PATH=/qfs/projects/oddite/tang584/ddmd_runs/test_100ps #NFS
+EXPERIMENT_PATH=/files0/oddite/tang584/ddmd_runs/test_100ps #PFS
 DDMD_PATH=/people/tang584/scripts/deepdrivemd
 MOLECULES_PATH=/qfs/projects/oddite/tang584/git/molecules
 
@@ -153,6 +153,8 @@ INFERENCE () {
     cd $dest_path
     echo cd $dest_path
 
+    echo "INFERENCE $STAGE_IDX_FORMAT $STAGE_IDX"
+
     mkdir -p $EXPERIMENT_PATH/agent_runs/$STAGE_IDX_FORMAT/$task_id/
 
     sed -e "s/\$SIM_LENGTH/${SIM_LENGTH}/" -e "s/\$OUTPUT_PATH/${dest_path//\//\\/}/" -e "s/\$EXPERIMENT_PATH/${EXPERIMENT_PATH//\//\\/}/" -e "s/\$STAGE_IDX/${STAGE_IDX}/" $yaml_path  > $dest_path/$(basename $yaml_path)
@@ -239,7 +241,7 @@ do
 
     STAGE_IDX_FORMAT="$(STAGE_UPDATE)"
     STAGE_IDX=$((STAGE_IDX + 1))
-    echo $STAGE_IDX_FORMAT
+    echo $STAGE_IDX_FORMAT $STAGE_IDX
     if [ "$SHORTENED_PIPELINE" != true ]
     then
         wait
