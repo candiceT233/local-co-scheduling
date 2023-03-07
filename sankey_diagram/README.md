@@ -6,7 +6,6 @@ Logging process shell be improved in the future.
 The producer and consumer program is the sim_emulator.py and aggregator.py programs. Simplified as SIM and AGG below.
 
 ## List of Sankey Graphs
----
 ### Detailed Graphs 
 - [Sampled detailed SIM](https://htmlpreview.github.io/?https://github.com/candiceT233/local-co-scheduling/blob/sankey-graph/sankey_diagram/detailed_graph/sankey-sampled-sim_w-vol-vfd-.html)
 - [Sampled detailed AGG](https://htmlpreview.github.io/?https://github.com/candiceT233/local-co-scheduling/blob/sankey-graph/sankey_diagram/detailed_graph/sankey-sampled-agg-vol-vfd.html)
@@ -21,4 +20,4 @@ These are graphs grouping the small I/O accesses into larger groups
 - [Grouped SIM-AGG](https://htmlpreview.github.io/?https://github.com/candiceT233/local-co-scheduling/blob/sankey-graph/sankey_diagram/group_graph/sankey-grouped-sim_w_agg_r_w-vol-vfd.html)
 
 ### Note
-Prefix this linke https://htmlpreview.github.io/? to view HTML on GitHub.
+Prefix this linke `https://htmlpreview.github.io/?` to view HTML on GitHub.
