@@ -24,9 +24,9 @@ Located in the ./group_graph folder:
 ### Notation Explained
 #### Label Expalined
 ![Simulation Data Object Diagram](group_graph/networkx-grouped-sim.png)
-The sim_emulator.py (represented as task-sim_emulator in red) writes two datasets, contact map (cm) and point cloud (pc). \
-Orange vertices are the data access unit recorded from the HDF5 passthrough-VOL. cm-[0,200) means it is contact map dataset data access with index 0 to 199, not including 200. The dataset point cloud is only written once from the VOL layer. \
-Blue vertices are the POSIX layer I/O corresponds to the data access issued in VOL. The label addr-[0,1072] means these I/O corresponds to the file address location with starting address between 0 and 1072 (including 1072). This region is only the starting address, not indicating the I/O size.
+The sim_emulator.py (represented as `task-sim_emulator` in red) writes two datasets, contact map (cm) and point cloud (pc). The ouput file is in blue. \
+Orange vertices are the data access unit recorded from the HDF5 passthrough-VOL. `cm-[0,200)` means it is contact map dataset data access with index 0 to 199, not including 200. The dataset point cloud is only written once from the VOL layer. \
+Blue vertices are the POSIX layer I/O corresponds to the data access issued in VOL. The label `addr-[0,1072]` means these I/O corresponds to the file address location with starting address between 0 and 1072 (including 1072). This region is only the starting address, not indicating the I/O size.
 
 #### Data Lifecycle Diagram Explained
 ![Aggregation Write Snapshot](group_graph/snapshot.png)
