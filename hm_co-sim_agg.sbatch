@@ -64,6 +64,8 @@ SIMULATION (){
     node_id=$2
 
     SIM_CMD="--residue 100 -n 1 -a 100 -f 10 --output_task ${task_id}"
+    -genv HERMES_ADAPTER_MODE=kDefault \
+    -genv HERMES_STOP_DAEMON=0 \
 
     source $PY_VENV/bin/activate
     srun -w $node_id -n1 -N1 --exclusive \
@@ -71,8 +73,6 @@ SIMULATION (){
         -genv LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/libhermes_posix.so \
         -genv HERMES_CONF=${HERMES_CONF} \
         -genv HERMES_CLIENT_CONF=${HERMES_CLIENT_CONF} \
-        -genv HERMES_ADAPTER_MODE=kDefault \
-        -genv HERMES_STOP_DAEMON=0 \
         python ${SCRIPT_DIR}/sim_emulator.py ${SIM_CMD} &
 
 }
@@ -80,17 +80,17 @@ SIMULATION (){
 AGGREGATE (){
     # task_id=task0000
     AGG_CMD="-no_rmsd -no_fnc --input_path ${DEV2_DIR} --output_path ${DEV2_DIR}/aggregate.h5"
-            # -genv HERMES_CLIENT_CONF=${HERMES_CLIENT_CONF} \
-    
+        
+    # -genv HERMES_ADAPTER_MODE=kDefault \
+    # -genv HERMES_STOP_DAEMON=0 \
+
     # -genv HERMES_CLIENT=1 \
     source $PY_VENV/bin/activate
     mpirun -np 1 \
-        -genv LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so \
-        -genv HERMES_CONF=$HERMES_CONF \
-        -genv HERMES_CLIENT_CONF=$HERMES_CLIENT_CONF \
-        -genv HERMES_ADAPTER_MODE=kDefault \
-        -genv HERMES_STOP_DAEMON=0 \
-        python $SCRIPT_DIR/aggregate.py $AGG_CMD
+        -genv LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/libhermes_posix.so \
+        -genv HERMES_CONF=${HERMES_CONF} \
+        -genv HERMES_CLIENT_CONF=${HERMES_CLIENT_CONF} \
+        python ${SCRIPT_DIR}/aggregate.py $AGG_CMD
 
 }
 
@@ -168,12 +168,13 @@ do
 
     ls -lrtah $DEV2_DIR | grep "aggregate.h5" # check file size for correctness
 
-    set -x
-    # srun -N$NODE_COUNT ${HERMES_INSTALL_DIR}/bin/finalize_hermes
-    mpirun -np $NODE_COUNT -ppn 1 -host $hostlist -genv HERMES_CONF=${HERMES_CONF} ${HERMES_INSTALL_DIR}/bin/finalize_hermes
-    set +x
+
 
 done
+
+set -x
+mpirun -np $NODE_COUNT -ppn 1 -host $hostlist -genv HERMES_CONF=${HERMES_CONF} ${HERMES_INSTALL_DIR}/bin/finalize_hermes
+set +x
 
 hostname;date;
 
