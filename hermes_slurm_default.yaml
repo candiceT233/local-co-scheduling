@@ -56,9 +56,9 @@ metadata_arena_percentage: 0.35
 transient_arena_percentage: 0.05
 
 # The maxiumum number of buckets(=files) that can be created.
-max_buckets_per_node: 256
+max_buckets_per_node: 1024
 # The maxiumum number of virtual buckets that can be created.
-max_vbuckets_per_node: 128
+max_vbuckets_per_node: 512
 # The interval in milliseconds at which to update the global system view.
 system_view_state_update_interval_ms: 1000
 
@@ -112,7 +112,7 @@ buffer_organizer_num_threads: 4
 buffer_pool_shmem_name: "/hermes_buffer_pool_"
 
 # Choose Random, RoundRobin, or MinimizeIoTime
-default_placement_policy: "MinimizeIoTime"
+default_placement_policy: "RoundRobin"
 
 # If true (1) the RoundRobin placement policy algorithm will split each Blob
 # into a random number of smaller Blobs.
@@ -147,7 +147,7 @@ path_exclusions: [
     "/usr/",  "/lib/", 
     "/spack/", "/__pycache__/",
     # ".h5",
-    # "/venv_ddmd/",
+    "/qfs/people/tang584/scripts/venv_ddmd/",
     # "h5py/",
     # "/ompi.",
     "/scripts/",

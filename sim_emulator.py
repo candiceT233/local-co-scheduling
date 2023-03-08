@@ -271,4 +271,4 @@ if __name__ == "__main__":
     # # print("Error", file = sys.stderr )
     # # Add MPI for Hermes
     # MPI.Finalize()
-    c_mpi_lib.c_mpi_finalize()
+    # c_mpi_lib.c_mpi_finalize()
