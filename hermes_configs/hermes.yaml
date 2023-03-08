@@ -84,7 +84,7 @@ num_buffer_organizer_retries: 3
 rpc_server_host_file: ""
 
 # Base hostname for the RPC servers.
-rpc_server_base_name: $HOST_BASE_NAME #"localhost"
+rpc_server_base_name: "node" #"localhost"
 # RPC server name suffix. This is appended to the the base name plus host
 # number.
 rpc_server_suffix: ""
@@ -102,7 +102,7 @@ buffer_organizer_port: 50001
 # can be either a single number, or a range, which is 2 numbers separated by a
 # hyphen (-). For example the list [1, 3-5, 7, 8-10] will be expanded to
 # [1, 3, 4, 5, 7, 8, 9, 10].
-rpc_host_number_range: $HOST_NUMBER_RANGE
+rpc_host_number_range: [26,29-30,41]
 # The number of handler threads for each RPC server.
 rpc_num_threads: 1
 # The number of threads used in the background organization of internal Hermes buffers.
@@ -112,7 +112,7 @@ buffer_organizer_num_threads: 4
 buffer_pool_shmem_name: "/hermes_buffer_pool_"
 
 # Choose Random, RoundRobin, or MinimizeIoTime
-default_placement_policy: "RoundRobin"
+default_placement_policy: "MinimizeIoTime"
 
 # If true (1) the RoundRobin placement policy algorithm will split each Blob
 # into a random number of smaller Blobs.

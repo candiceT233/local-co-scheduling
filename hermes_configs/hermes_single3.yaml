@@ -4,28 +4,26 @@
 
 # The number of buffering tiers available. For example, RAM, NVMe, burst
 # buffer, and parallel file system would be 4 tiers.
-num_devices: 2
+num_devices: 3
 # For now this should be the same as num_devices.
-num_targets: 2
+num_targets: 3
 
 # The maximum buffering capacity in MiB of each device. Here we say that all 4
 # devices get 50 MiB of buffering capacity.
-# capacities_mb: [1000, 5000]
-capacities_gb: [8, 4]
-
+capacities_mb: [100, 100, 100]
 # The size of the smallest available buffer in KiB. In general this should be
 # the page size of your system for byte addressable storage, and the block size
 # of the storage device for block addressable storage.
-block_sizes_kb: [4, 4] #[4, 4] [16, 16]
-# block_sizes_mb: [1, 1]
+block_sizes_kb: [4, 4, 4]
 # The nummber of size categories for each device. Here we say that each of our 4
 # devices should have 4 different sizes of buffers.
-num_slabs: [4, 4] #[1,1] #[4, 4]
+num_slabs: [4, 4, 4]
 
 # The number of blocks (the size of which is chosen in block_sizes_kb) that each
 # device should contain for each slab (controlled by num_slabs). This allows for
 # precise control of the distibution of buffer sizes.
 slab_unit_sizes: [
+  [1, 4, 16, 32],
   [1, 4, 16, 32],
   [1, 4, 16, 32],
 ]
@@ -36,46 +34,46 @@ slab_unit_sizes: [
 desired_slab_percentages: [
   [0.25, 0.25, 0.25, 0.25],
   [0.25, 0.25, 0.25, 0.25],
-  # [0.6, 0.1, 0.1, 0.2],
-  # [0.5, 0.5],
-  # [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
+  [0.25, 0.25, 0.25, 0.25],
 ]
 
 # The maximum theoretical bandwidth (as advertised by the manufacturer) in
 # MiB/sec. of each device.
-bandwidths_mbps: [6000, 300]
+bandwidths_mbps: [5000, 300, 150]
 # The latency in microseconds of each device (as advertised by the manufacturer).
-latencies_us: [15, 250000]
+latencies_us: [15, 250000, 500000]
+
 
 # Hermes memory management. The following 4 values should add up to 1.
 # The percentage of Hermes memory to reserve for RAM buffers.
-buffer_pool_arena_percentage: 0.6
+buffer_pool_arena_percentage: 0.8
 # The percentage of Hermes memory to reserve for metadata.
-metadata_arena_percentage: 0.35
+metadata_arena_percentage: 0.1
 # The percentage of Hermes memory to reserve for short term storage.
-transient_arena_percentage: 0.05
+transient_arena_percentage: 0.1
 
-# The maxiumum number of buckets(=files) that can be created.
-max_buckets_per_node: 1024
+# The maxiumum number of buckets that can be created.
+max_buckets_per_node: 32
 # The maxiumum number of virtual buckets that can be created.
-max_vbuckets_per_node: 512
+max_vbuckets_per_node: 16
 # The interval in milliseconds at which to update the global system view.
 system_view_state_update_interval_ms: 1000
 
 # The mount point of each device. RAM should be the empty string. For block
 # devices, this is the directory where Hermes will create buffering files. For
 # object storage or cloud targets, this will be a url.
-mount_points: ["", "/state/partition1/tang584/hermes_slabs"] # RAM and BurstBuffer # /mnt/ssd/mtang11/hermes_slabs
-# mount_points: ["", "/mnt/ssd/mtang11/hermes_slabs"]
+# the RAM, NVMe, SSD
+mount_points: ["", "/mnt/nvme/mtang11/hermes_slabs","/mnt/ssd/mtang11/hermes_slabs"] 
+#mount_points: ["", "./", "./"]
 # For each device, indicate '1' if it is shared among nodes (e.g., burst
 # buffers), or '0' if it is per node (e.g., local NVMe).
-is_shared_device: [0,0]
+is_shared_device: [0,0,0]
 # The mount point of a PFS or object store for swap space, in the event that
 # Hermes buffers become full.
-swap_mount: "/files0/oddite/tang584/hermes_swaps" # the PFS # /mnt/ssd/mtang11/hermes_swaps
+swap_mount: "/mnt/hdd/mtang11/hermes_swap" # the HDD
 # The number of times the buffer organizer will attempt to place a blob from
 # swap space into the hierarchy before giving up.
-num_buffer_organizer_retries: 3
+num_buffer_organizer_retries: 5
 
 # A path to a file containing a list of server names, 1 per line. If your
 # servers are named according to a pattern (e.g., server-1, server-2, etc.),
@@ -84,13 +82,13 @@ num_buffer_organizer_retries: 3
 rpc_server_host_file: ""
 
 # Base hostname for the RPC servers.
-rpc_server_base_name: $HOST_BASE_NAME #"localhost"
+rpc_server_base_name: "localhost"
 # RPC server name suffix. This is appended to the the base name plus host
 # number.
 rpc_server_suffix: ""
 # The RPC protocol. This must come from the documentation of the specific RPC
 # library in use.
-rpc_protocol: "ofi+sockets" #"ofi+shm" #"ofi+sockets"
+rpc_protocol: "ofi+sockets"
 # RPC domain name for verbs transport. Blank for tcp.
 rpc_domain: ""
 # Desired RPC port number.
@@ -102,7 +100,7 @@ buffer_organizer_port: 50001
 # can be either a single number, or a range, which is 2 numbers separated by a
 # hyphen (-). For example the list [1, 3-5, 7, 8-10] will be expanded to
 # [1, 3, 4, 5, 7, 8, 9, 10].
-rpc_host_number_range: $HOST_NUMBER_RANGE
+rpc_host_number_range: []
 # The number of handler threads for each RPC server.
 rpc_num_threads: 1
 # The number of threads used in the background organization of internal Hermes buffers.
@@ -112,7 +110,7 @@ buffer_organizer_num_threads: 4
 buffer_pool_shmem_name: "/hermes_buffer_pool_"
 
 # Choose Random, RoundRobin, or MinimizeIoTime
-default_placement_policy: "RoundRobin"
+default_placement_policy: "Random"
 
 # If true (1) the RoundRobin placement policy algorithm will split each Blob
 # into a random number of smaller Blobs.
@@ -130,54 +128,16 @@ default_rr_split: 0
 bo_capacity_thresholds: [
   [0.0, 1.0],
   [0.0, 1.0],
+  [0.0, 1.0],
+  [0.0, 1.0]
 ]
-# bo_capacity_thresholds: [
-#   [0.0, 1.0],
-#   [0.0, 1.0],
-#   [0.0, 1.0],
-#   [0.0, 1.0]
-# ]
 
 #Paths which are ignored when buffering data
 path_exclusions: [
     "/bin/", "/boot/", "/dev/",  "/etc/",
-    "/opt/",  "/proc/", "/sbin/",
-    "/sys/", "/var/",  "/run/",
-    "pipe", "socket:", "anon_inode:",
-    "/usr/",  "/lib/", 
-    "/spack/", "/__pycache__/",
-    # ".h5",
-    "/qfs/people/tang584/scripts/venv_ddmd/",
-    # "h5py/",
-    # "/ompi.",
-    "/scripts/",
-    # "/qfs/people/tang584/scripts/local-co-scheduling",
-    # "/qfs/people/tang584/scripts/deepdrivemd/deepdrivemd/",
-    # "/qfs/people/tang584/scripts/deepdrivemd/data/",
-    # ".py"
-    # "/deepdrivemd/",
-    # "/share/apps/python/miniconda3.7/",
-    # "/people/tang584/.mpiexec.hydra.conf",
-    # "/people/tang584/.conda/envs",
-    # "/git/",
-    # "/deepdrivemd/",
-    # "/.conda/", 
-    # "/qfs/projects/oddite/tang584/git/",
-    # "/files0/oddite/deepdrivemd/src",
-    # "/people/tang584/.local/lib/python3.7/",
-    # "/projects/oddite/tang584/git/",
-    # "/qfs/projects/oddite/tang584/ddmd_runs/hermes_test_1600ps/model_selection_runs/stage0000/task0000/stage0000_task0000.json",
-    # ".yaml",
-    # "/1FME-folded.pdb",
-    
+    "/lib/", "/opt/",  "/proc/", "/sbin/",
+    "/sys/", "/usr/",  "/var/",  "/run/",
+    "pipe", "socket:", "anon_inode:"
 ]
-
-# Exclude yaml file only when printing out errors
-
-path_inclusions: [
-    # "/var/opt/cray/dws/mounts/",
-    # "/qfs/projects/oddite/tang584/ddmd_runs/hermes_test_100ps",
-    # "molecular_dynamics_runs",
-    # "aggregate.h5",
-    # ".dcd",".h5",".pdb",
-]
+#Paths which are never ignored when buffering data
+path_inclusions: ["/var/opt/cray/dws/mounts/"]
