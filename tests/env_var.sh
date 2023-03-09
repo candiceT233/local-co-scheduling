@@ -2,15 +2,13 @@
 
 #CWD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-# source /share/apps/python/miniconda3.7/etc/profile.d/conda.sh
-
 #spack load hdf5 mochi-thallium catch2 glpk gflags glog
 #spack find --loaded
 
 USER=$(whoami)
 
 # User directories
-MNT_HOME=/qfs/people/$USER
+MNT_HOME=$HOME #/people/$USER
 INSTALL_DIR=$HOME/install
 DL_DIR=$HOME/download
 SCRIPT_DIR=$MNT_HOME/scripts/local-co-scheduling
@@ -21,10 +19,17 @@ STAGE_DIR=$MNT_HOME/hermes_stage
 HERMES_REPO=$STAGE_DIR/hermes
 MOCHI_REPO=$STAGE_DIR/mochi
 SPACK_DIR=$MNT_HOME/spack
+HERMES_INSTALL_DIR=$INSTALL_DIR/hermes
 
 # Hermes config files -----------
-HERMES_DEFAULT_CONF=$CONFIG_DIR/hermes_slurm_default.yaml
-HERMES_CONF=$CONFIG_DIR/hermes.yaml
+DEFAULT_CONF_NAME=hermes_server_default.yaml
+HERMES_DEFAULT_CONF=$CONFIG_DIR/$DEFAULT_CONF_NAME
+
+CONF_NAME=hermes_server.yaml
+HERMES_CONF=$CONFIG_DIR/$CONF_NAME
+
+CLIENT_CONF_NAME=hermes_client.yaml
+HERMES_CLIENT_CONF=$CONFIG_DIR/$CLIENT_CONF_NAME
 
 # HERMES_INSTALL_DIR=`spack location -i hermes`
 HERMES_INSTALL_DIR=$INSTALL_DIR/hermes
@@ -35,8 +40,8 @@ HSLABS=hermes_slabs
 # System storage dirs -----------
 
 # DEV0_DIR="" # this is memory
-export DEV1_DIR=/state/partition1 # this is BurstBuffer
-export DEV2_DIR=/files0/oddite # this is Parallel File System
+export DEV1_DIR=/state/partition1/$USER # this is BurstBuffer
+export DEV2_DIR=/files0/oddite/$USER # this is Parallel File System
 # export DEV1_DIR="." # current dir
 # export DEV2_DIR="." # current dir
 # export DEV1_DIR="/tmp" # current dir
