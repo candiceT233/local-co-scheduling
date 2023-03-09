@@ -19,7 +19,9 @@ STAGE_DIR=$MNT_HOME/hermes_stage
 HERMES_REPO=$STAGE_DIR/hermes
 MOCHI_REPO=$STAGE_DIR/mochi
 SPACK_DIR=$MNT_HOME/spack
-HERMES_INSTALL_DIR=$INSTALL_DIR/hermes
+# HERMES_INSTALL_DIR=$INSTALL_DIR/hermes
+# HERMES_INSTALL_DIR=`spack location -i hermes`
+HERMES_INSTALL_DIR=$INSTALL_DIR/hermes_new
 
 # Hermes config files -----------
 DEFAULT_CONF_NAME=hermes_server_default.yaml
@@ -31,14 +33,11 @@ HERMES_CONF=$CONFIG_DIR/$CONF_NAME
 CLIENT_CONF_NAME=hermes_client.yaml
 HERMES_CLIENT_CONF=$CONFIG_DIR/$CLIENT_CONF_NAME
 
-# HERMES_INSTALL_DIR=`spack location -i hermes`
-HERMES_INSTALL_DIR=$INSTALL_DIR/hermes
 
-BENCHMARKS_DIR=$HERMES_REPO/benchmarks
-HSLABS=hermes_slabs
+
 
 # System storage dirs -----------
-
+HSLABS=hermes_slabs
 # DEV0_DIR="" # this is memory
 export DEV1_DIR=/state/partition1/$USER # this is BurstBuffer
 export DEV2_DIR=/files0/oddite/$USER # this is Parallel File System
@@ -48,6 +47,7 @@ export DEV2_DIR=/files0/oddite/$USER # this is Parallel File System
 # export DEV2_DIR="/tmp" # current dir
 
 # Other tools dirs -----------
+BENCHMARKS_DIR=$HERMES_REPO/benchmarks
 HDF5_REPO=$DL_DIR/hdf5-hdf5-1_13_1
 IOR_REPO=$STAGE_DIR/ior
 IOR_INSTALL=$INSTALL_DIR/ior
@@ -62,8 +62,8 @@ mkdir -p $LOG_DIR
 
 PY_VENV=$SCRIPT_DIR/venv_ddmd
 
-export GLOG_minloglevel=2
-export FLAGS_logtostderr=2
+export GLOG_minloglevel=0
+export FLAGS_logtostderr=0
 
 export HDF5_USE_FILE_LOCKING='FALSE' #'TRUE'
 # export MPICH_GNI_NDREG_ENTRIES=1024

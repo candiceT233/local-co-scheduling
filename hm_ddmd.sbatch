@@ -1,18 +1,18 @@
 #!/bin/bash
-#SBATCH --job-name=hm_deepdrivemd_n4sc_rr
+#SBATCH --job-name=hm_deepdrivemd_kD
 #SBATCH --account=oddite
 #SBATCH --time=00:30:00
 #SBATCH --exclude=node[01-25]
-#SBATCH -N 4
-#SBATCH -n 12
+#SBATCH -N 1
+#SBATCH -n 1
 #SBATCH --output=R_%x.out                                        
 #SBATCH --error=R_%x.err
 
 # --output=R_%x.%j.out --exclude=node[01-25]
 SHORTENED_PIPELINE=false
-MD_RUNS=12
+MD_RUNS=1
 ITER_COUNT=1 # TBD
-SIM_LENGTH=0.1
+SIM_LENGTH=0.01
 
 NODE_COUNT=$SLURM_JOB_NUM_NODES
 GPU_PER_NODE=6
@@ -317,10 +317,6 @@ do
     # STAGE_IDX_FORMAT="$(STAGE_UPDATE)"
     # STAGE_IDX=$((STAGE_IDX + 1))
     # echo $STAGE_IDX_FORMAT
-
-    STAGE_IDX_FORMAT="$(STAGE_UPDATE)"
-    STAGE_IDX=$((STAGE_IDX + 1))
-    echo $STAGE_IDX_FORMAT
 
 done
 
