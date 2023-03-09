@@ -134,4 +134,3 @@ if __name__ == "__main__":
     # # Add MPI for Hermes
     # MPI.Finalize()
     # c_mpi_lib.c_mpi_finalize()
-    

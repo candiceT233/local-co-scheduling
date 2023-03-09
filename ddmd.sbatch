@@ -1,13 +1,13 @@
 #!/bin/bash
-#SBATCH --job-name=deepdrivemd
+#SBATCH --job-name=deepdrivemd_n4
 #SBATCH --account=oddite
 #SBATCH --time=01:30:00
-#SBATCH -N 2
+#SBATCH -N 4
 #SBATCH -n 12
 #SBATCH --output=R_%x.out                                        
 #SBATCH --error=R_%x.err
 
-# --output=R_%x.%j.out --nodelist=node[20,23-27]
+# --output=R_%x.%j.out --exclude=node[01-25]
 SHORTENED_PIPELINE=false
 MD_RUNS=12
 ITER_COUNT=1 # TBD
@@ -266,4 +266,6 @@ do
 
 done
 
+
+hostname;date;
 sacct -j $SLURM_JOB_ID -o jobid,submit,start,end,state

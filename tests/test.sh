@@ -48,7 +48,7 @@ hermes_simulation(){
     HDF5_PLUGIN_PATH=${HERMES_INSTALL_DIR}/lib/hermes_vfd \
     HDF5_DRIVER_CONFIG="true 65536" HERMES_CONF=${HERMES_CONF} \
     LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/hermes_vfd/libhdf5_hermes_vfd.so \
-    python3 sim_emulator.py $sim_cmd > >(tee $LOG_DIR/hm-sim.log) 2>$LOG_DIR/hm-sim.err
+    python3 $SCRIPT_DIR/src/sim_emulator.py $sim_cmd > >(tee $LOG_DIR/hm-sim.log) 2>$LOG_DIR/hm-sim.err
 
   ls $DEV2_DIR/molecular_dynamics_runs/*/* -hl
   set +x
@@ -68,7 +68,7 @@ hermes_aggregator(){
       HDF5_PLUGIN_PATH=${HERMES_INSTALL_DIR}/lib/hermes_vfd \
       HDF5_DRIVER_CONFIG="true 65536" HERMES_CONF=${HERMES_CONF} \
       LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/hermes_vfd/libhdf5_hermes_vfd.so \
-      python3 aggregate.py -no_rmsd -no_fnc --input_path $DEV2_DIR --output_path $DEV2_DIR/aggregate.h5 > >(tee $LOG_DIR/hm-agg.log) 2>$LOG_DIR/hm-agg.err
+      python3 $SCRIPT_DIR/src/aggregate.py -no_rmsd -no_fnc --input_path $DEV2_DIR --output_path $DEV2_DIR/aggregate.h5 > >(tee $LOG_DIR/hm-agg.log) 2>$LOG_DIR/hm-agg.err
 
     
     # python3 -m trace -t --ignore-module=trace,argparse,numpy,deepdrivemd.data.api \
@@ -116,7 +116,7 @@ hermes_sim_posix(){
   LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so \
     HERMES_CONF=$HERMES_CONF \
     ADAPTER_MODE=SCRATCH \
-    python $SCRIPT_DIR/sim_emulator.py $sim_cmd \
+    python $SCRIPT_DIR/src/sim_emulator.py $sim_cmd \
     > >(tee $LOG_DIR/hm-sim.posix-nd.log) 2>$LOG_DIR/hm-sim.posix-nd.err
 
   echo "Simulation finished..."
@@ -171,7 +171,8 @@ hermes_sim_agg_posix(){
     ADAPTER_MODE=WORKFLOW \
     HERMES_STOP_DAEMON=0 \
     HERMES_CLIENT=1 \
-    python $SCRIPT_DIR/sim_emulator.py $sim_cmd \
+    python3 $SCRIPT_DIR/src/sim_emulator.py $sim_cmd \
+
     > >(tee $LOG_DIR/hm-sim.posix.log) 2>$LOG_DIR/hm-sim.posix.err
 
   echo "Simulation finished..."
@@ -183,17 +184,17 @@ hermes_sim_agg_posix(){
     ADAPTER_MODE=WORKFLOW \
     HERMES_STOP_DAEMON=1 \
     HERMES_CLIENT=1 \
-    python $SCRIPT_DIR/aggregate.py -no_rmsd -no_fnc --input_path $DEV2_DIR --output_path $DEV2_DIR/aggregate.h5 \
+    python3 $SCRIPT_DIR/src/aggregate.py -no_rmsd -no_fnc --input_path $DEV2_DIR --output_path $DEV2_DIR/aggregate.h5 \
     > >(tee $LOG_DIR/hm-agg.posix.log) 2>$LOG_DIR/hm-agg.posix.err
 
   # mpirun -n 1 \
-  #   -x LD_PRELOAD ${HERMES_INSTALL_DIR}/lib/libhermes_posix.so \
-  #   -x HERMES_CONF ${HERMES_CONF} \
-  #   -x ADAPTER_MODE SCRATCH \
-  #   -x HERMES_STOP_DAEMON 1 \
-  #   -x HERMES_CLIENT 1 \
-  #   python3 aggregate.py -no_rmsd -no_fnc --input_path $DEV2_DIR --output_path $DEV2_DIR/aggregate.h5 \
-  #   > >(tee $LOG_DIR/hm-agg.posix.log) 2>$LOG_DIR/hm-agg.posix.err
+  #   -genv LD_PRELOAD ${HERMES_INSTALL_DIR}/lib/libhermes_posix.so \
+  #   -genv HERMES_CONF ${HERMES_CONF} \
+  #   -genv ADAPTER_MODE SCRATCH \
+  #   -genv HERMES_STOP_DAEMON 1 \
+  #   -genv HERMES_CLIENT 1 \
+  #   python3 $SCRIPT_DIR/src/aggregate.py -no_rmsd -no_fnc --input_path $DEV2_DIR --output_path $DEV2_DIR/aggregate.h5 \
+
 
   # $HERMES_INSTALL_DIR/bin/stage_out "${DEV2_DIR}/aggregate.h5"
   # cd $HERMES_INSTALL_DIR/bin
@@ -240,7 +241,7 @@ hermes_sim_agg_mpiio(){
     HERMES_STOP_DAEMON=0 \
     ADAPTER_MODE=SCRATCH \
     HERMES_CLIENT=1 \
-    mpirun -n 1 python3 sim_emulator.py --residue 100 -n 2 -a 200 -f 200 \
+    mpirun -n 1 python3 $SCRIPT_DIR/src/sim_emulator.py --residue 100 -n 2 -a 200 -f 200 \
     > >(tee $LOG_DIR/hm-sim.mpiio.log) 2>$LOG_DIR/hm-sim.mpiio.err
 
   echo "Simulation finished..."
@@ -251,7 +252,7 @@ hermes_sim_agg_mpiio(){
     HERMES_CONF=$HERMES_CONF \
     HERMES_STOP_DAEMON=1 \
     ADAPTER_MODE=SCRATCH \
-    mpirun -n 1 python3 aggregate.py -no_cm -no_rmsd -no_fnc --input_path $DEV2_DIR --output_path $DEV2_DIR/aggregate.h5 \
+    mpirun -n 1 python3 $SCRIPT_DIR/src/aggregate.py -no_cm -no_rmsd -no_fnc --input_path $DEV2_DIR --output_path $DEV2_DIR/aggregate.h5 \
     > >(tee $LOG_DIR/hm-agg.mpiio.log) 2>$LOG_DIR/hm-agg.mpiio.err
 
   # ls -lrtah $DEV2_DIR | grep "aggregate.h5" # check file size for correctness
@@ -401,7 +402,7 @@ hermes_sim_agg_vfd(){
           HDF5_PLUGIN_PATH=${HERMES_INSTALL_DIR}/lib/hermes_vfd \
           HDF5_DRIVER_CONFIG="true 65536" HERMES_CONF=${HERMES_CONF} \
           LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/hermes_vfd/libhdf5_hermes_vfd.so \
-          python3 sim_emulator.py --residue ${RES} -n ${NJOB} -a 1000 -f  "${SIZE}00" \
+          python3 $SCRIPT_DIR/src/sim_emulator.py --residue ${RES} -n ${NJOB} -a 1000 -f  "${SIZE}00" \
           > >(tee $LOG_DIR/hm-sim.${F_NAME}.log) 2>$LOG_DIR/hm-sim.${F_NAME}.err
         
         ls molecular_dynamics_runs/*/* -hl
@@ -410,7 +411,7 @@ hermes_sim_agg_vfd(){
           HDF5_PLUGIN_PATH=${HERMES_INSTALL_DIR}/lib/hermes_vfd \
           HDF5_DRIVER_CONFIG="true 65536" HERMES_CONF=${HERMES_CONF} \
           LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/hermes_vfd/libhdf5_hermes_vfd.so \
-          python3 aggregate.py -no_rmsd -no_fnc --input_path . --output_path ./aggregate.h5 \
+          python3 $SCRIPT_DIR/src/aggregate.py -no_rmsd -no_fnc --input_path . --output_path ./aggregate.h5 \
           > >(tee $LOG_DIR/hm-agg.${F_NAME}.log) 2>$LOG_DIR/hm-agg.${F_NAME}.err
 
         ls -lrtah | grep "aggregate.h5"
@@ -434,17 +435,17 @@ simulation_only(){
     cd $SCRIPT_DIR
     rm -rf $DEV2_DIR/molecular_dynamics_runs
 
-    # strace python3 sim_emulator.py --residue 100 -n 2 -a 600 -f 600 \
+    # strace python3 $SCRIPT_DIR/src/sim_emulator.py --residue 100 -n 2 -a 600 -f 600 \
     #   > >(tee $LOG_DIR/strace-sim.log) 2>$LOG_DIR/strace-sim.err
-    python3 sim_emulator.py $sim_cmd \
-      #> >(tee $LOG_DIR/sim.log) 2>$LOG_DIR/sim.err
+    python3 $SCRIPT_DIR/src/sim_emulator.py $sim_cmd \
+      > >(tee $LOG_DIR/sim.log) 2>$LOG_DIR/sim.err
 
     ls $DEV2_DIR/molecular_dynamics_runs/*/* -hl
 }
 aggregator_only(){
     cd $SCRIPT_DIR
     rm -rf $DEV2_DIR/aggregate.h5
-    python3 aggregate.py -no_rmsd -no_fnc --input_path $DEV2_DIR --output_path $DEV2_DIR/aggregate.h5 \
+    python3 $SCRIPT_DIR/src/aggregate.py -no_rmsd -no_fnc --input_path $DEV2_DIR --output_path $DEV2_DIR/aggregate.h5 \
       > >(tee $LOG_DIR/agg.log) 2>$LOG_DIR/agg.err
     ls -lrtah $DEV2_DIR | grep "aggregate.h5"
 }
@@ -465,8 +466,8 @@ sim_agg_test(){
       echo "Running trial at $(hostname)"
       start_time="$(date -u +%s.%N)"
 
-      python3 sim_emulator.py $sim_cmd
-      python3 aggregate.py -no_rmsd -no_fnc --input_path $DEV2_DIR --output_path $DEV2_DIR/aggregate.h5
+      python3 $SCRIPT_DIR/src/sim_emulator.py $sim_cmd
+      python3 $SCRIPT_DIR/src/aggregate.py -no_rmsd -no_fnc --input_path $DEV2_DIR --output_path $DEV2_DIR/aggregate.h5
 
       end_time="$(date -u +%s.%N)"
       elapsed="$(bc <<<"$end_time-$start_time")"
@@ -486,7 +487,7 @@ sim_agg_test(){
 aggregator_nocm_only(){
     cd $SCRIPT_DIR
     rm -rf ./aggregate.no_cm.h5
-    time python3 aggregate.py  -no_cm -no_rmsd -no_fnc --input_path . --output_path ./aggregate.no_cm.h5
+    time python3 $SCRIPT_DIR/src/aggregate.py  -no_cm -no_rmsd -no_fnc --input_path . --output_path ./aggregate.no_cm.h5
     ls -lrtah | grep "aggregate.no_cm.h5"
 }
 
@@ -536,12 +537,12 @@ cleanup_logs(){
         F_AGG=curr_job_log/hm-agg.${F_NAME}.log
         if [ -f "$F_SIM" ]; then
           echo -e "\n$F_SIM exists."
-          python3 analyze.py curr_job_log/hm-sim.${F_NAME}.log | tee -a hm-vfd.txt
+          python3 $SCRIPT_DIR/src/analyze.py curr_job_log/hm-sim.${F_NAME}.log | tee -a hm-vfd.txt
         fi
 
         if [ -f "$F_AGG" ]; then
           echo -e "\n$F_AGG exists."
-          python3 analyze.py curr_job_log/hm-agg.${F_NAME}.log | tee -a hm-vfd.txt
+          python3 $SCRIPT_DIR/src/analyze.py curr_job_log/hm-agg.${F_NAME}.log | tee -a hm-vfd.txt
         fi
       done
     done
@@ -567,7 +568,7 @@ prov_vfd_sim(){
   HDF5_VOL_CONNECTOR="provenance under_vol=0;under_info={};path=$SCRIPT_DIR;level=0;format=" \
   HDF5_DRIVER_CONFIG="false 65536" HERMES_CONF=${HERMES_CONF} \
   LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/hermes_vfd/libhdf5_hermes_vfd.so \
-  python3 sim_emulator.py --residue 100 -n 1 -a 100 -f 1000 \
+  python3 $SCRIPT_DIR/src/sim_emulator.py --residue 100 -n 1 -a 100 -f 1000 \
   > >(tee $LOG_DIR/prov-vfd-sim.log) 2>$LOG_DIR/prov-vfd-sim.err
 
   ls molecular_dynamics_runs/*/* -hl
@@ -588,7 +589,7 @@ prov_vfd_agg(){
   HDF5_VOL_CONNECTOR="provenance under_vol=0;under_info={};path=$SCRIPT_DIR;level=0;format=" \
   HDF5_DRIVER_CONFIG="true 65536" HERMES_CONF=${HERMES_CONF} \
   LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/hermes_vfd/libhdf5_hermes_vfd.so \
-  python3 aggregate.py -no_rmsd -no_fnc --input_path . --output_path ./aggregate.h5 \
+  python3 $SCRIPT_DIR/src/aggregate.py -no_rmsd -no_fnc --input_path . --output_path ./aggregate.h5 \
   > >(tee $LOG_DIR/prov-vfd-agg.log) 2>$LOG_DIR/prov-vfd-agg.err
 
   ls -lrtah | grep "aggregate.h5"

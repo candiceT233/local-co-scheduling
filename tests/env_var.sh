@@ -12,6 +12,7 @@ MNT_HOME=$HOME #/people/$USER
 INSTALL_DIR=$HOME/install
 DL_DIR=$HOME/download
 SCRIPT_DIR=$MNT_HOME/scripts/local-co-scheduling
+CONFIG_DIR=$SCRIPT_DIR/hermes_configs
 
 # Hermes running dirs -----------
 STAGE_DIR=$MNT_HOME/hermes_stage
@@ -22,19 +23,19 @@ HERMES_INSTALL_DIR=$INSTALL_DIR/hermes
 
 # Hermes config files -----------
 DEFAULT_CONF_NAME=hermes_server_default.yaml
-HERMES_DEFAULT_CONF=$SCRIPT_DIR/$DEFAULT_CONF_NAME
+HERMES_DEFAULT_CONF=$CONFIG_DIR/$DEFAULT_CONF_NAME
 
 CONF_NAME=hermes_server.yaml
-HERMES_CONF=$SCRIPT_DIR/$CONF_NAME
+HERMES_CONF=$CONFIG_DIR/$CONF_NAME
 
 CLIENT_CONF_NAME=hermes_client.yaml
-HERMES_CLIENT_CONF=$SCRIPT_DIR/$CLIENT_CONF_NAME
-
-mkdir -p $SCRIPT_DIR/hermes_slabs
+HERMES_CLIENT_CONF=$CONFIG_DIR/$CLIENT_CONF_NAME
 
 # HERMES_INSTALL_DIR=`spack location -i hermes`
-# BENCHMARKS_DIR=$HERMES_REPO/benchmarks
-LIBASAN=`gcc -print-file-name=libasan.so` # for address sanitizer
+HERMES_INSTALL_DIR=$INSTALL_DIR/hermes
+
+BENCHMARKS_DIR=$HERMES_REPO/benchmarks
+HSLABS=hermes_slabs
 
 # System storage dirs -----------
 
@@ -61,8 +62,12 @@ mkdir -p $LOG_DIR
 
 PY_VENV=$SCRIPT_DIR/venv_ddmd
 
-export GLOG_minloglevel=0
-export FLAGS_logtostderr=0
+export GLOG_minloglevel=2
+export FLAGS_logtostderr=2
 
 export HDF5_USE_FILE_LOCKING='FALSE' #'TRUE'
 # export MPICH_GNI_NDREG_ENTRIES=1024
+
+export HERMES_PAGESIZE=1048576
+# page size : 4096 8192 32768 65536 131072 262144 524288 1048576 4194304 8388608
+# default : 1048576

@@ -1,17 +1,18 @@
 #!/bin/bash
-#SBATCH --job-name=hm_deepdrivemd
+#SBATCH --job-name=hm_deepdrivemd_n4sc_rr
 #SBATCH --account=oddite
-#SBATCH --time=01:30:00
-#SBATCH -N 1
-#SBATCH -n 1
+#SBATCH --time=00:30:00
+#SBATCH --exclude=node[01-25]
+#SBATCH -N 4
+#SBATCH -n 12
 #SBATCH --output=R_%x.out                                        
 #SBATCH --error=R_%x.err
 
 # --output=R_%x.%j.out --exclude=node[01-25]
 SHORTENED_PIPELINE=false
-MD_RUNS=1
+MD_RUNS=12
 ITER_COUNT=1 # TBD
-SIM_LENGTH=0.01
+SIM_LENGTH=0.1
 
 NODE_COUNT=$SLURM_JOB_NUM_NODES
 GPU_PER_NODE=6
@@ -21,6 +22,14 @@ NODE_NAMES=`echo $SLURM_JOB_NODELIST|scontrol show hostnames`
 STAGE_IDX=0
 STAGE_IDX_FORMAT=$(seq -f "stage%04g" $STAGE_IDX $STAGE_IDX)
 
+# EXPERIMENT_PATH=/qfs/projects/oddite/tang584/ddmd_runs/hermes_test_100ps #NFS
+EXPERIMENT_PATH=/files0/oddite/tang584/ddmd_runs/hermes_test_100ps #PFS
+DDMD_PATH=/people/tang584/scripts/deepdrivemd
+MOLECULES_PATH=/qfs/projects/oddite/tang584/git/molecules
+rm -rf $EXPERIMENT_PATH/*
+ls $EXPERIMENT_PATH/* -hl
+# OPENMM_PYTHON=~/.conda/envs/hermes_openmm_ddmd/bin/python
+# PYTORCH_PYTHON=~/.conda/envs/hermes_pytorch_ddmd/bin/python
 
 # EXPERIMENT_PATH=/qfs/projects/oddite/tang584/ddmd_runs/hermes_test_100ps #NFS
 EXPERIMENT_PATH=/files0/oddite/tang584/ddmd_runs/hermes_test_100ps #PFS
@@ -61,7 +70,6 @@ hostlist=$(echo -e "$NODE_NAMES" | xargs | sed -e 's/ /,/g')
 echo "hostlist=$hostlist"
 
 
-
 OPENMM () {
 
     task_id=$(seq -f "task%04g" $1 $1)
@@ -82,24 +90,19 @@ OPENMM () {
     cd $dest_path
     echo cd $dest_path
 
-    # PYTHONPATH=$DDMD_PATH:$MOLECULES_PATH srun -w $node_id -n1 -N1 --exclusive \
-    #     mpirun -np 1 \
-    #     -genv LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/libhermes_posix.so \
-    #     -genv HERMES_CONF=${HERMES_CONF} \
-    #     -genv HERMES_CLIENT_CONF=${HERMES_CLIENT_CONF} \
     sed -e "s/\$SIM_LENGTH/${SIM_LENGTH}/" -e "s/\$OUTPUT_PATH/${dest_path//\//\\/}/" -e "s/\$EXPERIMENT_PATH/${EXPERIMENT_PATH//\//\\/}/" -e "s/\$DDMD_PATH/${DDMD_PATH//\//\\/}/" -e "s/\$GPU_IDX/${gpu_idx}/" -e "s/\$STAGE_IDX/${STAGE_IDX}/" $yaml_path  > $dest_path/$(basename $yaml_path)
 
     yaml_path=$dest_path/$(basename $yaml_path)
 
-    export LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so
-    export HERMES_CONF=$HERMES_CONF
-    export HERMES_CLIENT_CONF=$HERMES_CLIENT_CONF
+    # export LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so
+    # export HERMES_CONF=$HERMES_CONF
+    # export HERMES_CLIENT_CONF=$HERMES_CLIENT_CONF
 
     PYTHONPATH=$DDMD_PATH:$MOLECULES_PATH srun -w $node_id -n1 -N1 --exclusive \
-        # mpirun -np 1 \
-        # -genv LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so \
-        # -genv HERMES_CONF=$HERMES_CONF \
-        # -genv HERMES_CLIENT_CONF=$HERMES_CLIENT_CONF \
+        mpirun -np 1 \
+        -genv LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so \
+        -genv HERMES_CONF=$HERMES_CONF \
+        -genv HERMES_CLIENT_CONF=$HERMES_CLIENT_CONF \
         ~/.conda/envs/hermes_openmm_ddmd/bin/python $DDMD_PATH/deepdrivemd/sim/openmm/run_openmm.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log &
     #PYTHONPATH=~/git/molecules/ srun -w $node_id -N1 python /people/leeh736/git/DeepDriveMD-pipeline/deepdrivemd/sim/openmm/run_openmm.py -c $yaml_path &>> $task_id.log &
     #srun -n1 env LD_PRELOAD=~/git/tazer_forked/build.h5/src/client/libclient.so PYTHONPATH=~/git/molecules/ python /people/leeh736/git/DeepDriveMD-pipeline/deepdrivemd/sim/openmm/run_openmm.py -c /qfs/projects/oddite/leeh736/ddmd_runs/test/md_direct.yaml &> $task_id.log &
@@ -315,10 +318,15 @@ do
     # STAGE_IDX=$((STAGE_IDX + 1))
     # echo $STAGE_IDX_FORMAT
 
+    STAGE_IDX_FORMAT="$(STAGE_UPDATE)"
+    STAGE_IDX=$((STAGE_IDX + 1))
+    echo $STAGE_IDX_FORMAT
+
 done
 
 
 hostname;date;
+
 set -x
 mpirun -np $NODE_COUNT -ppn 1 -host $hostlist -genv HERMES_CONF=${HERMES_CONF} ${HERMES_INSTALL_DIR}/bin/finalize_hermes
 set +x

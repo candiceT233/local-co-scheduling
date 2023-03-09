@@ -2,14 +2,12 @@
 #SBATCH -A oddite
 #SBATCH --job-name="hm_co"
 #SBATCH  --exclude=node[01-25]
-#SBATCH -N 1
+#SBATCH -N 4
 #SBATCH -n 4
-#SBATCH --time=01:30:00
+#SBATCH --time=00:30:00
 #SBATCH --output=R_%x.out                                        
 #SBATCH --error=R_%x.err
 
-
-### params --nodelist=node[39,40]
 
 module purge
 module load python/miniconda3.7 gcc/9.1.0 git/2.31.1 cmake/3.21.4 #openmpi/4.1.3
@@ -64,8 +62,8 @@ SIMULATION (){
     node_id=$2
 
     SIM_CMD="--residue 100 -n 1 -a 100 -f 10 --output_task ${task_id}"
-    -genv HERMES_ADAPTER_MODE=kDefault \
-    -genv HERMES_STOP_DAEMON=0 \
+    # -genv HERMES_ADAPTER_MODE=kDefault \
+    # -genv HERMES_STOP_DAEMON=0 \
 
     source $PY_VENV/bin/activate
     srun -w $node_id -n1 -N1 --exclusive \
@@ -73,24 +71,32 @@ SIMULATION (){
         -genv LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/libhermes_posix.so \
         -genv HERMES_CONF=${HERMES_CONF} \
         -genv HERMES_CLIENT_CONF=${HERMES_CLIENT_CONF} \
-        python ${SCRIPT_DIR}/sim_emulator.py ${SIM_CMD} &
+        python $SCRIPT_DIR/src/sim_emulator.py ${SIM_CMD} &
 
 }
 
 AGGREGATE (){
     # task_id=task0000
-    AGG_CMD="-no_rmsd -no_fnc --input_path ${DEV2_DIR} --output_path ${DEV2_DIR}/aggregate.h5"
+
+    AGG_CMD="-no_rmsd -no_fnc --input_path $DEV2_DIR --output_path $DEV2_DIR/aggregate.h5"
         
     # -genv HERMES_ADAPTER_MODE=kDefault \
     # -genv HERMES_STOP_DAEMON=0 \
 
     # -genv HERMES_CLIENT=1 \
     source $PY_VENV/bin/activate
+
+    # export LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so
+    # export HERMES_CONF=$HERMES_CONF
+    # export ADAPTER_MODE=SCRATCH
+    # export HERMES_STOP_DAEMON=1
+    # export HERMES_CLIENT=1
+
     mpirun -np 1 \
         -genv LD_PRELOAD=${HERMES_INSTALL_DIR}/lib/libhermes_posix.so \
         -genv HERMES_CONF=${HERMES_CONF} \
         -genv HERMES_CLIENT_CONF=${HERMES_CLIENT_CONF} \
-        python ${SCRIPT_DIR}/aggregate.py $AGG_CMD
+        python $SCRIPT_DIR/src/aggregate.py $AGG_CMD
 
 }
 
@@ -123,9 +129,9 @@ hostname;date;
 
 mpirun -np $NODE_COUNT -ppn 1 -host $hostlist killall hermes_daemon
 set -x
-mpirun -np $NODE_COUNT -ppn 1 -host $hostlist -genv HERMES_CONF=${HERMES_CONF} ${HERMES_INSTALL_DIR}/bin/hermes_daemon &
-srun -N$
+mpirun -np $NODE_COUNT -ppn 1 -host $hostlist -genv HERMES_CONF $HERMES_CONF $HERMES_INSTALL_DIR/bin/hermes_daemon &
 sleep 3
+# START_HERMES_DAEMON
 set +x
 
 # export GLOG_minloglevel=0
