@@ -1,13 +1,14 @@
 #!/bin/bash
 #SBATCH --job-name=deepdrivemd_n4
-#SBATCH --account=oddite
-#SBATCH --time=01:30:00
+#SBATCH --partition=a100
+#SBATCH --account=chess
+#SBATCH --time=00:30:00
 #SBATCH -N 4
 #SBATCH -n 12
 #SBATCH --output=R_%x.out                                        
 #SBATCH --error=R_%x.err
 
-# --output=R_%x.%j.out --exclude=node[01-25]
+
 SHORTENED_PIPELINE=false
 MD_RUNS=12
 ITER_COUNT=1 # TBD
@@ -22,8 +23,8 @@ STAGE_IDX=0
 STAGE_IDX_FORMAT=$(seq -f "stage%04g" $STAGE_IDX $STAGE_IDX)
 
 
-# EXPERIMENT_PATH=/qfs/projects/oddite/tang584/ddmd_runs/test_100ps #NFS
-EXPERIMENT_PATH=/files0/oddite/tang584/ddmd_runs/test_100ps #PFS
+EXPERIMENT_PATH=/qfs/projects/oddite/tang584/ddmd_runs/test_100ps #NFS
+# EXPERIMENT_PATH=/files0/oddite/tang584/ddmd_runs/test_100ps #PFS
 DDMD_PATH=/people/tang584/scripts/deepdrivemd
 MOLECULES_PATH=/qfs/projects/oddite/tang584/git/molecules
 
