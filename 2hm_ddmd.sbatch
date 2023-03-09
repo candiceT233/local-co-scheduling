@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=hm_deepdrivemd_n4sc_256k
+#SBATCH --job-name=2hm_deepdrivemd_sc256k
 #SBATCH --account=oddite
 #SBATCH --time=00:30:00
 #SBATCH --exclude=node[01-25]
@@ -9,6 +9,9 @@
 #SBATCH --error=./R_%x.err
 
 # --output=R_%x.%j.out --exclude=node[01-25]
+
+## Workflow with Hermes only running on the last 3 stages
+
 SHORTENED_PIPELINE=false
 MD_RUNS=12
 ITER_COUNT=1 # TBD
@@ -84,12 +87,6 @@ OPENMM () {
     cd $dest_path
     echo cd $dest_path
 
-    # mpirun -np 1 \
-    #     -genv LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so \
-    #     -genv HERMES_CONF=$HERMES_CONF \
-    #     -genv ADAPTER_MODE=SCRATCH \
-    #     -genv HERMES_STOP_DAEMON=0 \
-    #     -genv HERMES_CLIENT=1 \
     sed -e "s/\$SIM_LENGTH/${SIM_LENGTH}/" -e "s/\$OUTPUT_PATH/${dest_path//\//\\/}/" -e "s/\$EXPERIMENT_PATH/${EXPERIMENT_PATH//\//\\/}/" -e "s/\$DDMD_PATH/${DDMD_PATH//\//\\/}/" -e "s/\$GPU_IDX/${gpu_idx}/" -e "s/\$STAGE_IDX/${STAGE_IDX}/" $yaml_path  > $dest_path/$(basename $yaml_path)
 
     yaml_path=$dest_path/$(basename $yaml_path)
@@ -98,16 +95,11 @@ OPENMM () {
     # export HERMES_CONF=$HERMES_CONF
 
     PYTHONPATH=$DDMD_PATH:$MOLECULES_PATH srun -w $node_id -n1 -N1 --exclusive \
-        mpirun -np 1 \
-        -genv LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so \
-        -genv HERMES_CONF=$HERMES_CONF \
-        -genv ADAPTER_MODE=SCRATCH \
-        -genv HERMES_STOP_DAEMON=0 \
-        -genv HERMES_CLIENT=1 \
         ~/.conda/envs/hermes_openmm_ddmd/bin/python $DDMD_PATH/deepdrivemd/sim/openmm/run_openmm.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log &
     #PYTHONPATH=~/git/molecules/ srun -w $node_id -N1 python /people/leeh736/git/DeepDriveMD-pipeline/deepdrivemd/sim/openmm/run_openmm.py -c $yaml_path &>> $task_id.log &
     #srun -n1 env LD_PRELOAD=~/git/tazer_forked/build.h5/src/client/libclient.so PYTHONPATH=~/git/molecules/ python /people/leeh736/git/DeepDriveMD-pipeline/deepdrivemd/sim/openmm/run_openmm.py -c /qfs/projects/oddite/leeh736/ddmd_runs/test/md_direct.yaml &> $task_id.log &
 }
+
 
 AGGREGATE () {
 
@@ -123,12 +115,6 @@ AGGREGATE () {
     cd $dest_path
     echo cd $dest_path
 
-    # mpirun -np 1 \
-    #     -genv LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so \
-    #     -genv HERMES_CONF=$HERMES_CONF \
-    #     -genv ADAPTER_MODE=SCRATCH \
-    #     -genv HERMES_STOP_DAEMON=0 \
-    #     -genv HERMES_CLIENT=1 \
     sed -e "s/\$SIM_LENGTH/${SIM_LENGTH}/" -e "s/\$OUTPUT_PATH/${dest_path//\//\\/}/" -e "s/\$EXPERIMENT_PATH/${EXPERIMENT_PATH//\//\\/}/" -e "s/\$STAGE_IDX/${STAGE_IDX}/" $yaml_path  > $dest_path/$(basename $yaml_path)
     yaml_path=$dest_path/$(basename $yaml_path)
 
@@ -152,7 +138,6 @@ TRAINING () {
     stage_name="training"
     yaml_path=$DDMD_PATH/test/bba/${stage_name}_stage_test.yaml
 
-
     mkdir -p $EXPERIMENT_PATH/model_selection_runs/$STAGE_IDX_FORMAT/$task_id/
     cp -p $DDMD_PATH/test/bba/stage0000_$task_id.json $EXPERIMENT_PATH/model_selection_runs/$STAGE_IDX_FORMAT/$task_id/${STAGE_IDX_FORMAT}_$task_id.json
 
@@ -161,12 +146,6 @@ TRAINING () {
     cd $dest_path
     echo cd $dest_path
 
-    # mpirun -np 1 \
-    #     -genv LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so \
-    #     -genv HERMES_CONF=$HERMES_CONF \
-    #     -genv ADAPTER_MODE=SCRATCH \
-    #     -genv HERMES_STOP_DAEMON=0 \
-    #     -genv HERMES_CLIENT=1 \
     sed -e "s/\$SIM_LENGTH/${SIM_LENGTH}/" -e "s/\$OUTPUT_PATH/${dest_path//\//\\/}/" -e "s/\$EXPERIMENT_PATH/${EXPERIMENT_PATH//\//\\/}/" -e "s/\$STAGE_IDX/${STAGE_IDX}/" $yaml_path  > $dest_path/$(basename $yaml_path)
     yaml_path=$dest_path/$(basename $yaml_path)
     
@@ -211,12 +190,6 @@ INFERENCE () {
 
     mkdir -p $EXPERIMENT_PATH/agent_runs/$STAGE_IDX_FORMAT/$task_id/
 
-    # mpirun -np 1 \
-    #     -genv LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so \
-    #     -genv HERMES_CONF=$HERMES_CONF \
-    #     -genv ADAPTER_MODE=SCRATCH \
-    #     -genv HERMES_STOP_DAEMON=0 \
-    #     -genv HERMES_CLIENT=1 \
     sed -e "s/\$SIM_LENGTH/${SIM_LENGTH}/" -e "s/\$OUTPUT_PATH/${dest_path//\//\\/}/" -e "s/\$EXPERIMENT_PATH/${EXPERIMENT_PATH//\//\\/}/" -e "s/\$STAGE_IDX/${STAGE_IDX}/" $yaml_path  > $dest_path/$(basename $yaml_path)
     yaml_path=$dest_path/$(basename $yaml_path)
     
@@ -229,13 +202,7 @@ INFERENCE () {
     STAGE_IDX_PREV=$((STAGE_IDX - 1))
     STAGE_IDX_FORMAT_PREV=$(seq -f "stage%04g" $STAGE_IDX_PREV $STAGE_IDX_PREV)
 
-    # mpirun -np 1 \
-    #     -genv LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so \
-    #     -genv HERMES_CONF=$HERMES_CONF \
-    #     -genv ADAPTER_MODE=SCRATCH \
-    #     -genv HERMES_STOP_DAEMON=0 \
-    #     -genv HERMES_CLIENT=1 \
-        sed -i -e "s/\$MODEL_CHECKPOINT/${model_checkpoint//\//\\/}/"  $EXPERIMENT_PATH/model_selection_runs/$STAGE_IDX_FORMAT_PREV/task0000/${STAGE_IDX_FORMAT_PREV}_task0000.json
+    sed -i -e "s/\$MODEL_CHECKPOINT/${model_checkpoint//\//\\/}/"  $EXPERIMENT_PATH/model_selection_runs/$STAGE_IDX_FORMAT_PREV/task0000/${STAGE_IDX_FORMAT_PREV}_task0000.json
 
 
     OMP_NUM_THREADS=4 PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH \

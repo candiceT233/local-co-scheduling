@@ -3,7 +3,7 @@
 #SBATCH --job-name="hm_co"
 #SBATCH  --exclude=node[01-25]
 #SBATCH -N 4
-#SBATCH -n 12
+#SBATCH -n 4
 #SBATCH --time=00:30:00
 #SBATCH --output=R_%x.out                                        
 #SBATCH --error=R_%x.err
@@ -23,7 +23,7 @@ source /qfs/people/tang584/scripts/local-co-scheduling/env_var.sh
 
 
 NODE_COUNT=$SLURM_JOB_NUM_NODES
-MD_RUNS=1
+MD_RUNS=4
 ITER_COUNT=1 # TBD
 # GPU_PER_NODE=6
 MD_START=0
@@ -77,7 +77,7 @@ SIMULATION (){
         -genv ADAPTER_MODE=SCRATCH \
         -genv HERMES_STOP_DAEMON=0 \
         -genv HERMES_CLIENT=1 \
-        python $SCRIPT_DIR/sim_emulator.py $SIM_CMD &
+        python $SCRIPT_DIR//src/sim_emulator.py $SIM_CMD &
 
 }
 
@@ -100,7 +100,7 @@ AGGREGATE (){
         -genv ADAPTER_MODE=SCRATCH \
         -genv HERMES_STOP_DAEMON=1 \
         -genv HERMES_CLIENT=1 \
-        python $SCRIPT_DIR/aggregate.py $AGG_CMD
+        python $SCRIPT_DIR//src/aggregate.py $AGG_CMD
     
 }
 
@@ -133,7 +133,7 @@ hostname;date;
 
 mpirun -np $NODE_COUNT -ppn 1 -host $hostlist killall hermes_daemon
 # set -x
-mpirun -np $NODE_COUNT -ppn 1 -host $hostlist -genv HERMES_CONF $HERMES_CONF $HERMES_INSTALL_DIR/bin/hermes_daemon &
+mpirun -verbose -np $NODE_COUNT -ppn 1 -host $hostlist -genv HERMES_CONF $HERMES_CONF $HERMES_INSTALL_DIR/bin/hermes_daemon &
 sleep 3
 # START_HERMES_DAEMON
 # set +x

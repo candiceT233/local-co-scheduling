@@ -8,13 +8,14 @@
 #SBATCH --output=R_%x.out                                        
 #SBATCH --error=R_%x.err
 
-
 SHORTENED_PIPELINE=false
 MD_RUNS=12
 ITER_COUNT=1 # TBD
 SIM_LENGTH=0.1
 
 NODE_COUNT=$SLURM_JOB_NUM_NODES
+echo "SLURM_JOB_NUM_NODES = $SLURM_JOB_NUM_NODES"
+echo "SLURM_JOB_NODELIST = $SLURM_JOB_NODELIST"
 GPU_PER_NODE=6
 MD_START=0
 MD_SLICE=$(($MD_RUNS/$NODE_COUNT))
@@ -30,7 +31,6 @@ MOLECULES_PATH=/qfs/projects/oddite/tang584/git/molecules
 
 # OPENMM_PYTHON=~/.conda/envs/hermes_openmm_ddmd/bin/python
 # PYTORCH_PYTHON=~/.conda/envs/hermes_pytorch_ddmd/bin/python
-
 
 
 rm -rf $EXPERIMENT_PATH/*
