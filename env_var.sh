@@ -28,12 +28,13 @@ HERMES_CONF=$CONFIG_DIR/hermes.yaml
 
 # HERMES_INSTALL_DIR=`spack location -i hermes`
 HERMES_INSTALL_DIR=$INSTALL_DIR/hermes
+# Debug
+ASAN_LIB=""
+# HERMES_INSTALL_DIR=$INSTALL_DIR/debug_hermes
+# HERMES_INSTALL_DIR=$INSTALL_DIR/8_hermes
 
-BENCHMARKS_DIR=$HERMES_REPO/benchmarks
-HSLABS=hermes_slabs
 
 # System storage dirs -----------
-
 # DEV0_DIR="" # this is memory
 export DEV1_DIR=/state/partition1 # this is BurstBuffer
 export DEV2_DIR=/files0/oddite # this is Parallel File System
@@ -43,6 +44,7 @@ export DEV2_DIR=/files0/oddite # this is Parallel File System
 # export DEV2_DIR="/tmp" # current dir
 
 # Other tools dirs -----------
+BENCHMARKS_DIR=$HERMES_REPO/benchmarks
 HDF5_REPO=$DL_DIR/hdf5-hdf5-1_13_1
 IOR_REPO=$STAGE_DIR/ior
 IOR_INSTALL=$INSTALL_DIR/ior
@@ -59,9 +61,10 @@ PY_VENV=$SCRIPT_DIR/venv_ddmd
 
 export GLOG_minloglevel=2
 export FLAGS_logtostderr=2
-
 export HDF5_USE_FILE_LOCKING='FALSE' #'TRUE'
 # export MPICH_GNI_NDREG_ENTRIES=1024
+# export I_MPI_HYDRA_TOPOLIB=ipl
+# export I_MPI_PMI_LIBRARY=libpmi2.so
 
 export HERMES_PAGESIZE=262144
 # page size : 4096 8192 32768 65536 131072 262144 524288 1048576 4194304 8388608
