@@ -30,7 +30,7 @@ mkdir -p $DEV2_DIR/$HSLABS
 # rm -rf /mnt/hdd/$USER/hermes_swap/*
 mkdir -p $SCRIPT_DIR/iortest
 
-sim_cmd="--residue 200 -n 1 -a 1000 -f 10000"
+sim_cmd="--residue 200 -n 1 -a 100 -f 100 --output_task 0"
 
 hermes_simulation(){
   echo "Test: hermes_simulation "
@@ -125,6 +125,9 @@ hermes_sim_posix(){
 }
 
 hermes_sim_agg_posix(){
+
+  source $PY_VENV/bin/activate
+
   cd $SCRIPT_DIR
   killall hermes_daemon # clean up if daemon still alive
   # remove previous results
@@ -137,7 +140,7 @@ hermes_sim_agg_posix(){
   # export GLOG_log_dir=$LOG_DIR
   # export FLAGS_logtostderr=0
   export GLOG_minloglevel=0
-  export HERMES_PAGE_SIZE=8192  # 1024 4096 8192 16384 32768 65536 262144 524288 2097152 4194304 (4m) # default : 1048576
+  #export HERMES_PAGE_SIZE=8192  # 1024 4096 8192 16384 32768 65536 262144 524288 2097152 4194304 (4m) # default : 1048576
   # 131072 often hangs
 
   echo "HERMES_CONF=${HERMES_CONF}"
@@ -154,21 +157,22 @@ hermes_sim_agg_posix(){
   # ps aux | grep "hermes_daemon"
 
   # mpirun -n 1 \
-  #   -genv LD_PRELOAD ${HERMES_INSTALL_DIR}/lib/libhermes_posix.so \
-  #   -genv HERMES_CONF ${HERMES_CONF} \
-  #   -genv ADAPTER_MODE SCRATCH \
-  #   -genv HERMES_STOP_DAEMON 0 \
-  #   -genv HERMES_CLIENT 1 \
-  #   -genv LD_LIBRARY_PATH ${LD_LIBRARY_PATH} \
-  #   python3 sim_emulator.py --residue 100 -n 2 -a 200 -f 200 \
+  #   -x LD_PRELOAD ${HERMES_INSTALL_DIR}/lib/libhermes_posix.so \
+  #   -x HERMES_CONF ${HERMES_CONF} \
+  #   -x ADAPTER_MODE SCRATCH \
+  #   -x HERMES_STOP_DAEMON 0 \
+  #   -x HERMES_CLIENT 1 \
+  #   -x LD_LIBRARY_PATH ${LD_LIBRARY_PATH} \
+  #   python3 sim_emulator.py $sim_cmd \
   #   > >(tee $LOG_DIR/hm-sim.posix.log) 2>$LOG_DIR/hm-sim.posix.err
 
   LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so \
     HERMES_CONF=$HERMES_CONF \
-    ADAPTER_MODE=SCRATCH \
+    ADAPTER_MODE=WORKFLOW \
     HERMES_STOP_DAEMON=0 \
     HERMES_CLIENT=1 \
     python3 $SCRIPT_DIR/src/sim_emulator.py $sim_cmd \
+
     > >(tee $LOG_DIR/hm-sim.posix.log) 2>$LOG_DIR/hm-sim.posix.err
 
   echo "Simulation finished..."
@@ -177,7 +181,7 @@ hermes_sim_agg_posix(){
   echo "Running aggregate.py with hermes posix ..."
   LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so \
     HERMES_CONF=$HERMES_CONF \
-    ADAPTER_MODE=SCRATCH \
+    ADAPTER_MODE=WORKFLOW \
     HERMES_STOP_DAEMON=1 \
     HERMES_CLIENT=1 \
     python3 $SCRIPT_DIR/src/aggregate.py -no_rmsd -no_fnc --input_path $DEV2_DIR --output_path $DEV2_DIR/aggregate.h5 \
@@ -190,8 +194,12 @@ hermes_sim_agg_posix(){
   #   -genv HERMES_STOP_DAEMON 1 \
   #   -genv HERMES_CLIENT 1 \
   #   python3 $SCRIPT_DIR/src/aggregate.py -no_rmsd -no_fnc --input_path $DEV2_DIR --output_path $DEV2_DIR/aggregate.h5 \
-  #   > >(tee $LOG_DIR/hm-agg.posix.log) 2>$LOG_DIR/hm-agg.posix.err
 
+
+  # $HERMES_INSTALL_DIR/bin/stage_out "${DEV2_DIR}/aggregate.h5"
+  # cd $HERMES_INSTALL_DIR/bin
+  # ./stage_out "${DEV2_DIR}/aggregate.h5"
+  # cd -
   ls -lrtah $DEV2_DIR | grep "aggregate.h5" # check file size for correctness
   # ls -lrtah $SCRIPT_DIR | grep "aggregate.h5" # check file size for correctness
 
@@ -378,9 +386,9 @@ hermes_sim_agg_vfd(){
   
   mkdir -p curr_job_log/
 
-  for RES in 145 210 295 ; do #  145 210 295
-    for NJOB in 1 ; do #  2 4 8
-      for SIZE in 100 ; do #  200 400 800
+  for RES in 100 ; do # 145 210 295
+    for NJOB in 2 ; do #  2 4 8
+      for SIZE in 10 ; do #  200 400 800
         rm -rf molecular_dynamics_runs
         rm -rf ./aggregate.h5
         rm -rf device1_slab*
@@ -721,3 +729,4 @@ then
 fi
 
 
+rm -rf $SCRIPT_DIR/core.*
