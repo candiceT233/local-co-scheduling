@@ -1,19 +1,17 @@
 #!/bin/bash
-#SBATCH --job-name=3hm_sc_ddmd_n8t24i2_100ps
+#SBATCH --job-name=3hm_sc_ddmd_n2t24i1_100ps
 #SBATCH --partition=a100
 #SBATCH --account=chess
-#SBATCH --time=00:30:00
-#SBATCH --exclude=node[01-25]
-#SBATCH -N 8
-#SBATCH -n 32
-#SBATCH --output=./R_%x.out
-#SBATCH --error=./R_%x.err
+#SBATCH --time=02:30:00
+#SBATCH -N 2
+#SBATCH -n 12
+#SBATCH --output=R_%x.out                                        
+#SBATCH --error=R_%x.err
 
-# --output=R_%x.%j.out --exclude=node[01-25]
-SKIP_OPENMM=true
+SKIP_OPENMM=false
 SHORTENED_PIPELINE=true
-MD_RUNS=24
-ITER_COUNT=2 # TBD
+MD_RUNS=12
+ITER_COUNT=1 # TBD
 SIM_LENGTH=0.1
 
 NODE_COUNT=$SLURM_JOB_NUM_NODES
