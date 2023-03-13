@@ -1,19 +1,23 @@
 #!/bin/bash
-#SBATCH --job-name=deepdrivemd_n4
+#SBATCH --job-name=ddmd_n8t24i1_100ps_short_2
 #SBATCH --account=oddite
-#SBATCH --time=01:30:00
-#SBATCH -N 4
-#SBATCH -n 12
+#SBATCH --time=02:30:00
+#SBATCH -N 8
+#SBATCH -n 24
 #SBATCH --output=R_%x.out                                        
 #SBATCH --error=R_%x.err
 
-# --output=R_%x.%j.out --exclude=node[01-25]
-SHORTENED_PIPELINE=false
-MD_RUNS=12
+# --partition=a100
+# --account=chess
+SKIP_OPENMM=false
+SHORTENED_PIPELINE=true
+MD_RUNS=24
 ITER_COUNT=1 # TBD
 SIM_LENGTH=0.1
 
 NODE_COUNT=$SLURM_JOB_NUM_NODES
+echo "SLURM_JOB_NUM_NODES = $SLURM_JOB_NUM_NODES"
+echo "SLURM_JOB_NODELIST = $SLURM_JOB_NODELIST"
 GPU_PER_NODE=6
 MD_START=0
 MD_SLICE=$(($MD_RUNS/$NODE_COUNT))
@@ -23,18 +27,25 @@ STAGE_IDX_FORMAT=$(seq -f "stage%04g" $STAGE_IDX $STAGE_IDX)
 
 
 # EXPERIMENT_PATH=/qfs/projects/oddite/tang584/ddmd_runs/test_100ps #NFS
-EXPERIMENT_PATH=/files0/oddite/tang584/ddmd_runs/test_100ps #PFS
-DDMD_PATH=/people/tang584/scripts/deepdrivemd
-MOLECULES_PATH=/qfs/projects/oddite/tang584/git/molecules
+EXPERIMENT_PATH=/files0/oddite/tang584/ddmd_runs/test_100ps_i1 #PFS
+DDMD_PATH=/people/tang584/scripts/deepdrivemd #NFS
+MOLECULES_PATH=/qfs/projects/oddite/tang584/git/molecules #NFS
+
+if [ "$SKIP_OPENMM" == true ]
+then
+    # keep molecular_dynamics_runs
+    rm -rf $EXPERIMENT_PATH/agent_runs
+    rm -rf $EXPERIMENT_PATH/inference_runs
+    rm -rf $EXPERIMENT_PATH/machine_learning_runs
+    rm -rf $EXPERIMENT_PATH/model_selection_runs
+    ls $EXPERIMENT_PATH/* -hl
+else
+    rm -rf $EXPERIMENT_PATH/*
+    ls $EXPERIMENT_PATH/* -hl
+fi
 
 # OPENMM_PYTHON=~/.conda/envs/hermes_openmm_ddmd/bin/python
 # PYTORCH_PYTHON=~/.conda/envs/hermes_pytorch_ddmd/bin/python
-
-
-
-rm -rf $EXPERIMENT_PATH/*
-ls $EXPERIMENT_PATH/* -hl
-
 
 module purge
 module load python/miniconda3.7 gcc/9.1.0 git/2.31.1 cmake/3.21.4 openmpi/4.1.3
@@ -110,9 +121,6 @@ TRAINING () {
     mkdir -p $EXPERIMENT_PATH/model_selection_runs/$STAGE_IDX_FORMAT/$task_id/
     cp -p $DDMD_PATH/test/bba/stage0000_$task_id.json $EXPERIMENT_PATH/model_selection_runs/$STAGE_IDX_FORMAT/$task_id/${STAGE_IDX_FORMAT}_$task_id.json
 
-    # module purge
-    # module load python/miniconda3.7 gcc/9.1.0 git/2.31.1 cmake/3.21.4 openmpi/4.1.3
-    # source /share/apps/python/miniconda3.7/etc/profile.d/conda.sh
     source activate hermes_pytorch_ddmd
 
     mkdir -p $dest_path
@@ -189,51 +197,58 @@ STAGE_UPDATE() {
     echo $tmp
 }
 
+total_start_time=$SECONDS
 
 for iter in $(seq $ITER_COUNT)
 do
 
     # STAGE 1: OpenMM
     start_time=$SECONDS
-    for node in $NODE_NAMES
-    do
-        while [ $MD_SLICE -gt 0 ] && [ $MD_START -lt $MD_RUNS ]
+
+    if [ "$SKIP_OPENMM" != true ]
+    then
+        for node in $NODE_NAMES
         do
-            echo $node
-            OPENMM $MD_START $node
-            MD_START=$(($MD_START + 1))
-            MD_SLICE=$(($MD_SLICE - 1))
+            while [ $MD_SLICE -gt 0 ] && [ $MD_START -lt $MD_RUNS ]
+            do
+                echo $node
+                OPENMM $MD_START $node
+                MD_START=$(($MD_START + 1))
+                MD_SLICE=$(($MD_SLICE - 1))
+            done
+            MD_SLICE=$(($MD_RUNS/$NODE_COUNT))
         done
-        MD_SLICE=$(($MD_RUNS/$NODE_COUNT))
-    done
+    else
+        echo "OpenMM Skipped ---"
+    fi
+    wait
 
     MD_START=0
 
-    wait
-
     duration=$(($SECONDS - $start_time))
-    echo "OpenMM done... $(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed."
-    ls $EXPERIMENT_PATH/molecular_dynamics_runs/*/* -hl
+    echo "OpenMM done... $(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed ($duration secs)."
 
     STAGE_IDX_FORMAT="$(STAGE_UPDATE)"
     STAGE_IDX=$((STAGE_IDX + 1))
     echo $STAGE_IDX_FORMAT
 
-    # STAGE 2: Aggregate
-    start_time=$SECONDS
+    # STAGE 2: Aggregate       
     if [ "$SHORTENED_PIPELINE" != true ]
     then
+        start_time=$SECONDS
         srun -N1 $( AGGREGATE )
+        wait 
+        duration=$(($SECONDS - $start_time))
+        echo "Aggregate done... $(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed ($duration secs)."
+    else
+        echo "No AGGREGATE, SHORTENED_PIPELINE = $SHORTENED_PIPELINE..."
     fi
+    
     wait
-    duration=$(($SECONDS - $start_time))
-    echo "Aggregate done... $(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed."
-    ls $EXPERIMENT_PATH/molecular_dynamics_runs/stage0000/task0000 -hl
-
+    
     STAGE_IDX_FORMAT="$(STAGE_UPDATE)"
     STAGE_IDX=$((STAGE_IDX + 1))
     echo $STAGE_IDX_FORMAT
-
 
     # STAGE 3: Training
     start_time=$SECONDS
@@ -245,19 +260,18 @@ do
     if [ "$SHORTENED_PIPELINE" != true ]
     then
         wait
+        duration=$(($SECONDS - $start_time))
+        echo "Training done... $(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed ($duration secs)."
+    else
+        echo "Training not waited, SHORTENED_PIPELINE = $SHORTENED_PIPELINE..."
     fi
-
-    duration=$(($SECONDS - $start_time))
-    echo "Training done... $(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed."
-    ls $EXPERIMENT_PATH/machine_learning_runs/*/* -hl
 
     # STAGE 4: Inference
     start_time=$SECONDS
     srun $( INFERENCE )
     wait
     duration=$(($SECONDS - $start_time))
-    echo "Inference done... $(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed."
-    ls $EXPERIMENT_PATH/inference_runs/*/* -hl
+    echo "Inference done... $(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed ($duration secs)."
 
     STAGE_IDX_FORMAT="$(STAGE_UPDATE)"
     STAGE_IDX=$((STAGE_IDX + 1))
@@ -266,6 +280,13 @@ do
 
 done
 
+total_duration=$(($SECONDS - $total_start_time))
+echo "All done... $(($total_duration / 60)) minutes and $(($total_duration % 60)) seconds elapsed ($total_duration secs)."
+
+# ls $EXPERIMENT_PATH/molecular_dynamics_runs/*/* -hl
+# ls $EXPERIMENT_PATH/machine_learning_runs/*/* -hl
+# ls $EXPERIMENT_PATH/inference_runs/*/* -hl
+ls $EXPERIMENT_PATH/*/*/* -hl
 
 hostname;date;
 sacct -j $SLURM_JOB_ID -o jobid,submit,start,end,state

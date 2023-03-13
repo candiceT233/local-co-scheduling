@@ -10,7 +10,7 @@
 USER=$(whoami)
 
 # User directories
-MNT_HOME=$HOME #/people/$USER
+MNT_HOME=/qfs/people/$USER
 INSTALL_DIR=$HOME/install
 DL_DIR=$HOME/download
 SCRIPT_DIR=$MNT_HOME/scripts/local-co-scheduling
@@ -23,7 +23,7 @@ MOCHI_REPO=$STAGE_DIR/mochi
 SPACK_DIR=$MNT_HOME/spack
 
 # Hermes config files -----------
-HERMES_DEFAULT_CONF=$CONFIG_DIR/hermes_slurm_default.yaml
+HERMES_DEFAULT_CONF=$CONFIG_DIR/hermes_bluesky_default.yaml
 HERMES_CONF=$CONFIG_DIR/hermes.yaml
 
 # HERMES_INSTALL_DIR=`spack location -i hermes`
@@ -36,9 +36,8 @@ ASAN_LIB=""
 
 # System storage dirs -----------
 # DEV0_DIR="" # this is memory
-export DEV1_DIR=/state/partition1 # this is BurstBuffer
-export DEV2_DIR=/files0/oddite # this is Parallel File System
-
+export DEV1_DIR=/state/partition1/$USER # this is BurstBuffer
+export DEV2_DIR=/files0/oddite/$USER # this is Parallel File System
 # export DEV1_DIR="." # current dir
 # export DEV2_DIR="." # current dir
 # export DEV1_DIR="/tmp" # current dir

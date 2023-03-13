@@ -1,4 +1,71 @@
 # For Hermes
+## Building Hermes
+### Install Spack
+```
+SPACK_DIR=~/spack
+git clone --depth=100 --branch=releases/v0.19 https://github.com/spack/spack.git ${SPACK_DIR}
+. ${SPACK_DIR}/share/spack/setup-env.sh
+```
+### Install Hermes Dependencies Through Spack
+```
+STAGE_DIR=~/hermes_stage
+MOCHI_REPO=${STAGE_DIR}/mochi
+HERMES_REPO=${STAGE_DIR}/hermes
+
+git clone https://github.com/mochi-hpc/mochi-spack-packages.git ${MOCHI_REPO}
+spack repo add ${MOCHI_REPO}
+
+git clone https://github.com/HDFGroup/hermes ${HERMES_REPO}
+cd ${HERMES_REPO} && git checkout -b tags/v0.9.5-beta
+spack repo add ${HERMES_REPO}/ci/hermes
+
+spack install hermes ^mpich@3.4.3
+``` 
+### Build Hermes with Custon Settings
+```
+cd ${HERMES_REPO}
+mkdir build
+ccmake ..
+```
+For script testing stage, it's recommended to only turn on these settings:
+```
+-DBUILD_SHARED_LIBS=ON
+-DBUILD_TESTING=ON
+-DHERMES_ENABLE_GFLAGS=ON
+-DHERMES_ENABLE_POSIX_ADAPTER=ON
+-DHERMES_ENABLE_WRAPPER=ON
+
+-DCMAKE_BUILD_TYPE=RelWithDebInfo
+CMAKE_INSTALL_PREFIX=/your/hermes/path
+```
+For performance testing stage, set `-CMAKE_BUILD_TYPE=RelWithDebInfo`, as well as `export GLOG_minloglevel=2` and 
+`export FLAGS_logtostderr=2` to minimize overhead.
+
+### Hermes Daemon Runnning Correctly
+With `RelWithDebInfo` build, you will see the following messages when the hermes_daemon is runnign correctly:
+```
+I0308 09:13:47.977505 285771 hermes.cc:419] Initializing hermes config
+I0308 09:13:47.977633 285771 config_parser.cc:527] ParseConfig-LoadFile
+WARNING: Logging before InitGoogleLogging() is written to STDERR
+I0308 09:14:07.434710 186776 config_parser.cc:527] ParseConfig-LoadFile
+I0308 09:13:47.979393 285771 config_parser.cc:529] ParseConfig-LoadComplete
+I0308 09:13:56.240029 364262 hermes.cc:225] HERMES CORE
+I0308 09:13:56.240041 364262 buffer_pool.cc:1223] 60392672 bytes required for BufferPool metadata
+WARNING: Logging before InitGoogleLogging() is written to STDERR
+I0308 09:13:48.012466 285805 config_parser.cc:527] ParseConfig-LoadFile
+I0308 09:13:56.281834 364262 metadata_storage_stb_ds.cc:1030] Metadata can support 4472701 Blobs per node
+```
+If you check the 2nd mount path (other than `""`/RAM), there should be devices created:
+```
+/path_to_hermes_2nd_mount_point/device1_slab0.hermes
+/path_to_hermes_2nd_mount_point/device1_slab1.hermes
+/path_to_hermes_2nd_mount_point/device1_slab2.hermes
+/path_to_hermes_2nd_mount_point/device1_slab3.hermes
+... 
+```
+The number depends on the `num_slabs` parameter in the hermes config file.
+
+
 # Workflow Simulator for Co-scheduling
 
 To investigate data movements in a workflow lifetime, the scripts in the current directory provide a way to generate synthetic data across the workflow steps (stages). For example, the simulation and the aggregator in the DeepDriveMD workflow, produce h5 files that contain multiple datasets and uses `np.concatenate` to build AI training sets for PyTorch or TensorFlow. Instead of running a real simulation task, the workflow simulator generates certain data (Producer) in an exact size and then the aggregator reads them (Consumer) with a specific record and a dataset.
