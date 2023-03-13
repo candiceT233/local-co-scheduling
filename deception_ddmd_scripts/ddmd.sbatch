@@ -25,7 +25,7 @@ echo "SLURM_JOB_NODELIST = $SLURM_JOB_NODELIST"
 NODE_NAMES=`echo $SLURM_JOB_NODELIST|scontrol show hostnames`
 
 # EXPERIMENT_PATH=/qfs/projects/oddite/tang584/ddmd_runs/test_100ps #NFS
-EXPERIMENT_PATH=/rcfs/scratch/$USER/ddmd_runs/test_100ps_i1 #PFS
+EXPERIMENT_PATH=/rcfs/projects/chess/$USER/ddmd_runs/test_100ps_i$ITER_COUNT #PFS, BeeGFS
 DDMD_PATH=/people/tang584/scripts/deepdrivemd #NFS
 MOLECULES_PATH=/qfs/projects/oddite/tang584/git/molecules #NFS
 mkdir -p $EXPERIMENT_PATH

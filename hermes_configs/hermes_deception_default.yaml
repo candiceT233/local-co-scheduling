@@ -72,7 +72,7 @@ mount_points: ["", "/scratch/tang584/hermes_slabs"] # RAM and BurstBuffer at Dec
 is_shared_device: [0,0]
 # The mount point of a PFS or object store for swap space, in the event that
 # Hermes buffers become full.
-swap_mount: "/rcfs/scratch/tang584/hermes_swaps" # the PFS at Deception (?)
+swap_mount: "/rcfs/projects/chess/tang584/hermes_swaps" # the PFS at Deception (?)
 # The number of times the buffer organizer will attempt to place a blob from
 # swap space into the hierarchy before giving up.
 num_buffer_organizer_retries: 3
