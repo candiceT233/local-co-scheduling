@@ -1,17 +1,19 @@
 #!/bin/bash
-#SBATCH --job-name=ddmd_n2t24i1_100ps_short
+#SBATCH --job-name=ddmd_n4t24i2_100ps_short
 #SBATCH --partition=a100
 #SBATCH --account=chess
+#SBATCH --exclude=a100-05
 #SBATCH --time=02:30:00
-#SBATCH -N 2
-#SBATCH -n 12
+#SBATCH -N 4
+#SBATCH -n 24
 #SBATCH --output=R_%x.out                                        
 #SBATCH --error=R_%x.err
 
+
 SKIP_OPENMM=false
 SHORTENED_PIPELINE=true
-MD_RUNS=12
-ITER_COUNT=1 # TBD
+MD_RUNS=24
+ITER_COUNT=2 # TBD
 SIM_LENGTH=0.1
 GPU_PER_NODE=6
 MD_START=0
@@ -24,7 +26,7 @@ STAGE_IDX_FORMAT=$(seq -f "stage%04g" $STAGE_IDX $STAGE_IDX)
 echo "SLURM_JOB_NODELIST = $SLURM_JOB_NODELIST"
 NODE_NAMES=`echo $SLURM_JOB_NODELIST|scontrol show hostnames`
 
-# EXPERIMENT_PATH=/qfs/projects/oddite/tang584/ddmd_runs/test_100ps #NFS
+# EXPERIMENT_PATH=/qfs/projects/oddite/$USER/ddmd_runs/test_100ps_i$ITER_COUNT #Lustre
 EXPERIMENT_PATH=/rcfs/projects/chess/$USER/ddmd_runs/test_100ps_i$ITER_COUNT #PFS, BeeGFS
 DDMD_PATH=/people/tang584/scripts/deepdrivemd #NFS
 MOLECULES_PATH=/qfs/projects/oddite/tang584/git/molecules #NFS

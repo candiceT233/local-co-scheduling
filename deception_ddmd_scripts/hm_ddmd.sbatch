@@ -1,6 +1,7 @@
 #!/bin/bash
-#SBATCH --job-name=1hm_sc_ddmd_n2t24i1_100ps
+#SBATCH --job-name=1hm_sc_ddmd_n2t12i1_100ps
 #SBATCH --partition=a100
+#SBATCH --exclude=a100-[01,05]
 #SBATCH --account=chess
 #SBATCH --time=02:30:00
 #SBATCH -N 2
@@ -8,26 +9,30 @@
 #SBATCH --output=R_%x.out
 #SBATCH --error=R_%x.err
 
+# --exclude=a100-[01-09]
 SKIP_OPENMM=false
+LOCAL=false
 SHORTENED_PIPELINE=true
 MD_RUNS=12
 ITER_COUNT=1 # TBD
 SIM_LENGTH=0.1
-
-NODE_COUNT=$SLURM_JOB_NUM_NODES
 GPU_PER_NODE=6
 MD_START=0
+NODE_COUNT=$SLURM_JOB_NUM_NODES
 MD_SLICE=$(($MD_RUNS/$NODE_COUNT))
-NODE_NAMES=`echo $SLURM_JOB_NODELIST|scontrol show hostnames`
 STAGE_IDX=0
 STAGE_IDX_FORMAT=$(seq -f "stage%04g" $STAGE_IDX $STAGE_IDX)
-ADAPTER_MODE="SCRATCH"
 
-# EXPERIMENT_PATH=/qfs/projects/oddite/tang584/ddmd_runs/hermes_test_100ps #NFS
-EXPERIMENT_PATH=/files0/oddite/tang584/ddmd_runs/hermes_test_100ps_i$ITER_COUNT #PFS
+
+echo "SLURM_JOB_NODELIST = $SLURM_JOB_NODELIST"
+NODE_NAMES=`echo $SLURM_JOB_NODELIST|scontrol show hostnames`
+echo "HOSTLIST = $HOSTLIST"
+
+# EXPERIMENT_PATH=/qfs/projects/oddite/$USER/ddmd_runs/hermes_test_100ps_i$ITER_COUNT # NFS
+EXPERIMENT_PATH=/rcfs/projects/chess/$USER/ddmd_runs/hermes_test_100ps_i$ITER_COUNT #PFS, BeeGFS
 DDMD_PATH=/people/tang584/scripts/deepdrivemd #NFS
 MOLECULES_PATH=/qfs/projects/oddite/tang584/git/molecules #NFS
-
+mkdir -p $EXPERIMENT_PATH
 
 if [ "$SKIP_OPENMM" == true ]
 then
@@ -41,8 +46,8 @@ else
     rm -rf $EXPERIMENT_PATH/*
     ls $EXPERIMENT_PATH/* -hl
 fi
-# OPENMM_PYTHON=~/.conda/envs/hermes_openmm_ddmd/bin/python
-# PYTORCH_PYTHON=~/.conda/envs/hermes_pytorch_ddmd/bin/python
+# OPENMM_PYTHON=~/.conda/envs/hermes_openmm7_ddmd/bin/python
+# PYTORCH_PYTHON=~/.conda/envs/hermes_pytorch7_ddmd/bin/python
 
 module purge
 module load python/miniconda3.7 gcc/9.1.0 git/2.31.1 cmake/3.21.4 
@@ -51,31 +56,40 @@ source /share/apps/python/miniconda3.7/etc/profile.d/conda.sh
 
 # load environment variables for Hermes
 ulimit -c unlimited
-. $HOME/spack/share/spack/setup-env.sh
+# . /qfs/people/tang584/zen2_dec/dec_spack/share/spack/setup-env.sh
 source /qfs/people/tang584/scripts/local-co-scheduling/load_hermes_deps.sh
 source /qfs/people/tang584/scripts/local-co-scheduling/env_var.sh
 
-mkdir -p $DEV1_DIR/hermes_slabs
-mkdir -p $DEV2_DIR/hermes_swaps
-rm -rf $DEV1_DIR/hermes_slabs/*
-rm -rf $DEV2_DIR/hermes_swaps/*
+rm -rf $DEV1_DIR/*
+rm -rf $DEV2_DIR/*
 
-# get nodelist to hermes config file
+
+export HERMES_CONF=$HERMES_CONF
+export ADAPTER_MODE="SCRATCH"
+export HERMES_STOP_DAEMON=0
+
+# prepare hermes config file
 if [ "$NODE_COUNT" = "1" ]; then
     sed "s/\$HOST_BASE_NAME/\"localhost\"/" $HERMES_DEFAULT_CONF  > $HERMES_CONF
     sed -i "s/\$HOST_NUMBER_RANGE/ /" $HERMES_CONF
+elif [ "$LOCAL" == true ]; then
+    sed "s/\$HOST_BASE_NAME/\"localhost\"/" $HERMES_DEFAULT_CONF  > $HERMES_CONF
+    sed -i "s/\$HOST_NUMBER_RANGE/ /" $HERMES_CONF
 else
-    sed "s/\$HOST_BASE_NAME/\"node\"/" $HERMES_DEFAULT_CONF  > $HERMES_CONF
+    sed "s/\$HOST_BASE_NAME/\"a100-\"/" $HERMES_DEFAULT_CONF  > $HERMES_CONF
     rpc_host_number_range=$(echo "$SLURM_JOB_NODELIST" | grep -Po '[\[].*[\]]')
     sed -i "s/\$HOST_NUMBER_RANGE/${rpc_host_number_range}/" $HERMES_CONF
 fi
+# sed -i "s/\$DEV1_DIR/\"${DEV1_DIR}\"/" $HERMES_CONF
+# sed -i "s/\$DEV2_DIR/\"${DEV2_DIR}\"/" $HERMES_CONF
 
 NODE_NAMES=`echo $SLURM_JOB_NODELIST|scontrol show hostnames`
 hostlist=$(echo -e "$NODE_NAMES" | xargs | sed -e 's/ /,/g')
 echo "hostlist=$hostlist"
 
-
-
+IFS=',' read -r -a NODE_ARR <<< "$hostlist"
+echo "TRAINING on = ${NODE_ARR[0]}"
+echo "INFERENCE on = ${NODE_ARR[1]}"
 
 OPENMM () {
 
@@ -94,7 +108,7 @@ OPENMM () {
     # module purge
     # module load python/miniconda3.7 gcc/9.1.0 git/2.31.1 cmake/3.21.4 openmpi/4.1.3
     # source /share/apps/python/miniconda3.7/etc/profile.d/conda.sh
-    source activate hermes_openmm_ddmd
+    source activate hermes_openmm7_ddmd
 
     mkdir -p $dest_path
     cd $dest_path
@@ -103,21 +117,22 @@ OPENMM () {
     sed -e "s/\$SIM_LENGTH/${SIM_LENGTH}/" -e "s/\$OUTPUT_PATH/${dest_path//\//\\/}/" -e "s/\$EXPERIMENT_PATH/${EXPERIMENT_PATH//\//\\/}/" -e "s/\$DDMD_PATH/${DDMD_PATH//\//\\/}/" -e "s/\$GPU_IDX/${gpu_idx}/" -e "s/\$STAGE_IDX/${STAGE_IDX}/" $yaml_path  > $dest_path/$(basename $yaml_path)
     yaml_path=$dest_path/$(basename $yaml_path)
 
-    # PYTHONPATH=$DDMD_PATH:$MOLECULES_PATH srun -w $node_id -n1 -N1 --exclusive \
+    # # --oversubscribe
+    # PYTHONPATH=$DDMD_PATH:$MOLECULES_PATH srun -w $node_id -n1 -N1 --oversubscribe\
     #     mpirun -np 1 \
     #     -genv LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so \
     #     -genv HERMES_CONF=$HERMES_CONF \
-    #     -genv ADAPTER_MODE= \
+    #     -genv ADAPTER_MODE=$ADAPTER_MODE \
     #     -genv HERMES_STOP_DAEMON=0 \
-    #     -genv HERMES_CLIENT=1 \
-    #     ~/.conda/envs/hermes_openmm_ddmd/bin/python $DDMD_PATH/deepdrivemd/sim/openmm/run_openmm.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log &
+    #     ~/.conda/envs/hermes_openmm7_ddmd/bin/python $DDMD_PATH/deepdrivemd/sim/openmm/run_openmm.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log &
 
+    # # --oversubscribe HERMES_CLIENT=1 
     LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so:$LD_PRELOAD \
         HERMES_CONF=$HERMES_CONF \
         HERMES_STOP_DAEMON=0 HERMES_CLIENT=1 \
         PYTHONPATH=$DDMD_PATH:$MOLECULES_PATH \
-        srun -w $node_id -n1 -N1 --exclusive \
-        ~/.conda/envs/hermes_openmm_ddmd/bin/python $DDMD_PATH/deepdrivemd/sim/openmm/run_openmm.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log &
+        srun -w $node_id -n1 -N1 --oversubscribe \
+        ~/.conda/envs/hermes_openmm7_ddmd/bin/python $DDMD_PATH/deepdrivemd/sim/openmm/run_openmm.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log &
 
     #PYTHONPATH=~/git/molecules/ srun -w $node_id -N1 python /people/leeh736/git/DeepDriveMD-pipeline/deepdrivemd/sim/openmm/run_openmm.py -c $yaml_path &>> $task_id.log &
     #srun -n1 env LD_PRELOAD=~/git/tazer_forked/build.h5/src/client/libclient.so PYTHONPATH=~/git/molecules/ python /people/leeh736/git/DeepDriveMD-pipeline/deepdrivemd/sim/openmm/run_openmm.py -c /qfs/projects/oddite/leeh736/ddmd_runs/test/md_direct.yaml &> $task_id.log &
@@ -132,7 +147,7 @@ AGGREGATE () {
     dest_path=$EXPERIMENT_PATH/molecular_dynamics_runs/$STAGE_IDX_FORMAT/$task_id
     yaml_path=$DDMD_PATH/test/bba/${stage_name}_stage_test.yaml
 
-    source activate hermes_openmm_ddmd
+    source activate hermes_openmm7_ddmd
     mkdir -p $dest_path
     cd $dest_path
     echo cd $dest_path
@@ -146,10 +161,9 @@ AGGREGATE () {
         -genv HERMES_CONF=$HERMES_CONF \
         -genv ADAPTER_MODE=$ADAPTER_MODE \
         -genv HERMES_STOP_DAEMON=0 \
-        -genv HERMES_CLIENT=1 \
-    ~/.conda/envs/hermes_openmm_ddmd/bin/python $DDMD_PATH/deepdrivemd/aggregation/basic/aggregate.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log
+    ~/.conda/envs/hermes_openmm7_ddmd/bin/python $DDMD_PATH/deepdrivemd/aggregation/basic/aggregate.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log
 
-    # { time PYTHONPATH=$DDMD_PATH/ ~/.conda/envs/hermes_openmm_ddmd/bin/python $DDMD_PATH/deepdrivemd/aggregation/basic/aggregate.py -c $yaml_path ; } &> ${task_id}_${FUNCNAME[0]}.log
+    # { time PYTHONPATH=$DDMD_PATH/ ~/.conda/envs/hermes_openmm7_ddmd/bin/python $DDMD_PATH/deepdrivemd/aggregation/basic/aggregate.py -c $yaml_path ; } &> ${task_id}_${FUNCNAME[0]}.log
     #env LD_PRELOAD=/qfs/people/leeh736/git/tazer_forked/build.h5.pread64.bluesky/src/client/libclient.so PYTHONPATH=$DDMD_PATH/ python /files0/oddite/deepdrivemd/src/deepdrivemd/aggregation/basic/aggregate.py -c /qfs/projects/oddite/leeh736/ddmd_runs/1k/agg_test.yaml &> agg_test_output.log
 }
 
@@ -165,47 +179,54 @@ TRAINING () {
     mkdir -p $EXPERIMENT_PATH/model_selection_runs/$STAGE_IDX_FORMAT/$task_id/
     cp -p $DDMD_PATH/test/bba/stage0000_$task_id.json $EXPERIMENT_PATH/model_selection_runs/$STAGE_IDX_FORMAT/$task_id/${STAGE_IDX_FORMAT}_$task_id.json
 
-    source activate hermes_pytorch_ddmd
+    source activate hermes_pytorch7_ddmd
     mkdir -p $dest_path
     cd $dest_path
     echo cd $dest_path
 
     sed -e "s/\$SIM_LENGTH/${SIM_LENGTH}/" -e "s/\$OUTPUT_PATH/${dest_path//\//\\/}/" -e "s/\$EXPERIMENT_PATH/${EXPERIMENT_PATH//\//\\/}/" -e "s/\$STAGE_IDX/${STAGE_IDX}/" $yaml_path  > $dest_path/$(basename $yaml_path)
     yaml_path=$dest_path/$(basename $yaml_path)
+
     
-    # PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH ~/.conda/envs/hermes_pytorch_ddmd/bin/python $DDMD_PATH/deepdrivemd/models/aae/train_init.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log 
-    echo PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH srun -n1 -N1 --exclusive ~/.conda/envs/hermes_pytorch_ddmd/bin/python $DDMD_PATH/deepdrivemd/models/aae/train_init.py -c $yaml_path ${task_id}_${FUNCNAME[0]}.log 
+    # PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH ~/.conda/envs/hermes_pytorch7_ddmd/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log 
+    echo PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH srun -n1 -N1 ~/.conda/envs/hermes_pytorch7_ddmd/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path ${task_id}_${FUNCNAME[0]}.log 
     if [ "$SHORTENED_PIPELINE" == true ]
     then
-        # PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH srun -n1 -N1 --exclusive \
+
+        # -genv HERMES_STOP_DAEMON=0 \
+
+        # # --oversubscribe
+        # PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH srun -n1 -N1 \
+        #     mpirun -np 1 \
+        #     -genv LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so \
+        #     -genv HERMES_CONF=$HERMES_CONF \
+        #     -genv HERMES_STOP_DAEMON=0 \
+        #     -genv ADAPTER_MODE=$ADAPTER_MODE \
+        #     -genv HERMES_CLIENT=1 \
+        #     ~/.conda/envs/hermes_pytorch7_ddmd/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log &
+        
+        # # --oversubscribe -w ${NODE_ARR[1]}
+        LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so \
+            HERMES_CONF=$HERMES_CONF \
+            ADAPTER_MODE=$ADAPTER_MODE \
+            PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH srun -w ${NODE_ARR[1]} -n1 -N1 --oversubscribe \
+            ~/.conda/envs/hermes_pytorch7_ddmd/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log &
+    else
+        # # --oversubscribe
+        # PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH srun -n1 -N1 --oversubscribe \
         #     mpirun -np 1 \
         #     -genv LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so \
         #     -genv HERMES_CONF=$HERMES_CONF \
         #     -genv ADAPTER_MODE=$ADAPTER_MODE \
         #     -genv HERMES_STOP_DAEMON=0 \
-        #     -genv HERMES_CLIENT=1 \
-        #     ~/.conda/envs/hermes_pytorch_ddmd/bin/python $DDMD_PATH/deepdrivemd/models/aae/train_init.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log &
+        #     ~/.conda/envs/hermes_pytorch7_ddmd/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log
         
-        LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so:$LD_PRELOAD \
+        # --oversubscribe
+        LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so \
             HERMES_CONF=$HERMES_CONF \
-            HERMES_STOP_DAEMON=0 HERMES_CLIENT=1 \
-            PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH srun -n1 -N1 --exclusive \
-            ~/.conda/envs/hermes_pytorch_ddmd/bin/python $DDMD_PATH/deepdrivemd/models/aae/train_init.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log &
-    else
-        PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH srun -n1 -N1 --exclusive \
-            mpirun -np 1 \
-            -genv LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so \
-            -genv HERMES_CONF=$HERMES_CONF \
-            -genv ADAPTER_MODE=$ADAPTER_MODE \
-            -genv HERMES_STOP_DAEMON=0 \
-            -genv HERMES_CLIENT=1 \
-            ~/.conda/envs/hermes_pytorch_ddmd/bin/python $DDMD_PATH/deepdrivemd/models/aae/train_init.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log
-
-        # LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so:$LD_PRELOAD \
-        #     HERMES_CONF=$HERMES_CONF \
-        #     HERMES_STOP_DAEMON=0 HERMES_CLIENT=1 \
-        #     PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH srun -n1 -N1 --exclusive \
-        #     ~/.conda/envs/hermes_pytorch_ddmd/bin/python $DDMD_PATH/deepdrivemd/models/aae/train_init.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log
+            ADAPTER_MODE=$ADAPTER_MODE \
+            PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH srun -w ${NODE_ARR[1]} -n1 -N1 --oversubscribe \
+            ~/.conda/envs/hermes_pytorch7_ddmd/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log
     fi
 
 }
@@ -218,10 +239,11 @@ INFERENCE () {
     yaml_path=$DDMD_PATH/test/bba/${stage_name}_stage_test.yaml
     pretrained_model=$DDMD_PATH/data/bba/epoch-130-20201203-150026.pt
 
-    source activate hermes_pytorch_ddmd
+    source activate hermes_pytorch7_ddmd
     mkdir -p $dest_path
     cd $dest_path
     echo cd $dest_path
+    echo `hostname`
 
     mkdir -p $EXPERIMENT_PATH/agent_runs/$STAGE_IDX_FORMAT/$task_id/
 
@@ -241,15 +263,26 @@ INFERENCE () {
 
     sed -i -e "s/\$MODEL_CHECKPOINT/${model_checkpoint//\//\\/}/"  $EXPERIMENT_PATH/model_selection_runs/$STAGE_IDX_FORMAT_PREV/task0000/${STAGE_IDX_FORMAT_PREV}_task0000.json
 
+    # mpirun -n 4 $HERMES_INSTALL_DIR/bin/stage_in $EXPERIMENT_PATH/machine_learning_runs 0 0 MinimizeIoTime
 
-    OMP_NUM_THREADS=4 PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH \
-        mpirun -np 1 \
-        -genv LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so \
-        -genv HERMES_CONF=$HERMES_CONF \
-        -genv ADAPTER_MODE= \
-        -genv HERMES_STOP_DAEMON=0 \
-        -genv HERMES_CLIENT=1 \
-        ~/.conda/envs/hermes_pytorch_ddmd/bin/python $DDMD_PATH/deepdrivemd/agents/lof/lof_init.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log 
+        # -genv HERMES_CLIENT=1 \
+
+    # PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH \
+    #     mpirun -np 1 \
+    #     -genv LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so \
+    #     -genv HERMES_CONF=$HERMES_CONF \
+    #     -genv ADAPTER_MODE=$ADAPTER_MODE \
+    #     -genv HERMES_STOP_DAEMON=0 \
+    #     -genv HERMES_CLIENT=1 \
+    #     -genv OMP_NUM_THREADS=4 \
+    #     ~/.conda/envs/hermes_pytorch7_ddmd/bin/python $DDMD_PATH/deepdrivemd/agents/lof/lof.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log 
+    
+    LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so \
+        HERMES_CONF=$HERMES_CONF \
+        ADAPTER_MODE=$ADAPTER_MODE \
+        OMP_NUM_THREADS=4 \
+        PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH \
+        ~/.conda/envs/hermes_pytorch7_ddmd/bin/python $DDMD_PATH/deepdrivemd/agents/lof/lof.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log 
 
 }
 #
@@ -269,10 +302,14 @@ STAGE_UPDATE() {
 
 HERMES_TRAINING_STAGEIN (){
     # data stage_in
-    STAGE_PROCS=1
-    ALL_PPROCS=$(( $STAGE_PROCS * $NODE_COUNT ))
-    mpirun -np $ALL_PPROCS -ppn $STAGE_PROCS -host $hostlist \
-        $HERMES_INSTALL_DIR/bin/stage_in $EXPERIMENT_PATH/molecular_dynamics_runs 0 0 MinimizeIoTime
+    # STAGE_PROCS=1
+    # ALL_PPROCS=$(( $STAGE_PROCS * $NODE_COUNT ))
+    # mpirun -np $ALL_PPROCS -ppn $STAGE_PROCS -host $hostlist \
+    #     $HERMES_INSTALL_DIR/bin/stage_in $EXPERIMENT_PATH/molecular_dynamics_runs 0 0 MinimizeIoTime
+
+    # export LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so
+    srun -n1 -N1 mpirun -n 1 -genv HERMES_CONF=$HERMES_CONF $HERMES_INSTALL_DIR/bin/hermes_daemon &
+    srun -n1 -N1 mpirun -n 4 $HERMES_INSTALL_DIR/bin/stage_in $EXPERIMENT_PATH/molecular_dynamics_runs 0 0 MinimizeIoTime
 
     # mpirun -n $STAGE_PROCS $HERMES_INSTALL_DIR/bin/stage_in $HERMES_SCRIPT/ALL.chr1.250000.vcf 0 0 MinimizeIoTime
 }
@@ -284,19 +321,29 @@ STOP_DAEMON() {
         -genv HERMES_CONF=$HERMES_CONF \
         -genv ADAPTER_MODE=$ADAPTER_MODE \
         -genv HERMES_STOP_DAEMON=1 \
-        -genv HERMES_CLIENT=1 \
         echo "finished"
+}
+
+START_HERMES_DAEMON () {
+    echo "Starting hermes_daemon..."
+    mpirun -np $NODE_COUNT -ppn 1 -host $hostlist -genv HERMES_CONF=$HERMES_CONF $HERMES_INSTALL_DIR/bin/hermes_daemon &
+    sleep 3
+    ls -l $DEV1_DIR
+
+    # for node in $NODE_NAMES
+    # do
+    #     # srun -w $node -n1 -N1 mpirun -n 1 -genv HERMES_CONF=$HERMES_CONF $HERMES_INSTALL_DIR/bin/hermes_daemon &
+    #     HERMES_CONF=$HERMES_CONF srun -w $node -n1 -N1 $HERMES_INSTALL_DIR/bin/hermes_daemon &
+    # done
 }
 
 hostname;date;
 echo "Hermes Config : ADAPTER_MODE=$ADAPTER_MODE HERMES_PAGESIZE=$HERMES_PAGESIZE"
 
-set -x
 mpirun -np $NODE_COUNT -ppn 1 -host $hostlist killall hermes_daemon
-mpirun -np $NODE_COUNT -ppn 1 -host $hostlist -genv HERMES_CONF=$HERMES_CONF $HERMES_INSTALL_DIR/bin/hermes_daemon &
-sleep 6
-# ls -l /state/partition1/tang584/hermes_slabs
-set +x
+# HERMES_CONF=$HERMES_CONF srun -n$NODE_COUNT --nodelist $SLURM_JOB_NODELIST $HERMES_INSTALL_DIR/bin/hermes_daemon &
+if [ "$LOCAL" != true ]; then START_HERMES_DAEMON; fi
+
 
 total_start_time=$SECONDS
 
@@ -323,9 +370,8 @@ do
             echo "OpenMM Skipped ---"
         fi
         wait
-
+        
         MD_START=0
-
         duration=$(($SECONDS - $start_time))
         echo "OpenMM done... $(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed ($duration secs)."
 
@@ -367,10 +413,10 @@ do
             echo "Training not waited, SHORTENED_PIPELINE = $SHORTENED_PIPELINE..."
         fi
 
-
         # STAGE 4: Inference
         start_time=$SECONDS
-        srun $( INFERENCE )
+        srun -w ${NODE_ARR[0]} $( INFERENCE )
+        # INFERENCE -w ${NODE_ARR[1]} 
         wait
         duration=$(($SECONDS - $start_time))
         echo "Inference done... $(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed ($duration secs)."
@@ -395,9 +441,7 @@ hostname;date;
 STOP_DAEMON
 # wait
 
-ls $EXPERIMENT_PATH/molecular_dynamics_runs/*/* -hl
-ls $EXPERIMENT_PATH/machine_learning_runs/*/* -hl
-ls $EXPERIMENT_PATH/inference_runs/*/* -hl
+ls $EXPERIMENT_PATH/*/*/* -hl
 
 sacct -j $SLURM_JOB_ID -o jobid,submit,start,end,state
 rm -rf $SCRIPT_DI/core.*

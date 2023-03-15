@@ -50,7 +50,7 @@ source /share/apps/python/miniconda3.7/etc/profile.d/conda.sh
 
 # load environment variables for Hermes
 ulimit -c unlimited
-. $HOME/spack/share/spack/setup-env.sh
+. /qfs/people/tang584/zen2_dec/dec_spack/share/spack/setup-env.sh
 source /qfs/people/tang584/scripts/local-co-scheduling/load_hermes_deps.sh
 source /qfs/people/tang584/scripts/local-co-scheduling/env_var.sh
 
@@ -393,8 +393,6 @@ hostname;date;
 
 STOP_DAEMON
 
-# ls $EXPERIMENT_PATH/molecular_dynamics_runs/*/* -hl
-# ls $EXPERIMENT_PATH/machine_learning_runs/*/* -hl
 ls $EXPERIMENT_PATH/*/*/* -hl
 
 

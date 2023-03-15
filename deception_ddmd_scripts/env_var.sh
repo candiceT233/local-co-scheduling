@@ -27,17 +27,23 @@ HERMES_DEFAULT_CONF=$CONFIG_DIR/hermes_deception_default.yaml
 HERMES_CONF=$CONFIG_DIR/hermes.yaml
 
 # HERMES_INSTALL_DIR=`spack location -i hermes`
-HERMES_INSTALL_DIR=$INSTALL_DIR/hermes
+HERMES_INSTALL_DIR=$INSTALL_DIR/dec_hermes
+# HERMES_INSTALL_DIR=$INSTALL_DIR/dec_degub_hermes
+# HERMES_INSTALL_DIR=$INSTALL_DIR/8dec_hermes
 # Debug
 ASAN_LIB=""
+# HERMES_INSTALL_DIR=$INSTALL_DIR/hermes
 # HERMES_INSTALL_DIR=$INSTALL_DIR/debug_hermes
 # HERMES_INSTALL_DIR=$INSTALL_DIR/8_hermes
 
 
 # System storage dirs -----------
 # DEV0_DIR="" # this is memory
-export DEV1_DIR=/scratch/$USER # BurstBuffer (?)
-export DEV2_DIR=/rcfs/scratch/$USER # Parallel File System (?)
+# export DEV1_DIR=/scratch/$USER/hermes_slabs # Node Local NVME
+export DEV1_DIR=/qfs/projects/oddite/$USER/hermes_slabs # Node Local NVME
+export DEV2_DIR=/qfs/projects/oddite/$USER/hermes_swaps # Lustre PFS
+mkdir -p $DEV1_DIR
+mkdir -p $DEV2_DIR
 # export DEV1_DIR="/tmp" # current dir
 # export DEV2_DIR="/tmp" # current dir
 
@@ -55,10 +61,11 @@ PY_VENV=$SCRIPT_DIR/venv_ddmd
 
 
 # Test specific env var
-export GLOG_minloglevel=2
-export FLAGS_logtostderr=2
+export GLOG_minloglevel=0
+export FLAGS_logtostderr=0
 export HDF5_USE_FILE_LOCKING='FALSE' #'TRUE'
-export HERMES_PAGESIZE=262144
+export HERMES_PAGESIZE=131072
+export I_MPI_PMI_LIBRARY=/usr/lib64/slurm/mpi_pmi2.so #/path/to/slurm/lib/libpmi2.so
 # page size : 4096 8192 32768 65536 131072 262144 524288 1048576 4194304 8388608
 # default : 1048576
 
