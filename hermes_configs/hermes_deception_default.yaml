@@ -11,7 +11,7 @@ num_targets: 2
 # The maximum buffering capacity in MiB of each device. Here we say that all 4
 # devices get 50 MiB of buffering capacity.
 # capacities_mb: [1000, 5000]
-capacities_gb: [32, 4]
+capacities_gb: [8, 4]
 
 # The size of the smallest available buffer in KiB. In general this should be
 # the page size of your system for byte addressable storage, and the block size
@@ -49,9 +49,9 @@ latencies_us: [15, 250000]
 
 # Hermes memory management. The following 4 values should add up to 1.
 # The percentage of Hermes memory to reserve for RAM buffers.
-buffer_pool_arena_percentage: 0.78
+buffer_pool_arena_percentage: 0.80
 # The percentage of Hermes memory to reserve for metadata.
-metadata_arena_percentage: 0.12
+metadata_arena_percentage: 0.10
 # The percentage of Hermes memory to reserve for short term storage.
 transient_arena_percentage: 0.10
 
@@ -65,14 +65,14 @@ system_view_state_update_interval_ms: 1000
 # The mount point of each device. RAM should be the empty string. For block
 # devices, this is the directory where Hermes will create buffering files. For
 # object storage or cloud targets, this will be a url.
-mount_points: ["", "/scratch/tang584/hermes_slabs"] # RAM and BurstBuffer at Deception (?)
+mount_points: ["", "/qfs/projects/oddite/tang584/hermes_slabs"] # RAM and Local SSD at Deception
 # mount_points: ["", "/mnt/ssd/mtang11/hermes_slabs"]
 # For each device, indicate '1' if it is shared among nodes (e.g., burst
 # buffers), or '0' if it is per node (e.g., local NVMe).
 is_shared_device: [0,0]
 # The mount point of a PFS or object store for swap space, in the event that
 # Hermes buffers become full.
-swap_mount: "/rcfs/projects/chess/tang584/hermes_swaps" # the PFS at Deception (?)
+swap_mount: "/qfs/projects/oddite/tang584/hermes_swaps" # the PFS at Deception (?)
 # The number of times the buffer organizer will attempt to place a blob from
 # swap space into the hierarchy before giving up.
 num_buffer_organizer_retries: 3
@@ -156,7 +156,7 @@ path_exclusions: [
     # "/people/tang584/.mpiexec",
     "/qfs/people/tang584/scripts/local-co-scheduling",
     # "/qfs/people/tang584/scripts/deepdrivemd/deepdrivemd/",
-    "/qfs/people/tang584/scripts/deepdrivemd/data/",
+    "/qfs/people/tang584/scripts/deepdrivemd/",
     # "/people/tang584/.local/lib/python3.7/",
 ]
 
