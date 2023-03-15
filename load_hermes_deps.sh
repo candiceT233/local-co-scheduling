@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 . /qfs/people/tang584/zen2_dec/dec_spack/share/spack/setup-env.sh
 spack load --only dependencies hermes 
 

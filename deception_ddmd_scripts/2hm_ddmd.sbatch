@@ -103,6 +103,7 @@ OPENMM () {
 
     # export LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so
     # export HERMES_CONF=$HERMES_CONF
+    # export HERMES_CLIENT_CONF=$HERMES_CLIENT_CONF
 
     # PYTHONPATH=$DDMD_PATH:$MOLECULES_PATH srun -w $node_id -n1 -N1 --exclusive \
     #     mpirun -np 1 \
@@ -114,6 +115,10 @@ OPENMM () {
     #     ~/.conda/envs/hermes_openmm_ddmd/bin/python $DDMD_PATH/deepdrivemd/sim/openmm/run_openmm.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log &
 
     PYTHONPATH=$DDMD_PATH:$MOLECULES_PATH srun -w $node_id -n1 -N1 --exclusive \
+        mpirun -np 1 \
+        -genv LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so \
+        -genv HERMES_CONF=$HERMES_CONF \
+        -genv HERMES_CLIENT_CONF=$HERMES_CLIENT_CONF \
         ~/.conda/envs/hermes_openmm_ddmd/bin/python $DDMD_PATH/deepdrivemd/sim/openmm/run_openmm.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log &
 
     #PYTHONPATH=~/git/molecules/ srun -w $node_id -N1 python /people/leeh736/git/DeepDriveMD-pipeline/deepdrivemd/sim/openmm/run_openmm.py -c $yaml_path &>> $task_id.log &
@@ -320,6 +325,7 @@ do
         STAGE_IDX=$((STAGE_IDX + 1))
         echo $STAGE_IDX_FORMAT
 
+<<<<<<< HEAD:deception_ddmd_scripts/2hm_ddmd.sbatch
         # STAGE 2: Aggregate
         if [ "$SHORTENED_PIPELINE" != true ]
         then
@@ -365,7 +371,6 @@ do
         STAGE_IDX=$((STAGE_IDX + 1))
         echo $STAGE_IDX_FORMAT
 
-
 done
 )
 
@@ -373,9 +378,10 @@ total_duration=$(($SECONDS - $total_start_time))
 echo "All done... $(($total_duration / 60)) minutes and $(($total_duration % 60)) seconds elapsed ($total_duration secs)."
 
 hostname;date;
-# set -x
-# mpirun -np $NODE_COUNT -ppn 1 -host $hostlist -genv HERMES_CONF=${HERMES_CONF} ${HERMES_INSTALL_DIR}/bin/finalize_hermes
-# set +x
+
+set -x
+mpirun -np $NODE_COUNT -ppn 1 -host $hostlist -genv HERMES_CONF=${HERMES_CONF} ${HERMES_INSTALL_DIR}/bin/finalize_hermes
+set +x
 
 STOP_DAEMON
 # wait

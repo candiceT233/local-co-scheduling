@@ -10,7 +10,7 @@
 USER=$(whoami)
 
 # User directories
-MNT_HOME=/qfs/people/$USER
+MNT_HOME=$HOME #/people/$USER
 INSTALL_DIR=$HOME/install
 DL_DIR=$HOME/download
 SCRIPT_DIR=$MNT_HOME/scripts/local-co-scheduling
@@ -38,6 +38,7 @@ ASAN_LIB=""
 # DEV0_DIR="" # this is memory
 export DEV1_DIR=/state/partition1 # this is BurstBuffer
 export DEV2_DIR=/files0/oddite # this is Parallel File System
+
 # export DEV1_DIR="." # current dir
 # export DEV2_DIR="." # current dir
 # export DEV1_DIR="/tmp" # current dir
