@@ -147,10 +147,10 @@ path_exclusions: [
     "/usr/",  "/lib/", 
     "/spack/", "/__pycache__/",
     "/scripts/",
-    /qfs/people/tang584/scripts/local-co-scheduling/1000genome/chr1n-1001-2001.tar.gz
-    /qfs/people/tang584/scripts/local-co-scheduling/1000genome/chr1n-2001-3001.tar.gz
-    /qfs/people/tang584/scripts/local-co-scheduling/1000genome/chr1n-3001-4001.tar.gz
-    /qfs/people/tang584/scripts/local-co-scheduling/1000genome/chr1n-4001-5001.tar.gz
+    # /qfs/people/tang584/scripts/local-co-scheduling/1000genome/chr1n-1001-2001.tar.gz
+    # /qfs/people/tang584/scripts/local-co-scheduling/1000genome/chr1n-2001-3001.tar.gz
+    # /qfs/people/tang584/scripts/local-co-scheduling/1000genome/chr1n-3001-4001.tar.gz
+    # /qfs/people/tang584/scripts/local-co-scheduling/1000genome/chr1n-4001-5001.tar.gz
 ]
 
 # Exclude yaml file only when printing out errors
