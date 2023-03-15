@@ -23,6 +23,7 @@ spack install hermes ^mpich@3.4.3
 ``` 
 ### Build Hermes with Custon Settings
 ```
+spack load --only dependencies hermes 
 cd ${HERMES_REPO}
 mkdir build
 ccmake ..
