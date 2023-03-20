@@ -1,6 +1,7 @@
-<<<<<<< HEAD
-. /qfs/people/tang584/zen2_dec/dec_spack/share/spack/setup-env.sh
-spack load --only dependencies hermes 
+. ~/spack/share/spack/setup-env.sh
+# spack load --only dependencies hermes
+spack load mochi-thallium@0.8.3 catch2@3.0.1 glpk glog yaml-cpp
+module load openmpi/4.1.3
 
 FABRIC_LIB="`which fi_info |sed 's/.\{12\}$//'`/lib"
 MPI_LIB="`which mpicc |sed 's/.\{10\}$//'`/lib"

@@ -11,7 +11,7 @@ num_targets: 2
 # The maximum buffering capacity in MiB of each device. Here we say that all 4
 # devices get 50 MiB of buffering capacity.
 # capacities_mb: [1000, 5000]
-capacities_gb: [8, 4]
+capacities_gb: [20, 4]
 
 # The size of the smallest available buffer in KiB. In general this should be
 # the page size of your system for byte addressable storage, and the block size
@@ -49,16 +49,16 @@ latencies_us: [15, 250000]
 
 # Hermes memory management. The following 4 values should add up to 1.
 # The percentage of Hermes memory to reserve for RAM buffers.
-buffer_pool_arena_percentage: 0.6
+buffer_pool_arena_percentage: 0.78
 # The percentage of Hermes memory to reserve for metadata.
-metadata_arena_percentage: 0.35
+metadata_arena_percentage: 0.12
 # The percentage of Hermes memory to reserve for short term storage.
-transient_arena_percentage: 0.05
+transient_arena_percentage: 0.10
 
 # The maxiumum number of buckets(=files) that can be created.
-max_buckets_per_node: 1024
+max_buckets_per_node: 8192
 # The maxiumum number of virtual buckets that can be created.
-max_vbuckets_per_node: 512
+max_vbuckets_per_node: 4096
 # The interval in milliseconds at which to update the global system view.
 system_view_state_update_interval_ms: 1000
 
@@ -75,7 +75,7 @@ is_shared_device: [0,0]
 swap_mount: "/files0/oddite/tang584/hermes_swaps" # the PFS # /mnt/ssd/mtang11/hermes_swaps
 # The number of times the buffer organizer will attempt to place a blob from
 # swap space into the hierarchy before giving up.
-num_buffer_organizer_retries: 3
+num_buffer_organizer_retries: 10
 
 # A path to a file containing a list of server names, 1 per line. If your
 # servers are named according to a pattern (e.g., server-1, server-2, etc.),
@@ -87,10 +87,10 @@ rpc_server_host_file: ""
 rpc_server_base_name: $HOST_BASE_NAME #"localhost"
 # RPC server name suffix. This is appended to the the base name plus host
 # number.
-rpc_server_suffix: ""
+rpc_server_suffix: ".ibnet"
 # The RPC protocol. This must come from the documentation of the specific RPC
 # library in use.
-rpc_protocol: "ofi+sockets" #"ofi+shm" #"ofi+sockets"
+rpc_protocol: "ofi+sockets" #"na+sm" #"ofi+sockets"
 # RPC domain name for verbs transport. Blank for tcp.
 rpc_domain: ""
 # Desired RPC port number.
@@ -104,7 +104,7 @@ buffer_organizer_port: 50001
 # [1, 3, 4, 5, 7, 8, 9, 10].
 rpc_host_number_range: $HOST_NUMBER_RANGE
 # The number of handler threads for each RPC server.
-rpc_num_threads: 1
+rpc_num_threads: 2
 # The number of threads used in the background organization of internal Hermes buffers.
 buffer_organizer_num_threads: 4
 # The shared memory prefix for the hermes shared memory segment. A user name
@@ -147,37 +147,21 @@ path_exclusions: [
     "/usr/",  "/lib/", 
     "/spack/", "/__pycache__/",
     # ".h5",
-    "/qfs/people/tang584/scripts/venv_ddmd/",
-    # "h5py/",
+    "/.mpiexec","/dev/shm/open_mpi.","/tmp/ompi.",
+    # "/deepdrivemd/",
+    "/.local/",
+    "/.conda/",
+    "/.cache/",
+    # "/scripts/",
     # "/ompi.",
-    "/scripts/",
-    # "/qfs/people/tang584/scripts/local-co-scheduling",
-    # "/qfs/people/tang584/scripts/deepdrivemd/deepdrivemd/",
-    # "/qfs/people/tang584/scripts/deepdrivemd/data/",
-    # ".py"
-    # "/deepdrivemd/",
-    # "/share/apps/python/miniconda3.7/",
-    # "/people/tang584/.mpiexec.hydra.conf",
-    # "/people/tang584/.conda/envs",
-    # "/git/",
-    # "/deepdrivemd/",
-    # "/.conda/", 
-    # "/qfs/projects/oddite/tang584/git/",
-    # "/files0/oddite/deepdrivemd/src",
+    # "/people/tang584/.mpiexec",
+    # "/people/tang584/.",
+    "/qfs/people/tang584/scripts/local-co-scheduling",
+    "/qfs/people/tang584/scripts/deepdrivemd/",
+    "/qfs/projects/oddite/tang584/git/molecules",
     # "/people/tang584/.local/lib/python3.7/",
-    # "/projects/oddite/tang584/git/",
-    # "/qfs/projects/oddite/tang584/ddmd_runs/hermes_test_1600ps/model_selection_runs/stage0000/task0000/stage0000_task0000.json",
-    # ".yaml",
-    # "/1FME-folded.pdb",
-    
 ]
 
-# Exclude yaml file only when printing out errors
-
 path_inclusions: [
-    # "/var/opt/cray/dws/mounts/",
-    # "/qfs/projects/oddite/tang584/ddmd_runs/hermes_test_100ps",
-    # "molecular_dynamics_runs",
-    # "aggregate.h5",
-    # ".dcd",".h5",".pdb",
+  # "/files0/oddite/tang584/ddmd_runs/",
 ]

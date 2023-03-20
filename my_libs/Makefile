@@ -8,23 +8,25 @@ CC=mpicc
 #CC=gcc-10
 
 # -DDATA_PROVNC_LOGGING -DENABLE_PROVNC_LOGGING
-DEBUG= -g -O0
+DEBUG= -g -O2
 INCLUDES=-I$(MPI_DIR)/include
 CFLAGS = $(DEBUG) -fPIC $(INCLUDES) -Wall 
 #LIBS=-L$(MPI_DIR)/lib -L$(MPI_DIR)/lib -lhdf5 -lz
 LIBS=-L$(MPI_DIR)/lib -lmpi -lz
-# Uncomment this line MacOS builds:
+
+## Uncomment this line MacOS builds:
 # DYNLDFLAGS = $(DEBUG) -dynamiclib -current_version 1.0 -fPIC $(LIBS)
-# Uncomment this line Linux builds:
+## Uncomment this line Linux builds:
 DYNLDFLAGS = $(DEBUG) -shared -fPIC $(LIBS)
 LDFLAGS = $(DEBUG) $(LIBS)
 
 # Shared library 
 DYNSRC = c_mpi.c
 DYNOBJ = $(DYNSRC:.c=.o)
-# Uncomment this line Linux builds:
+
+## Uncomment this line Linux builds:
 DYNLIB = c_mpi.so
-# Uncomment this line MacOS builds:
+## Uncomment this line MacOS builds:
 # DYNLIB = c_mpi.dylib
 # DYNDBG = c_mpi.dylib.dSYM
 

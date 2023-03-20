@@ -1,0 +1,4 @@
+[submodule "my_libs/MD-tools"]
+	path = my_libs/MD-tools
+	url = https://github.com/candiceT233/MD-tools
+	#url = https://github.com/braceal/MD-tools.git
