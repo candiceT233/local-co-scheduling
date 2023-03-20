@@ -1,21 +1,21 @@
 #!/bin/bash
-#SBATCH --job-name=ddmd_n4t24i1_100ps_1
+#SBATCH --job-name=$TEST_NAME
 #SBATCH --partition=dlt
 #SBATCH --account=chess
 #SBATCH --time=02:30:00
-#SBATCH -N 4
-#SBATCH -n 24
+#SBATCH -N $NODES
+#SBATCH -n $TASKS
 #SBATCH --output=./R_%x.out                                        
 #SBATCH --error=./R_%x.err
 
 SKIP_OPENMM=false
 SHORTENED_PIPELINE=true
-MD_RUNS=24
-ITER_COUNT=1 # TBD
-SIM_LENGTH=0.1
+MD_RUNS=$TASKS
+ITER_COUNT=$ITER_NUM # TBD
+SIM_LENGTH=$TEST_SIZE
 SIZE=$(echo "$SIM_LENGTH * 1000" | bc)
 SIZE=${SIZE%.*}
-TRIAL=1
+TRIAL=$TRIAL
 # EXPERIMENT_PATH=/rcfs/projects/chess/$USER/ddmd_runs/test_${SIZE}ps_i${ITER_COUNT} #PFS
 EXPERIMENT_PATH=/qfs/projects/oddite/tang584/ddmd_runs/test_${SIZE}ps_i${ITER_COUNT}_${TRIAL} #NFS
 DDMD_PATH=/people/$USER/scripts/deepdrivemd #NFS
@@ -132,13 +132,13 @@ TRAINING () {
     # PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH ~/.conda/envs/hm_ddmd_pytorch_deception/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log 
 
    echo PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH ~/.conda/envs/hm_ddmd_pytorch_deception/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path ${task_id}_${FUNCNAME[0]}.log 
-#    PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH ~/.conda/envs/hm_ddmd_pytorch_deception/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log
-   if [ "$SHORTENED_PIPELINE" == true ]
-   then
-       PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH srun -n1 -N1 --exclusive ~/.conda/envs/hm_ddmd_pytorch_deception/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log &
-   else
-       PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH srun -n1 -N1 --exclusive ~/.conda/envs/hm_ddmd_pytorch_deception/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log
-   fi
+   PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH ~/.conda/envs/hm_ddmd_pytorch_deception/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log
+#    if [ "$SHORTENED_PIPELINE" == true ]
+#    then
+#        PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH srun -n1 -N1 --exclusive ~/.conda/envs/hm_ddmd_pytorch_deception/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log &
+#    else
+#        PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH srun -n1 -N1 --exclusive ~/.conda/envs/hm_ddmd_pytorch_deception/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log
+#    fi
 
 }
 
@@ -220,10 +220,9 @@ do
     else
         echo "OpenMM Skipped ---"
     fi
-    wait
-
+    
     MD_START=0
-
+    wait
     duration=$(($SECONDS - $start_time))
     echo "OpenMM done... $(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed ($duration secs)."
 
@@ -242,16 +241,14 @@ do
     else
         echo "No AGGREGATE, SHORTENED_PIPELINE = $SHORTENED_PIPELINE..."
     fi
-    
-    
+        
     STAGE_IDX_FORMAT="$(STAGE_UPDATE)"
     STAGE_IDX=$((STAGE_IDX + 1))
     echo $STAGE_IDX_FORMAT
 
     # STAGE 3: Training
     start_time=$SECONDS
-    # srun -n1 -N1 --exclusive $( TRAINING ) &
-    TRAINING
+    srun -n1 -N1 --exclusive $( TRAINING ) &
 
     if [ "$SHORTENED_PIPELINE" != true ]
     then

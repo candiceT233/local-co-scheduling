@@ -1,35 +1,36 @@
 #!/bin/bash
-#SBATCH --job-name=ddmd_n4t24i1_100ps_1
-#SBATCH --partition=dlt
-#SBATCH --account=chess
-#SBATCH --time=02:30:00
-#SBATCH -N 4
-#SBATCH -n 24
-#SBATCH --output=./R_%x.out                                        
+#SBATCH --job-name=$TEST_NAME
+#SBATCH --account=oddite
+#SBATCH --time=00:30:00
+#SBATCH --exclude=node[01-26]
+#SBATCH -N $NODES
+#SBATCH -n $TASKS
+#SBATCH --output=./R_%x.out
 #SBATCH --error=./R_%x.err
 
+# --output=R_%x.%j.out --exclude=node[01-25]
 SKIP_OPENMM=false
 SHORTENED_PIPELINE=true
-MD_RUNS=24
-ITER_COUNT=1 # TBD
+MD_RUNS=$TASKS
+ITER_COUNT=$ITER_NUM # TBD
 SIM_LENGTH=0.1
-SIZE=$(echo "$SIM_LENGTH * 1000" | bc)
-SIZE=${SIZE%.*}
-TRIAL=1
-# EXPERIMENT_PATH=/rcfs/projects/chess/$USER/ddmd_runs/test_${SIZE}ps_i${ITER_COUNT} #PFS
-EXPERIMENT_PATH=/qfs/projects/oddite/tang584/ddmd_runs/test_${SIZE}ps_i${ITER_COUNT}_${TRIAL} #NFS
-DDMD_PATH=/people/$USER/scripts/deepdrivemd #NFS
-MOLECULES_PATH=/qfs/projects/oddite/$USER/git/molecules #NFS
-mkdir -p $EXPERIMENT_PATH
 
+NODE_COUNT=$SLURM_JOB_NUM_NODES
 GPU_PER_NODE=6
 MD_START=0
-NODE_COUNT=$SLURM_JOB_NUM_NODES
 MD_SLICE=$(($MD_RUNS/$NODE_COUNT))
 STAGE_IDX=0
 STAGE_IDX_FORMAT=$(seq -f "stage%04g" $STAGE_IDX $STAGE_IDX)
 
 NODE_NAMES=`echo $SLURM_JOB_NODELIST|scontrol show hostnames`
+
+
+# EXPERIMENT_PATH=/qfs/projects/oddite/tang584/ddmd_runs/test_100ps #NFS
+EXPERIMENT_PATH=/files0/oddite/tang584/ddmd_runs/test_100ps_i${ITER_COUNT} #PFS
+DDMD_PATH=/people/tang584/scripts/deepdrivemd #NFS
+MOLECULES_PATH=/qfs/projects/oddite/tang584/git/molecules #NFS
+mkdir -p $EXPERIMENT_PATH
+
 
 if [ "$SKIP_OPENMM" == true ]
 then
@@ -44,13 +45,14 @@ else
     ls $EXPERIMENT_PATH/* -hl
 fi
 
-# OPENMM_PYTHON=~/.conda/envs/hm_ddmd_openmm_deception/bin/python
-# PYTORCH_PYTHON=~/.conda/envs/hm_ddmd_pytorch_deception/bin/python
+# OPENMM_PYTHON=~/.conda/envs/hermes_openmm7_ddmd/bin/python
+# PYTORCH_PYTHON=~/.conda/envs/hermes_pytorch_ddmd/bin/python
 
 module purge
 module load python/miniconda3.7 gcc/9.1.0 git/2.31.1 cmake/3.21.4 openmpi/4.1.3
 source /share/apps/python/miniconda3.7/etc/profile.d/conda.sh
 # conda activate hermes_ddmd #/files0/oddite/conda/ddmd/
+# source /qfs/people/tang584/scripts/local-co-scheduling/venv_ddmd/bin/activate
 
 OPENMM () {
 
@@ -69,7 +71,7 @@ OPENMM () {
     # module purge
     # module load python/miniconda3.7 gcc/9.1.0 git/2.31.1 cmake/3.21.4 openmpi/4.1.3
     # source /share/apps/python/miniconda3.7/etc/profile.d/conda.sh
-    source activate hm_ddmd_openmm_deception
+    source activate hermes_openmm7_ddmd
 
     mkdir -p $dest_path
     cd $dest_path
@@ -78,7 +80,7 @@ OPENMM () {
     sed -e "s/\$SIM_LENGTH/${SIM_LENGTH}/" -e "s/\$OUTPUT_PATH/${dest_path//\//\\/}/" -e "s/\$EXPERIMENT_PATH/${EXPERIMENT_PATH//\//\\/}/" -e "s/\$DDMD_PATH/${DDMD_PATH//\//\\/}/" -e "s/\$GPU_IDX/${gpu_idx}/" -e "s/\$STAGE_IDX/${STAGE_IDX}/" $yaml_path  > $dest_path/$(basename $yaml_path)
     yaml_path=$dest_path/$(basename $yaml_path)
 
-    PYTHONPATH=$DDMD_PATH:$MOLECULES_PATH srun -w $node_id -n1 -N1 --exclusive ~/.conda/envs/hm_ddmd_openmm_deception/bin/python $DDMD_PATH/deepdrivemd/sim/openmm/run_openmm.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log &
+    PYTHONPATH=$DDMD_PATH:$MOLECULES_PATH srun -w $node_id -n1 -N1 --exclusive ~/.conda/envs/hermes_openmm7_ddmd/bin/python $DDMD_PATH/deepdrivemd/sim/openmm/run_openmm.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log &
     #PYTHONPATH=~/git/molecules/ srun -w $node_id -N1 python /people/leeh736/git/DeepDriveMD-pipeline/deepdrivemd/sim/openmm/run_openmm.py -c $yaml_path &>> $task_id.log &
     #srun -n1 env LD_PRELOAD=~/git/tazer_forked/build.h5/src/client/libclient.so PYTHONPATH=~/git/molecules/ python /people/leeh736/git/DeepDriveMD-pipeline/deepdrivemd/sim/openmm/run_openmm.py -c /qfs/projects/oddite/leeh736/ddmd_runs/test/md_direct.yaml &> $task_id.log &
 }
@@ -95,7 +97,7 @@ AGGREGATE () {
     # module purge
     # module load python/miniconda3.7 gcc/9.1.0 git/2.31.1 cmake/3.21.4 openmpi/4.1.3
     # source /share/apps/python/miniconda3.7/etc/profile.d/conda.sh
-    source activate hm_ddmd_openmm_deception
+    source activate hermes_openmm7_ddmd
     mkdir -p $dest_path
     cd $dest_path
     echo cd $dest_path
@@ -103,10 +105,11 @@ AGGREGATE () {
     sed -e "s/\$SIM_LENGTH/${SIM_LENGTH}/" -e "s/\$OUTPUT_PATH/${dest_path//\//\\/}/" -e "s/\$EXPERIMENT_PATH/${EXPERIMENT_PATH//\//\\/}/" -e "s/\$STAGE_IDX/${STAGE_IDX}/" $yaml_path  > $dest_path/$(basename $yaml_path)
     yaml_path=$dest_path/$(basename $yaml_path)
 
-    { time PYTHONPATH=$DDMD_PATH/ ~/.conda/envs/hm_ddmd_openmm_deception/bin/python $DDMD_PATH/deepdrivemd/aggregation/basic/aggregate.py -c $yaml_path ; } &> ${task_id}_${FUNCNAME[0]}.log
+    { time PYTHONPATH=$DDMD_PATH/ ~/.conda/envs/hermes_openmm7_ddmd/bin/python $DDMD_PATH/deepdrivemd/aggregation/basic/aggregate.py -c $yaml_path ; } &> ${task_id}_${FUNCNAME[0]}.log
 
     #env LD_PRELOAD=/qfs/people/leeh736/git/tazer_forked/build.h5.pread64.bluesky/src/client/libclient.so PYTHONPATH=$DDMD_PATH/ python /files0/oddite/deepdrivemd/src/deepdrivemd/aggregation/basic/aggregate.py -c /qfs/projects/oddite/leeh736/ddmd_runs/1k/agg_test.yaml &> agg_test_output.log
 }
+
 
 TRAINING () {
 
@@ -120,7 +123,7 @@ TRAINING () {
     mkdir -p $EXPERIMENT_PATH/model_selection_runs/$STAGE_IDX_FORMAT/$task_id/
     cp -p $DDMD_PATH/test/bba/stage0000_$task_id.json $EXPERIMENT_PATH/model_selection_runs/$STAGE_IDX_FORMAT/$task_id/${STAGE_IDX_FORMAT}_$task_id.json
 
-    source activate hm_ddmd_pytorch_deception
+    source activate hermes_pytorch_ddmd
 
     mkdir -p $dest_path
     cd $dest_path
@@ -129,16 +132,16 @@ TRAINING () {
     sed -e "s/\$SIM_LENGTH/${SIM_LENGTH}/" -e "s/\$OUTPUT_PATH/${dest_path//\//\\/}/" -e "s/\$EXPERIMENT_PATH/${EXPERIMENT_PATH//\//\\/}/" -e "s/\$STAGE_IDX/${STAGE_IDX}/" $yaml_path  > $dest_path/$(basename $yaml_path)
     yaml_path=$dest_path/$(basename $yaml_path)
     
-    # PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH ~/.conda/envs/hm_ddmd_pytorch_deception/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log 
+    # PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH ~/.conda/envs/hermes_pytorch_ddmd/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log 
 
-   echo PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH ~/.conda/envs/hm_ddmd_pytorch_deception/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path ${task_id}_${FUNCNAME[0]}.log 
-#    PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH ~/.conda/envs/hm_ddmd_pytorch_deception/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log
-   if [ "$SHORTENED_PIPELINE" == true ]
-   then
-       PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH srun -n1 -N1 --exclusive ~/.conda/envs/hm_ddmd_pytorch_deception/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log &
-   else
-       PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH srun -n1 -N1 --exclusive ~/.conda/envs/hm_ddmd_pytorch_deception/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log
-   fi
+   echo PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH ~/.conda/envs/hermes_pytorch_ddmd/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path ${task_id}_${FUNCNAME[0]}.log 
+   PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH ~/.conda/envs/hermes_pytorch_ddmd/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log
+#    if [ "$SHORTENED_PIPELINE" == true ]
+#    then
+#        PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH srun -n1 -N1 --exclusive ~/.conda/envs/hermes_pytorch_ddmd/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log &
+#    else
+#        PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH srun -n1 -N1 --exclusive ~/.conda/envs/hermes_pytorch_ddmd/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log
+#    fi
 
 }
 
@@ -154,7 +157,7 @@ INFERENCE () {
     # module purge
     # module load python/miniconda3.7 gcc/9.1.0 git/2.31.1 cmake/3.21.4 openmpi/4.1.3
     # source /share/apps/python/miniconda3.7/etc/profile.d/conda.sh
-    source activate hm_ddmd_pytorch_deception
+    source activate hermes_pytorch_ddmd
 
     mkdir -p $dest_path
     cd $dest_path
@@ -178,10 +181,10 @@ INFERENCE () {
     sed -i -e "s/\$MODEL_CHECKPOINT/${model_checkpoint//\//\\/}/"  $EXPERIMENT_PATH/model_selection_runs/$STAGE_IDX_FORMAT_PREV/task0000/${STAGE_IDX_FORMAT_PREV}_task0000.json
 
 
-    OMP_NUM_THREADS=4 PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH ~/.conda/envs/hm_ddmd_pytorch_deception/bin/python $DDMD_PATH/deepdrivemd/agents/lof/lof.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log 
+    OMP_NUM_THREADS=4 PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH ~/.conda/envs/hermes_pytorch_ddmd/bin/python $DDMD_PATH/deepdrivemd/agents/lof/lof.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log 
 
 }
-#
+
 
 # Python environment on Bluesky
 # module load python/miniconda3.7 gcc/9.1.0
@@ -243,6 +246,7 @@ do
         echo "No AGGREGATE, SHORTENED_PIPELINE = $SHORTENED_PIPELINE..."
     fi
     
+    wait
     
     STAGE_IDX_FORMAT="$(STAGE_UPDATE)"
     STAGE_IDX=$((STAGE_IDX + 1))
@@ -250,9 +254,11 @@ do
 
     # STAGE 3: Training
     start_time=$SECONDS
-    # srun -n1 -N1 --exclusive $( TRAINING ) &
-    TRAINING
+    srun -n1 -N1 --exclusive $( TRAINING ) &
 
+    STAGE_IDX_FORMAT="$(STAGE_UPDATE)"
+    STAGE_IDX=$((STAGE_IDX + 1))
+    echo $STAGE_IDX_FORMAT $STAGE_IDX
     if [ "$SHORTENED_PIPELINE" != true ]
     then
         wait
@@ -261,10 +267,6 @@ do
     else
         echo "Training not waited, SHORTENED_PIPELINE = $SHORTENED_PIPELINE..."
     fi
-
-    STAGE_IDX_FORMAT="$(STAGE_UPDATE)"
-    STAGE_IDX=$((STAGE_IDX + 1))
-    echo $STAGE_IDX_FORMAT $STAGE_IDX
 
     # STAGE 4: Inference
     start_time=$SECONDS
@@ -276,7 +278,6 @@ do
     STAGE_IDX_FORMAT="$(STAGE_UPDATE)"
     STAGE_IDX=$((STAGE_IDX + 1))
     echo $STAGE_IDX_FORMAT
-
 
 done
 
