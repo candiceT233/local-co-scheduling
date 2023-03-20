@@ -22,6 +22,10 @@ HERMES_REPO=$STAGE_DIR/hermes
 MOCHI_REPO=$STAGE_DIR/mochi
 SPACK_DIR=$MNT_HOME/spack
 
+# HERMES_INSTALL_DIR=$INSTALL_DIR/hermes
+# HERMES_INSTALL_DIR=`spack location -i hermes`
+HERMES_INSTALL_DIR=$INSTALL_DIR/hermes_new
+
 # Hermes config files -----------
 HERMES_DEFAULT_CONF=$CONFIG_DIR/hermes_slurm_default.yaml
 HERMES_CONF=$CONFIG_DIR/hermes.yaml
@@ -60,8 +64,9 @@ mkdir -p $LOG_DIR
 
 PY_VENV=$SCRIPT_DIR/venv_ddmd
 
-export GLOG_minloglevel=2
-export FLAGS_logtostderr=2
+
+export GLOG_minloglevel=0
+export FLAGS_logtostderr=0
 export HDF5_USE_FILE_LOCKING='FALSE' #'TRUE'
 # export MPICH_GNI_NDREG_ENTRIES=1024
 # export I_MPI_HYDRA_TOPOLIB=ipl
