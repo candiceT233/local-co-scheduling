@@ -12,7 +12,7 @@ SKIP_OPENMM=false
 SHORTENED_PIPELINE=true
 MD_RUNS=12
 ITER_COUNT=1 # TBD
-SIM_LENGTH=0.1
+SIM_LENGTH=0.01
 
 NODE_COUNT=$SLURM_JOB_NUM_NODES
 GPU_PER_NODE=6
@@ -325,7 +325,6 @@ do
         STAGE_IDX=$((STAGE_IDX + 1))
         echo $STAGE_IDX_FORMAT
 
-<<<<<<< HEAD:deception_ddmd_scripts/2hm_ddmd.sbatch
         # STAGE 2: Aggregate
         if [ "$SHORTENED_PIPELINE" != true ]
         then

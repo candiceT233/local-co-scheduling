@@ -22,6 +22,10 @@ HERMES_REPO=$STAGE_DIR/hermes
 MOCHI_REPO=$STAGE_DIR/mochi
 SPACK_DIR=$MNT_HOME/spack
 
+# HERMES_INSTALL_DIR=$INSTALL_DIR/hermes
+# HERMES_INSTALL_DIR=`spack location -i hermes`
+HERMES_INSTALL_DIR=$INSTALL_DIR/hermes_new
+
 # Hermes config files -----------
 HERMES_DEFAULT_CONF=$CONFIG_DIR/hermes_slurm_default.yaml
 HERMES_CONF=$CONFIG_DIR/hermes.yaml
@@ -35,6 +39,7 @@ ASAN_LIB=""
 
 
 # System storage dirs -----------
+
 # DEV0_DIR="" # this is memory
 export DEV1_DIR=/state/partition1 # this is BurstBuffer
 export DEV2_DIR=/files0/oddite # this is Parallel File System
