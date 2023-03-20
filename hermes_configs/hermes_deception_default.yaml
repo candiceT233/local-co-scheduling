@@ -11,7 +11,7 @@ num_targets: 2
 # The maximum buffering capacity in MiB of each device. Here we say that all 4
 # devices get 50 MiB of buffering capacity.
 # capacities_mb: [1000, 5000]
-capacities_gb: [8, 4]
+capacities_gb: [32, 4]
 
 # The size of the smallest available buffer in KiB. In general this should be
 # the page size of your system for byte addressable storage, and the block size
@@ -36,14 +36,11 @@ slab_unit_sizes: [
 desired_slab_percentages: [
   [0.25, 0.25, 0.25, 0.25],
   [0.25, 0.25, 0.25, 0.25],
-  # [0.6, 0.1, 0.1, 0.2],
-  # [0.5, 0.5],
-  # [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
 ]
 
 # The maximum theoretical bandwidth (as advertised by the manufacturer) in
 # MiB/sec. of each device.
-bandwidths_mbps: [6000, 300]
+bandwidths_mbps: [6000, 1000]
 # The latency in microseconds of each device (as advertised by the manufacturer).
 latencies_us: [15, 250000]
 
@@ -51,52 +48,56 @@ latencies_us: [15, 250000]
 # The percentage of Hermes memory to reserve for RAM buffers.
 buffer_pool_arena_percentage: 0.80
 # The percentage of Hermes memory to reserve for metadata.
-metadata_arena_percentage: 0.10
+metadata_arena_percentage: 0.11
 # The percentage of Hermes memory to reserve for short term storage.
-transient_arena_percentage: 0.10
+transient_arena_percentage: 0.09
 
 # The maxiumum number of buckets(=files) that can be created.
-max_buckets_per_node: 8192
+max_buckets_per_node: 1024
 # The maxiumum number of virtual buckets that can be created.
-max_vbuckets_per_node: 4096
+max_vbuckets_per_node: 512
 # The interval in milliseconds at which to update the global system view.
 system_view_state_update_interval_ms: 1000
 
 # The mount point of each device. RAM should be the empty string. For block
 # devices, this is the directory where Hermes will create buffering files. For
 # object storage or cloud targets, this will be a url.
-mount_points: ["", "/qfs/projects/oddite/tang584/hermes_slabs"] # RAM and Local SSD at Deception
-# mount_points: ["", "/mnt/ssd/mtang11/hermes_slabs"]
+# "/scratch/tang584/hermes_slabs", 
+# mount_points: ["", "/rcfs/projects/chess/tang584/hermes_slabs"] # PFS
+mount_points: ["", "/scratch/tang584/hermes_slabs"] # NVMe
+
 # For each device, indicate '1' if it is shared among nodes (e.g., burst
 # buffers), or '0' if it is per node (e.g., local NVMe).
 is_shared_device: [0,0]
 # The mount point of a PFS or object store for swap space, in the event that
 # Hermes buffers become full.
-swap_mount: "/qfs/projects/oddite/tang584/hermes_swaps" # the PFS at Deception (?)
+# swap_mount: "/qfs/projects/oddite/tang584/hermes_swaps" # the NFS at Deception
+swap_mount: "/rcfs/projects/chess/tang584/hermes_swaps" # the PFS at Deception
 # The number of times the buffer organizer will attempt to place a blob from
 # swap space into the hierarchy before giving up.
-num_buffer_organizer_retries: 3
+num_buffer_organizer_retries: 10
 
 # A path to a file containing a list of server names, 1 per line. If your
 # servers are named according to a pattern (e.g., server-1, server-2, etc.),
 # prefer the `rpc_server_base_name` and `rpc_host_number_range` options. If this
 # option is not empty, it will override anything in `rpc_server_base_name`.
-rpc_server_host_file: ""
+# rpc_server_host_file: "/qfs/people/tang584/scripts/local-co-scheduling/host_ip"
+rpc_server_host_file: "/qfs/people/tang584/scripts/local-co-scheduling/host_ip"
 
 # Base hostname for the RPC servers.
 rpc_server_base_name: $HOST_BASE_NAME #"localhost"
 # RPC server name suffix. This is appended to the the base name plus host
 # number.
-rpc_server_suffix: ""
+rpc_server_suffix: ".ibnet" #.ibnet
 # The RPC protocol. This must come from the documentation of the specific RPC
 # library in use.
 rpc_protocol: "ofi+sockets" #"ofi+shm" #"ofi+sockets"
 # RPC domain name for verbs transport. Blank for tcp.
 rpc_domain: ""
 # Desired RPC port number.
-rpc_port: 50000
+rpc_port: 8080
 # Desired RPC port number for buffer organizer.
-buffer_organizer_port: 50001
+buffer_organizer_port: 8081
 # A list of host numbers. Host names are constructed as "rpc_server_base_name +
 # host_number + rpc_server_suffix." Each entry in the rpc_host_number_range_list
 # can be either a single number, or a range, which is 2 numbers separated by a
@@ -131,12 +132,6 @@ bo_capacity_thresholds: [
   [0.0, 1.0],
   [0.0, 1.0],
 ]
-# bo_capacity_thresholds: [
-#   [0.0, 1.0],
-#   [0.0, 1.0],
-#   [0.0, 1.0],
-#   [0.0, 1.0]
-# ]
 
 #Paths which are ignored when buffering data
 path_exclusions: [
@@ -146,17 +141,17 @@ path_exclusions: [
     "pipe", "socket:", "anon_inode:",
     "/usr/",  "/lib/", 
     "/spack/", "/__pycache__/",
-    # ".h5",
-    "/.mpiexec",
-    # "/deepdrivemd/",
+    "/dec_spack/", "/zen2_dec/",
+    "/.mpiexec", "/ompi.","/System/",
+    # "/dev/shm/open_mpi.",
     "/.local/",
     "/.conda/",
+    "/.cache/",
     # "/scripts/",
-    # "/ompi.",
-    # "/people/tang584/.mpiexec",
     "/qfs/people/tang584/scripts/local-co-scheduling",
-    # "/qfs/people/tang584/scripts/deepdrivemd/deepdrivemd/",
+    "/tmp/dep-", "/molecules.egg-info/",
     "/qfs/people/tang584/scripts/deepdrivemd/",
+    # "/people/tang584/.",
     # "/people/tang584/.local/lib/python3.7/",
 ]
 
