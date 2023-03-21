@@ -325,7 +325,6 @@ do
         STAGE_IDX=$((STAGE_IDX + 1))
         echo $STAGE_IDX_FORMAT
 
-<<<<<<< HEAD:deception_ddmd_scripts/2hm_ddmd.sbatch
         # STAGE 2: Aggregate
         if [ "$SHORTENED_PIPELINE" != true ]
         then
