@@ -22,16 +22,19 @@ HERMES_REPO=$STAGE_DIR/hermes
 MOCHI_REPO=$STAGE_DIR/mochi
 SPACK_DIR=$MNT_HOME/spack
 
-# HERMES_INSTALL_DIR=$INSTALL_DIR/hermes
-# HERMES_INSTALL_DIR=`spack location -i hermes`
-HERMES_INSTALL_DIR=$INSTALL_DIR/hermes_new
-
 # Hermes config files -----------
-HERMES_DEFAULT_CONF=$CONFIG_DIR/hermes_slurm_default.yaml
-HERMES_CONF=$CONFIG_DIR/hermes.yaml
+DEFAULT_CONF_NAME=hermes_server_default.yaml
+HERMES_DEFAULT_CONF=$CONFIG_DIR/$DEFAULT_CONF_NAME
 
-# HERMES_INSTALL_DIR=`spack location -i hermes`
-HERMES_INSTALL_DIR=$INSTALL_DIR/hermes
+CONF_NAME=hermes_server.yaml
+HERMES_CONF=$CONFIG_DIR/$CONF_NAME
+
+CLIENT_CONF_NAME=hermes_client.yaml
+HERMES_CLIENT_CONF=$CONFIG_DIR/$CLIENT_CONF_NAME
+
+# HERMES_INSTALL_DIR=$INSTALL_DIR/hermes
+HERMES_INSTALL_DIR=$INSTALL_DIR/1dec_hermes
+#8dec_hermes dec_hermes
 # Debug
 ASAN_LIB=""
 # HERMES_INSTALL_DIR=$INSTALL_DIR/debug_hermes
@@ -40,8 +43,8 @@ ASAN_LIB=""
 
 # System storage dirs -----------
 # DEV0_DIR="" # this is memory
-export DEV1_DIR=/state/partition1 # this is BurstBuffer
-export DEV2_DIR=/files0/oddite # this is Parallel File System
+export DEV1_DIR=/scratch/$USER # this is BurstBuffer
+export DEV2_DIR=/rcfs/projects/chess/$USER # this is Parallel File System
 
 # export DEV1_DIR="." # current dir
 # export DEV2_DIR="." # current dir

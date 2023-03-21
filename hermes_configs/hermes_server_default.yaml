@@ -48,17 +48,19 @@ devices:
     borg_capacity_thresh: [0.0, 1.0]
 
   ssd:
-    mount_point: "/state/partition1/tang584/hermes_slabs" #BB
-    capacity: 5000MB
+    # mount_point: "/state/partition1/tang584/hermes_slabs" # bluesky B
+    mount_point: "/scratch/tang584/hermes_slabs" # deception NVMe
+    capacity: 512GB
     block_size: 4KB
     slab_sizes: [ 4KB, 16KB, 64KB, 1MB ]
-    bandwidth: 500MBps
+    bandwidth: 1000MBps
     latency: 1200us
     is_shared_device: true
     borg_capacity_thresh: [ 0.0, 1.0 ]
 
   pfs:
-    mount_point: "/files0/oddite/tang584/hermes_swaps"
+    # mount_point: "/files0/oddite/tang584/hermes_swaps" # bluesky PFS
+    mount_point: "/rcfs/projects/chess/tang584/hermes_swaps" #deception PFS (BeeGFS)
     capacity: inf
     block_size: 64KB # The stripe size of PFS
     slab_sizes: [ 4KB, 16KB, 64KB, 1MB ]
@@ -73,7 +75,8 @@ rpc:
   # servers are named according to a pattern (e.g., server-1, server-2, etc.),
   # prefer the `rpc_server_base_name` and `rpc_host_number_range` options. If this
   # option is not empty, it will override anything in `rpc_server_base_name`.
-  host_file: ""
+  # host_file: ""
+  host_file: "/qfs/people/tang584/scripts/local-co-scheduling/host_ip"
 
   # Host names are constructed as "base_name +
   # host_number + rpc_server_suffix." Each entry in the rpc_host_number_range_list
@@ -82,7 +85,7 @@ rpc:
   # {01, 03, 04, 05, 07, 08, 09, 10}.
   base_name: $HOST_BASE_NAME
   host_number_range: $HOST_NUMBER_RANGE
-  suffix: ""
+  suffix: ".ibnet"
 
   # The RPC protocol. This must come from the documentation of the specific RPC
   # library in use.
