@@ -290,7 +290,7 @@ done
 wait
 
 total_duration=$(( $(date +%s%N)/1000000 - $total_start_time))
-echo "All done... $duration milliseconds elapsed."
+echo "All done... $total_duration milliseconds elapsed."
 
 ls $EXPERIMENT_PATH/*/*/* -hl
 
