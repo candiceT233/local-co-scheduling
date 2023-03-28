@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=ddmd_n2t12i5_100ps_NFS
+#SBATCH --job-name=ddmd_n2t12i5_100ps_PFS
 #SBATCH --partition=dlt
 #SBATCH --account=chess
 #SBATCH --time=00:30:00
@@ -17,10 +17,10 @@ ITER_COUNT=5 # TBD
 SIM_LENGTH=0.1
 SIZE=$(echo "$SIM_LENGTH * 1000" | bc)
 SIZE=${SIZE%.*}
-TRIAL="NFS"
+TRIAL="PFS"
 
-EXPERIMENT_PATH=/qfs/projects/oddite/$USER/ddmd_runs/test_${SIZE}ps_i${ITER_COUNT}_${TRIAL} #NFS
-# EXPERIMENT_PATH=/rcfs/projects/chess/$USER/ddmd_runs/test_${SIZE}ps_i${ITER_COUNT}_${TRIAL} #PFS
+# EXPERIMENT_PATH=/qfs/projects/oddite/$USER/ddmd_runs/test_${SIZE}ps_i${ITER_COUNT}_${TRIAL} #NFS
+EXPERIMENT_PATH=/rcfs/projects/chess/$USER/ddmd_runs/test_${SIZE}ps_i${ITER_COUNT}_${TRIAL} #PFS
 # DDMD_PATH=/people/$USER/scripts/deepdrivemd #NFS
 # MOLECULES_PATH=/qfs/projects/oddite/$USER/git/molecules #NFS
 DDMD_PATH=/people/leeh736/git/deepdrivemd #NFS
@@ -289,7 +289,7 @@ done
 
 wait
 
-total_duration=$(( $(date +%s%N)/1000000 - $start_time))
+total_duration=$(( $(date +%s%N)/1000000 - $total_start_time))
 echo "All done... $duration milliseconds elapsed."
 
 ls $EXPERIMENT_PATH/*/*/* -hl
