@@ -1,25 +1,32 @@
 #!/bin/bash
-#SBATCH --job-name=ddmd_n4t24i1_100ps_1
+#SBATCH --job-name=ddmd_n2t12i5_100ps_NFS
 #SBATCH --partition=dlt
 #SBATCH --account=chess
-#SBATCH --time=02:30:00
-#SBATCH -N 4
-#SBATCH -n 24
+#SBATCH --time=00:30:00
+#SBATCH -N 2
+#SBATCH -n 12
 #SBATCH --output=./R_%x.out                                        
 #SBATCH --error=./R_%x.err
 
+# --gres=gpu:6
+
 SKIP_OPENMM=false
 SHORTENED_PIPELINE=true
-MD_RUNS=24
-ITER_COUNT=1 # TBD
+MD_RUNS=12
+ITER_COUNT=5 # TBD
 SIM_LENGTH=0.1
 SIZE=$(echo "$SIM_LENGTH * 1000" | bc)
 SIZE=${SIZE%.*}
-TRIAL=1
-# EXPERIMENT_PATH=/rcfs/projects/chess/$USER/ddmd_runs/test_${SIZE}ps_i${ITER_COUNT} #PFS
-EXPERIMENT_PATH=/qfs/projects/oddite/tang584/ddmd_runs/test_${SIZE}ps_i${ITER_COUNT}_${TRIAL} #NFS
-DDMD_PATH=/people/$USER/scripts/deepdrivemd #NFS
-MOLECULES_PATH=/qfs/projects/oddite/$USER/git/molecules #NFS
+TRIAL="NFS"
+
+EXPERIMENT_PATH=/qfs/projects/oddite/$USER/ddmd_runs/test_${SIZE}ps_i${ITER_COUNT}_${TRIAL} #NFS
+# EXPERIMENT_PATH=/rcfs/projects/chess/$USER/ddmd_runs/test_${SIZE}ps_i${ITER_COUNT}_${TRIAL} #PFS
+# DDMD_PATH=/people/$USER/scripts/deepdrivemd #NFS
+# MOLECULES_PATH=/qfs/projects/oddite/$USER/git/molecules #NFS
+DDMD_PATH=/people/leeh736/git/deepdrivemd #NFS
+MOLECULES_PATH=/qfs/projects/oddite/leeh736/git/molecules #NFS
+
+
 mkdir -p $EXPERIMENT_PATH
 
 GPU_PER_NODE=6
@@ -47,9 +54,9 @@ fi
 # OPENMM_PYTHON=~/.conda/envs/hm_ddmd_openmm_deception/bin/python
 # PYTORCH_PYTHON=~/.conda/envs/hm_ddmd_pytorch_deception/bin/python
 
-module purge
-module load python/miniconda3.7 gcc/9.1.0 git/2.31.1 cmake/3.21.4 openmpi/4.1.3
-source /share/apps/python/miniconda3.7/etc/profile.d/conda.sh
+# module purge
+# module load python/miniconda3.7 gcc/9.1.0 git/2.31.1 cmake/3.21.4 openmpi/4.1.3
+# source /share/apps/python/miniconda3.7/etc/profile.d/conda.sh
 # conda activate hermes_ddmd #/files0/oddite/conda/ddmd/
 
 OPENMM () {
@@ -66,9 +73,7 @@ OPENMM () {
         yaml_path=$DDMD_PATH/test/bba/${stage_name}_stage_test.yaml
     fi
 
-    # module purge
-    # module load python/miniconda3.7 gcc/9.1.0 git/2.31.1 cmake/3.21.4 openmpi/4.1.3
-    # source /share/apps/python/miniconda3.7/etc/profile.d/conda.sh
+    module load python/miniconda3.7 gcc/9.1.0
     source activate hm_ddmd_openmm_deception
 
     mkdir -p $dest_path
@@ -92,9 +97,8 @@ AGGREGATE () {
     dest_path=$EXPERIMENT_PATH/molecular_dynamics_runs/$STAGE_IDX_FORMAT/$task_id
     yaml_path=$DDMD_PATH/test/bba/${stage_name}_stage_test.yaml
 
-    # module purge
-    # module load python/miniconda3.7 gcc/9.1.0 git/2.31.1 cmake/3.21.4 openmpi/4.1.3
-    # source /share/apps/python/miniconda3.7/etc/profile.d/conda.sh
+
+    module load python/miniconda3.7 gcc/9.1.0
     source activate hm_ddmd_openmm_deception
     mkdir -p $dest_path
     cd $dest_path
@@ -120,6 +124,8 @@ TRAINING () {
     mkdir -p $EXPERIMENT_PATH/model_selection_runs/$STAGE_IDX_FORMAT/$task_id/
     cp -p $DDMD_PATH/test/bba/stage0000_$task_id.json $EXPERIMENT_PATH/model_selection_runs/$STAGE_IDX_FORMAT/$task_id/${STAGE_IDX_FORMAT}_$task_id.json
 
+
+    module load python/miniconda3.7 gcc/9.1.0
     source activate hm_ddmd_pytorch_deception
 
     mkdir -p $dest_path
@@ -154,6 +160,7 @@ INFERENCE () {
     # module purge
     # module load python/miniconda3.7 gcc/9.1.0 git/2.31.1 cmake/3.21.4 openmpi/4.1.3
     # source /share/apps/python/miniconda3.7/etc/profile.d/conda.sh
+    module load python/miniconda3.7 gcc/9.1.0
     source activate hm_ddmd_pytorch_deception
 
     mkdir -p $dest_path
@@ -196,13 +203,13 @@ STAGE_UPDATE() {
     echo $tmp
 }
 
-total_start_time=$SECONDS
+total_start_time=$(($(date +%s%N)/1000000))
 
 for iter in $(seq $ITER_COUNT)
 do
 
     # STAGE 1: OpenMM
-    start_time=$SECONDS
+    start_time=$(($(date +%s%N)/1000000))
 
     if [ "$SKIP_OPENMM" != true ]
     then
@@ -224,8 +231,8 @@ do
 
     MD_START=0
 
-    duration=$(($SECONDS - $start_time))
-    echo "OpenMM done... $(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed ($duration secs)."
+    duration=$(( $(date +%s%N)/1000000 - $start_time))
+    echo "OpenMM done... $duration milliseconds elapsed."
 
     STAGE_IDX_FORMAT="$(STAGE_UPDATE)"
     STAGE_IDX=$((STAGE_IDX + 1))
@@ -234,10 +241,10 @@ do
     # STAGE 2: Aggregate       
     if [ "$SHORTENED_PIPELINE" != true ]
     then
-        start_time=$SECONDS
+        start_time=$(($(date +%s%N)/1000000))
         srun -N1 $( AGGREGATE )
         wait 
-        duration=$(($SECONDS - $start_time))
+        duration=$(($(($(date +%s%N)/1000000)) - $start_time))
         echo "Aggregate done... $(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed ($duration secs)."
     else
         echo "No AGGREGATE, SHORTENED_PIPELINE = $SHORTENED_PIPELINE..."
@@ -249,15 +256,15 @@ do
     echo $STAGE_IDX_FORMAT
 
     # STAGE 3: Training
-    start_time=$SECONDS
+    start_time=$(($(date +%s%N)/1000000))
     # srun -n1 -N1 --exclusive $( TRAINING ) &
     TRAINING
 
     if [ "$SHORTENED_PIPELINE" != true ]
     then
         wait
-        duration=$(($SECONDS - $start_time))
-        echo "Training done... $(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed ($duration secs)."
+        duration=$(( $(date +%s%N)/1000000 - $start_time))
+        echo "Training done... $duration milliseconds elapsed."
     else
         echo "Training not waited, SHORTENED_PIPELINE = $SHORTENED_PIPELINE..."
     fi
@@ -267,11 +274,11 @@ do
     echo $STAGE_IDX_FORMAT $STAGE_IDX
 
     # STAGE 4: Inference
-    start_time=$SECONDS
+    start_time=$(($(date +%s%N)/1000000))
     srun $( INFERENCE )
     wait
-    duration=$(($SECONDS - $start_time))
-    echo "Inference done... $(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed ($duration secs)."
+    duration=$(( $(date +%s%N)/1000000 - $start_time))
+    echo "Inference done... $duration milliseconds elapsed."
 
     STAGE_IDX_FORMAT="$(STAGE_UPDATE)"
     STAGE_IDX=$((STAGE_IDX + 1))
@@ -282,12 +289,9 @@ done
 
 wait
 
-total_duration=$(($SECONDS - $total_start_time))
-echo "All done... $(($total_duration / 60)) minutes and $(($total_duration % 60)) seconds elapsed ($total_duration secs)."
+total_duration=$(( $(date +%s%N)/1000000 - $start_time))
+echo "All done... $duration milliseconds elapsed."
 
-# ls $EXPERIMENT_PATH/molecular_dynamics_runs/*/* -hl
-# ls $EXPERIMENT_PATH/machine_learning_runs/*/* -hl
-# ls $EXPERIMENT_PATH/inference_runs/*/* -hl
 ls $EXPERIMENT_PATH/*/*/* -hl
 
 hostname;date;
