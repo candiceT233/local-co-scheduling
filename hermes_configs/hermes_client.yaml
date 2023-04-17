@@ -9,7 +9,7 @@ path_inclusions: [
   # "/files0/oddite/tang584/ddmd_runs/hermes_test_100ps/molecular_dynamics_runs/stage0000/task0000/molecular_dynamics_stage_test.yaml",
   # "/people/tang584/scripts/deepdrivemd/deepdrivemd/config.py",
   # "/people/tang584/scripts/deepdrivemd/deepdrivemd/sim/openmm/run_openmm.py",
-  "/files0/oddite/tang584/molecular_dynamics_runs",
+  "/qfs/projects/oddite/tang584/ddmd_runs/",
   # "/files0/oddite/tang584/aggregate.h5",
   # "/files0/oddite/tang584",
 ]

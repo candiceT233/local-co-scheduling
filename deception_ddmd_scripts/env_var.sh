@@ -22,16 +22,13 @@ HERMES_REPO=$STAGE_DIR/hermes
 MOCHI_REPO=$STAGE_DIR/mochi
 SPACK_DIR=$MNT_HOME/spack
 
-# HERMES_INSTALL_DIR=$INSTALL_DIR/hermes
-# HERMES_INSTALL_DIR=`spack location -i hermes`
-HERMES_INSTALL_DIR=$INSTALL_DIR/hermes_new
-
 # Hermes config files -----------
-HERMES_DEFAULT_CONF=$CONFIG_DIR/hermes_slurm_default.yaml
-HERMES_CONF=$CONFIG_DIR/hermes.yaml
+HERMES_DEFAULT_CONF=$CONFIG_DIR/hermes_deception_default.yaml
+HERMES_CONF=$CONFIG_DIR/hermes_deception.yaml
 
-# HERMES_INSTALL_DIR=`spack location -i hermes`
-HERMES_INSTALL_DIR=$INSTALL_DIR/hermes
+# HERMES_INSTALL_DIR=$INSTALL_DIR/hermes
+HERMES_INSTALL_DIR=$INSTALL_DIR/8dec_hermes
+#8dec_hermes dec_hermes
 # Debug
 ASAN_LIB=""
 # HERMES_INSTALL_DIR=$INSTALL_DIR/debug_hermes
@@ -39,10 +36,9 @@ ASAN_LIB=""
 
 
 # System storage dirs -----------
-
 # DEV0_DIR="" # this is memory
-export DEV1_DIR=/state/partition1 # this is BurstBuffer
-export DEV2_DIR=/files0/oddite # this is Parallel File System
+export DEV1_DIR=/scratch/$USER # this is BurstBuffer
+export DEV2_DIR=/rcfs/projects/chess/$USER # this is Parallel File System
 
 # export DEV1_DIR="." # current dir
 # export DEV2_DIR="." # current dir
@@ -65,6 +61,7 @@ mkdir -p $LOG_DIR
 
 PY_VENV=$SCRIPT_DIR/venv_ddmd
 
+
 export GLOG_minloglevel=2
 export FLAGS_logtostderr=2
 export HDF5_USE_FILE_LOCKING='FALSE' #'TRUE'
@@ -72,6 +69,8 @@ export HDF5_USE_FILE_LOCKING='FALSE' #'TRUE'
 # export I_MPI_HYDRA_TOPOLIB=ipl
 # export I_MPI_PMI_LIBRARY=libpmi2.so
 
-export HERMES_PAGESIZE=262144
+# export OFI_INTERFACE=ib0
+
+export HERMES_PAGE_SIZE=131072
 # page size : 4096 8192 32768 65536 131072 262144 524288 1048576 4194304 8388608
 # default : 1048576

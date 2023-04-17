@@ -11,7 +11,7 @@ num_targets: 2
 # The maximum buffering capacity in MiB of each device. Here we say that all 4
 # devices get 50 MiB of buffering capacity.
 # capacities_mb: [1000, 5000]
-capacities_gb: [32, 4]
+capacities_gb: [20, 4]
 
 # The size of the smallest available buffer in KiB. In general this should be
 # the page size of your system for byte addressable storage, and the block size
@@ -81,8 +81,8 @@ num_buffer_organizer_retries: 10
 # servers are named according to a pattern (e.g., server-1, server-2, etc.),
 # prefer the `rpc_server_base_name` and `rpc_host_number_range` options. If this
 # option is not empty, it will override anything in `rpc_server_base_name`.
+rpc_server_host_file: ""
 # rpc_server_host_file: "/qfs/people/tang584/scripts/local-co-scheduling/host_ip"
-rpc_server_host_file: "/qfs/people/tang584/scripts/local-co-scheduling/host_ip"
 
 # Base hostname for the RPC servers.
 rpc_server_base_name: $HOST_BASE_NAME #"localhost"
@@ -91,9 +91,9 @@ rpc_server_base_name: $HOST_BASE_NAME #"localhost"
 rpc_server_suffix: ".ibnet" #.ibnet
 # The RPC protocol. This must come from the documentation of the specific RPC
 # library in use.
-rpc_protocol: "ofi+sockets" #"ofi+shm" #"ofi+sockets"
+rpc_protocol: "ucx+rc_verbs" #"ofi+sockets" #"ucx+rc #"ucx+ud" #"ucx+dc"
 # RPC domain name for verbs transport. Blank for tcp.
-rpc_domain: ""
+rpc_domain: "mlx5_2:1" #mlx5_0:1 #mlx5_0:1
 # Desired RPC port number.
 rpc_port: 8080
 # Desired RPC port number for buffer organizer.
@@ -142,19 +142,28 @@ path_exclusions: [
     "/usr/",  "/lib/", 
     "/spack/", "/__pycache__/",
     "/dec_spack/", "/zen2_dec/",
-    "/.mpiexec", "/ompi.","/System/",
+    "/System/",
+    "/.mpiexec", "/tmp/dep-", "/scratch/tang584/dep-","/ompi.", "/open_mpi","/open_mpi.",
+    "/src/mpi4py", #"/tmp/",
     # "/dev/shm/open_mpi.",
     "/.local/",
-    "/.conda/",
+    "/.conda/", "/home/conda/",
     "/.cache/",
     # "/scripts/",
     "/qfs/people/tang584/scripts/local-co-scheduling",
-    "/tmp/dep-", "/molecules.egg-info/",
+    # "/dev/shm",
+    # "/molecules.egg-info/",
     "/qfs/people/tang584/scripts/deepdrivemd/",
-    # "/people/tang584/.",
-    # "/people/tang584/.local/lib/python3.7/",
+    "/model_selection_runs/", 
+    # "/molecules/",
+    "/git/",
+    "/scratch/tang584/",
+    # "/qfs/projects/oddite/tang584/ddmd_runs/hermes_test_100ps_i1_0/inference_runs",
 ]
 
 path_inclusions: [
-  # "/files0/oddite/tang584/ddmd_runs/",
-]
+  # ".h5",".dcd",
+  #".pdb",
+#   $INTERCEPT_PATHS
+# ]
+

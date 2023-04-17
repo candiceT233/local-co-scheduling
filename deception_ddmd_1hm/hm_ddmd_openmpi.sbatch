@@ -3,7 +3,7 @@
 #SBATCH --partition=a100
 #SBATCH --account=chess
 #SBATCH --time=00:30:00
-#SBATCH -N 2
+#SBATCH -N 1
 #SBATCH -n 12
 #SBATCH --output=./R_%x.out                                        
 #SBATCH --error=./R_%x.err
@@ -14,7 +14,7 @@
 SKIP_OPENMM=false
 SHORTENED_PIPELINE=true
 S1_HM=true
-MD_RUNS=12
+MD_RUNS=1
 ITER_COUNT=1 # TBD
 SIM_LENGTH=0.1
 SIZE=$(echo "$SIM_LENGTH * 1000" | bc)
@@ -40,6 +40,7 @@ STAGE_IDX_FORMAT=$(seq -f "stage%04g" $STAGE_IDX $STAGE_IDX)
 
 NODE_NAMES=`echo $SLURM_JOB_NODELIST|scontrol show hostnames`
 
+
 if [ "$SKIP_OPENMM" == true ]
 then
     # keep molecular_dynamics_runs
@@ -55,7 +56,7 @@ fi
 # OPENMM_PYTHON=~/.conda/envs/hm_ddmd_openmm_deception/bin/python
 # PYTORCH_PYTHON=~/.conda/envs/hm_ddmd_pytorch_deception/bin/python
 
-# module purge
+# # module purge
 # module load python/miniconda3.7 gcc/9.1.0 git/2.31.1 cmake/3.21.4 openmpi/4.1.3
 # source /share/apps/python/miniconda3.7/etc/profile.d/conda.sh
 
@@ -71,7 +72,8 @@ rm -rf $DEV1_DIR/hermes_slabs/*
 rm -rf $DEV2_DIR/hermes_swaps/*
 
 NODE_NAMES=`echo $SLURM_JOB_NODELIST|scontrol show hostnames`
-
+# ib_hostlist=$(echo -e "$NODE_NAMES" | xargs | sed -e 's/ /,/g')
+# echo "ib_hostlist=$ib_hostlist"
 list=()
 while read -ra tmp; do
     list+=("${tmp[@]}")
@@ -95,7 +97,7 @@ echo "ib_hostlist: $ib_hostlist"
 # echo "TRAINING on = ${NODE_ARR[0]}"
 # echo "INFERENCE on = ${NODE_ARR[1]}"
 
-export TMPDIR=/scratch/$USER
+# export TMPDIR=/scratch/$USER
 # export OMP_NUM_THREADS=16
 
 OPENMM () {
@@ -125,22 +127,19 @@ OPENMM () {
     yaml_path=$dest_path/$(basename $yaml_path)
 
     # # HERMES_STOP_DAEMON=0 HERMES_CLIENT=1 \ #must have --oversubscribe --exclusive
-    ## --mpi=pmi2    HERMES_WRITE_ONLY=1 \
+    ## --mpi=pmi2 
+    set -x
 
-
-    if [ "$S1_HM" == true ]
-    then
-        LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so:$LD_PRELOAD \
-            HERMES_CONF=$HERMES_CONF \
-            ADAPTER_MODE=$ADAPTER_MODE \
-            HERMES_STOP_DAEMON=0 HERMES_CLIENT=1 \
-            PYTHONPATH=$DDMD_PATH:$MOLECULES_PATH \
-            srun -w $node_id -n1 -N1 --oversubscribe --mpi=pmi2 \
-            ~/.conda/envs/hm_ddmd_openmm_deception/bin/python $DDMD_PATH/deepdrivemd/sim/openmm/run_openmm.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log &
-    else
+    LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so:$LD_PRELOAD \
+        HERMES_CONF=$HERMES_CONF \
+        HERMES_CLIENT_CONF=$HERMES_CLIENT_CONF \
+        PYTHONPATH=$DDMD_PATH:$MOLECULES_PATH \
         srun -w $node_id -n1 -N1 --oversubscribe \
-            ~/.conda/envs/hm_ddmd_openmm_deception/bin/python $DDMD_PATH/deepdrivemd/sim/openmm/run_openmm.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log &
-    fi
+        ~/.conda/envs/hm_ddmd_openmm_deception/bin/python $DDMD_PATH/deepdrivemd/sim/openmm/run_openmm.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log &
+
+    # srun -w $node_id -N1 --oversubscribe \
+    #     ~/.conda/envs/hm_ddmd_openmm_deception/bin/python $DDMD_PATH/deepdrivemd/sim/openmm/run_openmm.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log &
+
 
     #PYTHONPATH=~/git/molecules/ srun -w $node_id -N1 python /people/leeh736/git/DeepDriveMD-pipeline/deepdrivemd/sim/openmm/run_openmm.py -c $yaml_path &>> $task_id.log &
     #srun -n1 env LD_PRELOAD=~/git/tazer_forked/build.h5/src/client/libclient.so PYTHONPATH=~/git/molecules/ python /people/leeh736/git/DeepDriveMD-pipeline/deepdrivemd/sim/openmm/run_openmm.py -c /qfs/projects/oddite/leeh736/ddmd_runs/test/md_direct.yaml &> $task_id.log &
@@ -198,30 +197,30 @@ TRAINING () {
     # PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH ~/.conda/envs/hm_ddmd_pytorch_deception/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log 
     echo PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH ~/.conda/envs/hm_ddmd_pytorch_deception/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path ${task_id}_${FUNCNAME[0]}.log 
 
-    # HERMES_TRAINING_STAGEIN OMP_NUM_THREADS=16 \ --mpi=pmi2 
-        LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so:$LD_PRELOAD \
-            HERMES_CONF=$HERMES_CONF \
-            ADAPTER_MODE=$ADAPTER_MODE \
-            HERMES_STOP_DAEMON=0 HERMES_CLIENT=1 \
-            PYTHONPATH=$DDMD_PATH:$MOLECULES_PATH \
-            ~/.conda/envs/hm_ddmd_pytorch_deception/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log
+    # HERMES_TRAINING_STAGEIN
+
+    LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so:$LD_PRELOAD \
+        HERMES_CONF=$HERMES_CONF \
+        HERMES_CLIENT_CONF=$HERMES_CLIENT_CONF \
+        PYTHONPATH=$DDMD_PATH:$MOLECULES_PATH \
+        ~/.conda/envs/hm_ddmd_pytorch_deception/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log
 
     # if [ "$SHORTENED_PIPELINE" == true ]
     # then
     #     LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so:$LD_PRELOAD \
     #         HERMES_CONF=$HERMES_CONF \
-    #         ADAPTER_MODE=$ADAPTER_MODE \
-    #         HERMES_STOP_DAEMON=0 HERMES_CLIENT=1 \
+    #         HERMES_CLIENT_CONF=$HERMES_CLIENT_CONF \
+    #         OMP_NUM_THREADS=16 \
     #         PYTHONPATH=$DDMD_PATH:$MOLECULES_PATH \
-    #         srun -n1 -N1 --oversubscribe --mpi=pmi2 \
+    #         srun -N1 --oversubscribe --mpi=pmi2 -n1 \
     #         ~/.conda/envs/hm_ddmd_pytorch_deception/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log &
     # else
     #     LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so:$LD_PRELOAD \
     #         HERMES_CONF=$HERMES_CONF \
-    #         ADAPTER_MODE=$ADAPTER_MODE \
-    #         HERMES_STOP_DAEMON=0 HERMES_CLIENT=1 \
+    #         HERMES_CLIENT_CONF=$HERMES_CLIENT_CONF \
+    #         OMP_NUM_THREADS=16 \
     #         PYTHONPATH=$DDMD_PATH:$MOLECULES_PATH \
-    #         srun -n1 -N1 --oversubscribe --mpi=pmi2 \
+    #         srun -N1 --oversubscribe --mpi=pmi2 -n1 \
     #         ~/.conda/envs/hm_ddmd_pytorch_deception/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log
     # fi
 
@@ -260,8 +259,7 @@ INFERENCE () {
 
     LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so:$LD_PRELOAD \
         HERMES_CONF=$HERMES_CONF \
-        ADAPTER_MODE=$ADAPTER_MODE \
-        HERMES_STOP_DAEMON=0 HERMES_CLIENT=1 \
+        HERMES_CLIENT_CONF=$HERMES_CLIENT_CONF \
         OMP_NUM_THREADS=4 \
         PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH \
         ~/.conda/envs/hm_ddmd_pytorch_deception/bin/python $DDMD_PATH/deepdrivemd/agents/lof/lof.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log 
@@ -292,16 +290,18 @@ HERMES_TRAINING_STAGEIN (){
 }
 
 STOP_DAEMON() {
+    echo "Stopping Hermes daemon"
 
+    set -x
     mpirun --host $ib_hostlist --pernode \
         -x LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so \
         -x HERMES_CONF=$HERMES_CONF \
-        -x ADAPTER_MODE=$ADAPTER_MODE \
+        -x HERMES_CLIENT_CONF=$HERMES_CLIENT_CONF \
         -x HERMES_STOP_DAEMON=1 \
-        -x HERMES_CLIENT=1 \
         echo "finished"
+    
+    set +x
 }
-
 
 HERMES_LOCAL_CONFIG () {
     sed "s/\$HOST_BASE_NAME/\"localhost\"/" $HERMES_DEFAULT_CONF  > $HERMES_CONF
@@ -309,13 +309,12 @@ HERMES_LOCAL_CONFIG () {
     sed -i "s/\$INTERCEPT_PATHS/ /" $HERMES_CONF
 }
 
-
 HERMES_DIS_CONFIG () {
 
     echo "SLURM_JOB_NODELIST = $(echo $SLURM_JOB_NODELIST|scontrol show hostnames)"
     NODE_NAMES=$(echo $SLURM_JOB_NODELIST|scontrol show hostnames)
 
-    prefix="a100-0" #dc dc00 a100-0
+    prefix="a100-" #dc dc00 a100-0
     sed "s/\$HOST_BASE_NAME/\"${prefix}\"/" $HERMES_DEFAULT_CONF  > $HERMES_CONF
     mapfile -t node_range < <(echo "$NODE_NAMES" | sed "s/${prefix}//g")
     rpc_host_number_range="[$(printf "%s," "${node_range[@]}" | sed 's/,$//')]"
@@ -324,14 +323,7 @@ HERMES_DIS_CONFIG () {
     echo "node_range=${node_range[@]}"
     echo "rpc_host_number_range=$rpc_host_number_range"
 
-    # echo "$NODE_NAMES" | sed 's/$/.ibnet/' > $SCRIPT_DIR/host_ip
-    # cat $SCRIPT_DIR/host_ip
-
-    # INTERCEPT_PATHS=$(sed "s/\$TEST_OUT_PATH/${TEST_OUT_PATH}/g" i${ITER_COUNT}_sim_files.txt)
-    # echo "$INTERCEPT_PATHS" >> $HERMES_CONF
-
-    echo "]" >> $HERMES_CONF
-
+    # echo "]" >> $HERMES_CONF
 }
 
 START_HERMES_DAEMON () {
@@ -342,20 +334,16 @@ START_HERMES_DAEMON () {
 
     echo "Starting hermes_daemon..."
     set -x
-    # export LD_PRELOAD=/lib64/libucs.so:$LD_PRELOAD
-    # export LD_LIBRARY_PATH=/lib64/ucx:$LD_LIBRARY_PATH
-    # -x LD_PRELOAD=/usr/lib64/libucs.so$LD_PRELOAD \
-    # -x UCX_NET_DEVICES=mlx5_0:1 \
+    # -map-by node:PE=1 , --npernode 1 , --map-by ppr:1:node , --pernode
+
+    # srun -w $hostlist -N$NODE_COUNT -n$NODE_COUNT margo-info ucx+rc_verbs://mlx5_2:1/
+    
     mpirun --host $ib_hostlist --npernode 1 \
-        -x UCX_NET_DEVICES="mlx5_2:1" \
-        -mca btl self -mca pml ucx \
         -x HERMES_CONF=$HERMES_CONF $HERMES_INSTALL_DIR/bin/hermes_daemon & #> ${FUNCNAME[0]}.log &
 
-    # srun -n$NODE_COUNT -w $ib_hostlist --mpi=pmi2 \
-    #     -x HERMES_CONF=$HERMES_CONF $HERMES_INSTALL_DIR/bin/hermes_daemon & #> ${FUNCNAME[0]}.log &
 
     sleep 5
-    # echo ls -l $DEV1_DIR/hermes_slabs
+    echo ls -l $DEV1_DIR/hermes_slabs
     ls -l $DEV1_DIR/hermes_slabs
     set +x
 }
@@ -367,10 +355,7 @@ START_HERMES_DAEMON () {
 #     HERMES_DIS_CONFIG
 # fi
 
-
-
-srun -n$NODE_COUNT -w $ib_hostlist killall hermes_daemon
-sleep 1
+mpirun --host $ib_hostlist --pernode killall hermes_daemon
 
 hostname;date;
 echo "Hermes Config : ADAPTER_MODE=$ADAPTER_MODE HERMES_PAGE_SIZE=$HERMES_PAGE_SIZE"
@@ -378,9 +363,9 @@ echo "Hermes Config : ADAPTER_MODE=$ADAPTER_MODE HERMES_PAGE_SIZE=$HERMES_PAGE_S
 HERMES_DIS_CONFIG
 START_HERMES_DAEMON
 
-
 total_start_time=$(($(date +%s%N)/1000000))
 
+sleep 10
 
 (
 total_start_time=$(($(date +%s%N)/1000000))
@@ -419,67 +404,67 @@ do
     STAGE_IDX=$((STAGE_IDX + 1))
     echo $STAGE_IDX_FORMAT
 
-    # STAGE 2: Aggregate       
-    if [ "$SHORTENED_PIPELINE" != true ]
-    then
-        start_time=$(($(date +%s%N)/1000000))
-        srun -N1 $( AGGREGATE )
-        wait 
-        duration=$(( $(date +%s%N)/1000000 - $start_time))
-        echo "Aggregate done... $duration milliseconds elapsed."
-    else
-        echo "No AGGREGATE, SHORTENED_PIPELINE = $SHORTENED_PIPELINE..."
-    fi
+    # # STAGE 2: Aggregate       
+    # if [ "$SHORTENED_PIPELINE" != true ]
+    # then
+    #     start_time=$(($(date +%s%N)/1000000))
+    #     srun -N1 $( AGGREGATE )
+    #     wait 
+    #     duration=$(( $(date +%s%N)/1000000 - $start_time))
+    #     echo "Aggregate done... $duration milliseconds elapsed."
+    # else
+    #     echo "No AGGREGATE, SHORTENED_PIPELINE = $SHORTENED_PIPELINE..."
+    # fi
     
     
-    STAGE_IDX_FORMAT="$(STAGE_UPDATE)"
-    STAGE_IDX=$((STAGE_IDX + 1))
-    echo $STAGE_IDX_FORMAT
-
-    # STAGE 3: Training
-    start_time=$(($(date +%s%N)/1000000))
-    # TRAINING
-    if [ "$SHORTENED_PIPELINE" != true ]
-    then
-        srun -n1 -N1 --oversubscribe --mpi=pmi2 $( TRAINING )
-        wait
-        duration=$(( $(date +%s%N)/1000000 - $start_time))
-        echo "Training done... $duration milliseconds elapsed."
-    else
-        srun  -n1 -N1 --oversubscribe --mpi=pmi2 $( TRAINING ) &
-        echo "Training not waited, SHORTENED_PIPELINE = $SHORTENED_PIPELINE..."
-    fi
+    # STAGE_IDX_FORMAT="$(STAGE_UPDATE)"
+    # STAGE_IDX=$((STAGE_IDX + 1))
+    # echo $STAGE_IDX_FORMAT
 
     # # STAGE 3: Training
     # start_time=$(($(date +%s%N)/1000000))
-    # TRAINING
-
-    # STAGE_IDX_FORMAT="$(STAGE_UPDATE)"
-    # STAGE_IDX=$((STAGE_IDX + 1))
-    # echo $STAGE_IDX_FORMAT $STAGE_IDX
+    # # TRAINING
     # if [ "$SHORTENED_PIPELINE" != true ]
     # then
+    #     srun -n1 -N1 --oversubscribe --mpi=pmi2 $( TRAINING )
     #     wait
     #     duration=$(( $(date +%s%N)/1000000 - $start_time))
     #     echo "Training done... $duration milliseconds elapsed."
     # else
+    #     srun  -n1 -N1 --oversubscribe --mpi=pmi2 $( TRAINING ) &
     #     echo "Training not waited, SHORTENED_PIPELINE = $SHORTENED_PIPELINE..."
     # fi
 
-    STAGE_IDX_FORMAT="$(STAGE_UPDATE)"
-    STAGE_IDX=$((STAGE_IDX + 1))
-    echo $STAGE_IDX_FORMAT $STAGE_IDX
+    # # # STAGE 3: Training
+    # # start_time=$(($(date +%s%N)/1000000))
+    # # TRAINING
 
-    # STAGE 4: Inference
-    start_time=$(($(date +%s%N)/1000000))
-    srun -n1 -N1 --oversubscribe --mpi=pmi2 $( INFERENCE )
-    wait
-    duration=$(( $(date +%s%N)/1000000 - $start_time))
-    echo "Inference done... $duration milliseconds elapsed."
+    # # STAGE_IDX_FORMAT="$(STAGE_UPDATE)"
+    # # STAGE_IDX=$((STAGE_IDX + 1))
+    # # echo $STAGE_IDX_FORMAT $STAGE_IDX
+    # # if [ "$SHORTENED_PIPELINE" != true ]
+    # # then
+    # #     wait
+    # #     duration=$(( $(date +%s%N)/1000000 - $start_time))
+    # #     echo "Training done... $duration milliseconds elapsed."
+    # # else
+    # #     echo "Training not waited, SHORTENED_PIPELINE = $SHORTENED_PIPELINE..."
+    # # fi
 
-    STAGE_IDX_FORMAT="$(STAGE_UPDATE)"
-    STAGE_IDX=$((STAGE_IDX + 1))
-    echo $STAGE_IDX_FORMAT
+    # STAGE_IDX_FORMAT="$(STAGE_UPDATE)"
+    # STAGE_IDX=$((STAGE_IDX + 1))
+    # echo $STAGE_IDX_FORMAT $STAGE_IDX
+
+    # # STAGE 4: Inference
+    # start_time=$(($(date +%s%N)/1000000))
+    # srun -n1 -N1 --oversubscribe --mpi=pmi2 $( INFERENCE )
+    # wait
+    # duration=$(( $(date +%s%N)/1000000 - $start_time))
+    # echo "Inference done... $duration milliseconds elapsed."
+
+    # STAGE_IDX_FORMAT="$(STAGE_UPDATE)"
+    # STAGE_IDX=$((STAGE_IDX + 1))
+    # echo $STAGE_IDX_FORMAT
 
 
 done
@@ -487,26 +472,22 @@ done
 )
 
 
-# wait
-
 total_duration=$(( $(date +%s%N)/1000000 - $total_start_time))
 echo "All done... $total_duration milliseconds elapsed."
 
+
 hostname;date;
-set -x
+# set -x
 # mpirun -np $NODE_COUNT -ppn 1 -host $ib_hostlist -x HERMES_CONF=${HERMES_CONF} ${HERMES_INSTALL_DIR}/bin/finalize_hermes
 # set +x
 
-
 STOP_DAEMON
-mpirun --host $ib_hostlist --pernode killall hermes_daemon
+# wait
 
 ls $EXPERIMENT_PATH/*/*/* -hl
-
 
 sacct -j $SLURM_JOB_ID -o jobid,submit,start,end,state
 rm -rf $SCRIPT_DIR/core.*
 
-# --output=R_%x.%j.out --exclude=a100[06]
+# --output=R_%x.%j.out --exclude=dlt[06]
 # --nodelist=a100-[03-06] --exclude=a100-[01-02]
-# --exclude=dlt[02,10-12] --gres=gpu:8 --mem=0
