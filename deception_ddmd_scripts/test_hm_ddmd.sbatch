@@ -111,17 +111,17 @@ OPENMM () {
     # # HERMES_STOP_DAEMON=0 HERMES_CLIENT=1 \ #must have --oversubscribe --exclusive
     ## --mpi=pmi2 
 
-    LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so:$LD_PRELOAD \
-        HERMES_CONF=$HERMES_CONF \
-        HERMES_STOP_DAEMON=0 HERMES_CLIENT=1 \
-        ADAPTER_MODE=$ADAPTER_MODE \
-        HERMES_WRITE_ONLY=1 \
-        PYTHONPATH=$DDMD_PATH:$MOLECULES_PATH \
-        srun -w $node_id -n1 -N1 --oversubscribe \
-        ~/.conda/envs/hm_ddmd_openmm_deception/bin/python $DDMD_PATH/deepdrivemd/sim/openmm/run_openmm.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log &
-
-    # srun -w $node_id -N1 --oversubscribe \
+    # LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so:$LD_PRELOAD \
+    #     HERMES_CONF=$HERMES_CONF \
+    #     HERMES_STOP_DAEMON=0 HERMES_CLIENT=1 \
+    #     ADAPTER_MODE=$ADAPTER_MODE \
+    #     HERMES_WRITE_ONLY=1 \
+    #     PYTHONPATH=$DDMD_PATH:$MOLECULES_PATH \
+    #     srun -w $node_id -n1 -N1 --oversubscribe \
     #     ~/.conda/envs/hm_ddmd_openmm_deception/bin/python $DDMD_PATH/deepdrivemd/sim/openmm/run_openmm.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log &
+
+    srun -w $node_id -n1 -N1 --oversubscribe \
+        ~/.conda/envs/hm_ddmd_openmm_deception/bin/python $DDMD_PATH/deepdrivemd/sim/openmm/run_openmm.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log &
 
 
     #PYTHONPATH=~/git/molecules/ srun -w $node_id -N1 python /people/leeh736/git/DeepDriveMD-pipeline/deepdrivemd/sim/openmm/run_openmm.py -c $yaml_path &>> $task_id.log &
@@ -180,7 +180,7 @@ TRAINING () {
     # PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH ~/.conda/envs/hm_ddmd_pytorch_deception/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log 
     echo PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH ~/.conda/envs/hm_ddmd_pytorch_deception/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path ${task_id}_${FUNCNAME[0]}.log 
 
-    # HERMES_TRAINING_STAGEIN
+    # HERMES_TRAINING_STAGEIN --mpi=pmi2  
 
     if [ "$SHORTENED_PIPELINE" == true ]
     then
@@ -190,7 +190,7 @@ TRAINING () {
             HERMES_STOP_DAEMON=0 HERMES_CLIENT=1 \
             OMP_NUM_THREADS=16 \
             PYTHONPATH=$DDMD_PATH:$MOLECULES_PATH \
-            srun -N1 --oversubscribe --mpi=pmi2 -n1 \
+            srun -n1 -N1 --oversubscribe --mpi=pmi2 \
             ~/.conda/envs/hm_ddmd_pytorch_deception/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log &
     else
         LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so:$LD_PRELOAD \
@@ -199,7 +199,7 @@ TRAINING () {
             HERMES_STOP_DAEMON=0 HERMES_CLIENT=1 \
             OMP_NUM_THREADS=16 \
             PYTHONPATH=$DDMD_PATH:$MOLECULES_PATH \
-            srun -N1 --oversubscribe --mpi=pmi2 -n1 \
+            srun -n1 -N1 --oversubscribe --mpi=pmi2 \
             ~/.conda/envs/hm_ddmd_pytorch_deception/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log
     fi
 
@@ -287,18 +287,24 @@ HERMES_LOCAL_CONFIG () {
 
 HERMES_DIS_CONFIG () {
 
-    prefix="dlt0"
-    sed "s/\$HOST_BASE_NAME/\"${prefix}\"/" $HERMES_DEFAULT_CONF  > $HERMES_CONF
+    NODE_NAMES=$(echo $SLURM_JOB_NODELIST|scontrol show hostnames)
 
-    node_range=()
-    while read -r node; do
-        node_range+=("${node//${prefix}/}")
-    done <<< "$NODE_NAMES"
+    # prefix="dlt0"
+    sed "s/\$HOST_BASE_NAME/\"dlt0\"/" $HERMES_DEFAULT_CONF  > $HERMES_CONF
+    mapfile -t node_range < <(echo "$NODE_NAMES" | sed 's/dlt0//g')
     rpc_host_number_range="[$(printf "%s," "${node_range[@]}" | sed 's/,$//')]"
-    
+    sed -i "s/\$HOST_NUMBER_RANGE/${rpc_host_number_range}/" $HERMES_CONF
+
     echo "node_range=${node_range[@]}"
     echo "rpc_host_number_range=$rpc_host_number_range"
-    sed -i "s/\$HOST_NUMBER_RANGE/${rpc_host_number_range}/" $HERMES_CONF
+
+    # echo "$NODE_NAMES" | sed 's/$/.ibnet/' > $SCRIPT_DIR/host_ip
+    # cat $SCRIPT_DIR/host_ip
+
+    # INTERCEPT_PATHS=$(sed "s/\$TEST_OUT_PATH/${TEST_OUT_PATH}/g" i${ITER_COUNT}_sim_files.txt)
+    # echo "$INTERCEPT_PATHS" >> $HERMES_CONF
+
+    echo "]" >> $HERMES_CONF
 
     # echo "$NODE_NAMES" | sed 's/$/.ibnet\n/' > $SCRIPT_DIR/host_ip
 }
@@ -403,9 +409,9 @@ do
         STAGE_IDX=$((STAGE_IDX + 1))
         echo $STAGE_IDX_FORMAT $STAGE_IDX
 
-        # STAGE 4: Inference -w ${NODE_ARR[1]} 
+        # STAGE 4: Inference -w ${NODE_ARR[1]} --mpi=pmi2 
         start_time=$SECONDS
-        srun -N1 --oversubscribe --mpi=pmi2 -n1 $( INFERENCE )
+        srun -N1 -n1 --oversubscribe $( INFERENCE )
         wait
         
         duration=$(($SECONDS - $start_time))

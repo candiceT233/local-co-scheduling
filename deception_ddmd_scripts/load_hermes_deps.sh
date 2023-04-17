@@ -23,6 +23,23 @@ MPI_INCLUDE="$MPI_PATH/include"
 [[ ":$C_INCLUDE_PATH:" != *":${MPI_INCLUDE}:"* ]] && C_INCLUDE_PATH="${MPI_INCLUDE}:${C_INCLUDE_PATH}"
 
 
+# MARGO_PATH="`which margo-info |sed 's/.\{15\}$//'`"
+# MARGO_BIN="$MARGO_PATH/bin"
+# MARGO_LIB="$MARGO_PATH/lib"
+# MARGO_INCLUDE="$MARGO_PATH/include"
+# [[ ":$PATH:" != *":${MARGO_BIN}:"* ]] && PATH="${MARGO_BIN}:${PATH}"
+# [[ ":$LD_LIBRARY_PATH:" != *":${MARGO_LIB}:"* ]] && LD_LIBRARY_PATH="${MARGO_LIB}:${LD_LIBRARY_PATH}"
+# [[ ":$C_INCLUDE_PATH:" != *":${MARGO_INCLUDE}:"* ]] && C_INCLUDE_PATH="${MARGO_INCLUDE}:${C_INCLUDE_PATH}"
+
+# FABRIC_PATH="`which fi_info |sed 's/.\{12\}$//'`"
+# FABRIC_BIN="$FABRIC_PATH/bin"
+# FABRIC_LIB="$FABRIC_PATH/lib"
+# FABRIC_INCLUDE="$FABRIC_PATH/include"
+# [[ ":$PATH:" != *":${FABRIC_BIN}:"* ]] && PATH="${FABRIC_BIN}:${PATH}"
+# [[ ":$LD_LIBRARY_PATH:" != *":${FABRIC_LIB}:"* ]] && LD_LIBRARY_PATH="${FABRIC_LIB}:${LD_LIBRARY_PATH}"
+# [[ ":$C_INCLUDE_PATH:" != *":${FABRIC_INCLUDE}:"* ]] && C_INCLUDE_PATH="${FABRIC_INCLUDE}:${C_INCLUDE_PATH}"
+
+
 MERCURY_PATH="/people/tang584/install/mercury"
 MERCURY_LIB="$MERCURY_PATH/lib"
 MERCURY_INCLUDE="$MERCURY_PATH/include"
@@ -48,7 +65,7 @@ JSONC_INCLUDE=$JSONC_PATH/include
 [[ ":$C_INCLUDE_PATH:" != *":${JSONC_INCLUDE}:"* ]] && C_INCLUDE_PATH="${JSONC_INCLUDE}:${C_INCLUDE_PATH}"
 
 
-spack load boost mochi-thallium@0.8.3 catch2@3.0.1 glpk glog yaml-cpp
+spack load mochi-thallium@0.8.3 catch2@3.0.1 glpk glog yaml-cpp
 
 # HERMES_PATH="/qfs/people/tang584/install/dec_hermes"
 # HERMES_BIN="$HERMES_PATH/bin"
@@ -66,3 +83,4 @@ spack load boost mochi-thallium@0.8.3 catch2@3.0.1 glpk glog yaml-cpp
 # spack load hdf5
 # spack load mpich
 #spack load libbsd
+    
