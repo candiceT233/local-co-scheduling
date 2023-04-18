@@ -36,8 +36,8 @@ total 824K
 ```
 
 ## hm_ddmd_openmpi.sh (TODO)
-Running the OpenMM simulation with Hermes. \
+Running the OpenMM simulation with Hermes, the mpi commands are for OpenMPI. \
 Get Hermes related environment variables from env_var.sh. \
-Hermes configuration read hosts from host_op.
 
 ## load_hermes_deps.sh
+Script to initialize spack and load hermes dependencies from spack.
