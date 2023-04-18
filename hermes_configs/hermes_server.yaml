@@ -1,8 +1,12 @@
+# Example Hermes configuration file
 
+### Define properties of the storage devices
 devices:
+  # The name of the device.
+  # It can be whatever the user wants, there are no special names
   ram:
     mount_point: ""
-    capacity: 5000MB
+    capacity: 2GB
     block_size: 4KB
     slab_sizes: [ 4KB, 16KB, 64KB, 1MB ]
     bandwidth: 6000MBps
@@ -10,43 +14,38 @@ devices:
     is_shared_device: false
     borg_capacity_thresh: [0.0, 1.0]
 
-  ssd:
-    mount_point: "/scratch/tang584/hermes_slabs" 
-    capacity: 512GB
+  nvme:
+    mount_point: "${HOME}/test"
+    capacity: 100GB
     block_size: 4KB
     slab_sizes: [ 4KB, 16KB, 64KB, 1MB ]
-    bandwidth: 1000MBps
-    latency: 1200us
-    is_shared_device: true
+    bandwidth: 1GBps
+    latency: 600us
+    is_shared_device: false
     borg_capacity_thresh: [ 0.0, 1.0 ]
 
-  pfs:
-    mount_point: "/rcfs/projects/chess/tang584/hermes_swaps" #deception PFS (BeeGFS)
-    capacity: 50GB
-    block_size: 64KB 
-    slab_sizes: [ 4KB, 16KB, 64KB, 1MB ]
-    bandwidth: 100MBps 
-    latency: 200ms
-    is_shared_device: true
-    borg_capacity_thresh: [ 0.0, 1.0 ]
-
+### Define properties of RPCs
 rpc:
-  host_file: "/qfs/people/tang584/scripts/local-co-scheduling/myhost" #"/qfs/people/tang584/scripts/local-co-scheduling/host_ip"
-  base_name: "a100-"
-  host_number_range: [02]
-  suffix: #".ibnet"
-  protocol: "tcp" #"ofi+sockets" #"ucx+ud" #"ucx+rc_verbs"
-  domain: "" #mlx5_2:1 #mlx5_0:1
+  host_file: ""
+  host_names: ["localhost"]
+  protocol: "ofi+sockets"
+  domain: ""
   port: 8080
   num_threads: 4
 
+### Define properties of the BORG
 buffer_organizer:
   num_threads: 4
   port: 8081
 
+### Define the default data placement policy
 dpe:
   default_placement_policy: "MinimizeIoTime"
   default_rr_split: 0
 
+# The shared memory prefix for the hermes shared memory segment. A user name
+# will be automatically appended.
 shmem_name: "/hermes_shm_"
+
+# The interval in milliseconds at which to update the global system view.
 system_view_state_update_interval_ms: 1000
