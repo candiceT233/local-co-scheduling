@@ -1,15 +1,13 @@
 # Scripts Note
 
-## ddmd.sbatch
-Same as https://gitlab.pnnl.gov/perf-lab/workflows/deepdrivemd/-/blob/main/examples/slurm/ddmd.sbatch
+## ddmd.sh
+Taken from https://gitlab.pnnl.gov/perf-lab/workflows/deepdrivemd/-/blob/main/examples/slurm/ddmd.sbatch
 But using my experiment paths
 ```
 EXPERIMENT_PATH : all the intermediate and final experiment output
 DDMD_PATH : DeepDriveMD script path
 MOLECULES_PATH : molecule script path for experiments
 ```
-
-## ddmd.sh
 Running only the OpenMM simulation from DeepDriveMD. \
 - Change `MD_RUNS` to increase the parallel simulation tasks
 - Change `SIM_LENGTH` to increase simulation size (this is compute intensive, recommend to use 0.01 for fast test )
@@ -37,7 +35,8 @@ total 824K
 
 ## hm_ddmd_openmpi.sh (TODO)
 Running the OpenMM simulation with Hermes, the mpi commands are for OpenMPI. \
-Get Hermes related environment variables from env_var.sh. \
+Get Hermes related environment variables from `env_var.sh`. \
+Hermes is installed with `spack install hermes@pnnl ^mercury+ofi+ucx ^openmpi@4.1.3 %gcc@9.1.0`.
 
 ## load_hermes_deps.sh
 Script to initialize spack and load hermes dependencies from spack.
