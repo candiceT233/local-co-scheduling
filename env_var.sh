@@ -21,7 +21,6 @@ HERMES_DEFAULT_CONF=$CONFIG_DIR/$DEFAULT_CONF_NAME
 
 CONF_NAME=hermes_server.yaml
 HERMES_CONF=$CONFIG_DIR/$CONF_NAME
-
 CLIENT_CONF_NAME=hermes_client.yaml
 HERMES_CLIENT_CONF=$CONFIG_DIR/$CLIENT_CONF_NAME
 
@@ -32,8 +31,7 @@ ASAN_LIB=""
 
 
 # System storage dirs -----------
-export DEV1_DIR=/tmp/tmp1 # 1st buffer area
-export DEV2_DIR=/tmp/tmp2 # 2nd buffer area
+export DEV1_DIR=$HOME/test # 1st buffer area
 
 # Other tools dirs -----------
 BENCHMARKS_DIR=$HERMES_REPO/benchmarks

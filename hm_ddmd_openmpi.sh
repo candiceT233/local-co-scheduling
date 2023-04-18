@@ -54,16 +54,6 @@ done <<< "$NODE_NAMES"
 hostlist=$(echo "$NODE_NAMES" | tr '\n' ',')
 echo "hostlist: $hostlist"
 
-> ./host_ip
-for node in $NODE_NAMES
-do
-    # "$node.ibnet:1"
-    # grep "$node.local" /etc/hosts | awk '{print $1}' >> ./host_ip
-    echo "$node" >> ./host_ip
-done
-cat ./host_ip
-ib_hostlist=$(cat ./host_ip | xargs | sed -e 's/ /,/g')
-echo "ib_hostlist: $ib_hostlist"
 
 # export TMPDIR=/scratch/$USER
 # export OMP_NUM_THREADS=16
@@ -108,7 +98,7 @@ STOP_DAEMON() {
     echo "Stopping Hermes daemon"
 
     set -x
-    mpirun --host $ib_hostlist --pernode \
+    mpirun --host $hostlist --pernode \
         -x LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so \
         -x HERMES_CONF=$HERMES_CONF \
         -x HERMES_CLIENT_CONF=$HERMES_CLIENT_CONF \
@@ -118,27 +108,6 @@ STOP_DAEMON() {
     set +x
 }
 
-HERMES_LOCAL_CONFIG () {
-    sed "s/\$HOST_BASE_NAME/\"localhost\"/" $HERMES_DEFAULT_CONF  > $HERMES_CONF
-    sed -i "s/\$HOST_NUMBER_RANGE/ /" $HERMES_CONF
-    sed -i "s/\$INTERCEPT_PATHS/ /" $HERMES_CONF
-}
-
-HERMES_DIS_CONFIG () {
-
-    echo "SLURM_JOB_NODELIST = $(echo $SLURM_JOB_NODELIST|scontrol show hostnames)"
-    NODE_NAMES=$(echo $SLURM_JOB_NODELIST|scontrol show hostnames)
-
-    prefix="a100-" #dc dc00 a100-0
-    sed "s/\$HOST_BASE_NAME/\"${prefix}\"/" $HERMES_DEFAULT_CONF  > $HERMES_CONF
-    mapfile -t node_range < <(echo "$NODE_NAMES" | sed "s/${prefix}//g")
-    rpc_host_number_range="[$(printf "%s," "${node_range[@]}" | sed 's/,$//')]"
-    sed -i "s/\$HOST_NUMBER_RANGE/${rpc_host_number_range}/" $HERMES_CONF
-
-    echo "node_range=${node_range[@]}"
-    echo "rpc_host_number_range=$rpc_host_number_range"
-
-}
 
 START_HERMES_DAEMON () {
     # --mca shmem_mmap_priority 80 \ \
@@ -147,28 +116,25 @@ START_HERMES_DAEMON () {
     # -mca btl self -mca pml ucx \
     # -map-by node:PE=1 , --npernode 1 , --map-by ppr:1:node , --pernode
 
-    # srun -w $hostlist -N$NODE_COUNT -n$NODE_COUNT margo-info ucx+rc_verbs://mlx5_2:1/
-
     echo "Starting hermes_daemon..."
     set -x
 
-    mpirun --host $ib_hostlist --npernode 1 \
+    mpirun --host $hostlist --npernode 1 \
         -x HERMES_CONF=$HERMES_CONF $HERMES_INSTALL_DIR/bin/hermes_daemon & #> ${FUNCNAME[0]}.log &
-
 
     sleep 5
 
-    ls -l $DEV1_DIR/hermes_slabs
-    ls -l $DEV2_DIR/hermes_slabs
+    # check hermes devices
+    ls -l $DEV1_DIR
+
     set +x
 }
 
-mpirun --host $ib_hostlist --pernode killall hermes_daemon
+mpirun --host $hostlist --pernode killall hermes_daemon
 
 hostname;date;
 echo "Hermes Config : ADAPTER_MODE=$ADAPTER_MODE HERMES_PAGE_SIZE=$HERMES_PAGE_SIZE"
 
-HERMES_DIS_CONFIG
 START_HERMES_DAEMON
 
 (
