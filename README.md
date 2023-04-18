@@ -8,9 +8,13 @@ EXPERIMENT_PATH : all the intermediate and final experiment output
 DDMD_PATH : DeepDriveMD script path
 MOLECULES_PATH : molecule script path for experiments
 ```
-Running only the OpenMM simulation from DeepDriveMD. \
+Running only the OpenMM simulation from DeepDriveMD. The script already loads the conda environment.
+```
+./ddmd.sh
+```
 - Change `MD_RUNS` to increase the parallel simulation tasks
 - Change `SIM_LENGTH` to increase simulation size (this is compute intensive, recommend to use 0.01 for fast test )
+### Example Output
 Example run with `SIM_LENGTH=0.1` abd `MD_RUNS=2`, the expected ouputs are:
 ```
 All done... 169239 milliseconds elapsed.
