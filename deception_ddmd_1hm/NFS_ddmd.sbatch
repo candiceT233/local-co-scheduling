@@ -1,26 +1,41 @@
 #!/bin/bash
-#SBATCH --job-name=$TEST_NAME
-#SBATCH --partition=dlt
+#SBATCH --job-name=org_ddmd_n2t12i5_100ps_nfs1
+#SBATCH --partition=a100
 #SBATCH --account=chess
-#SBATCH --time=02:30:00
-#SBATCH -N $NODES
-#SBATCH -n $TASKS
+#SBATCH --time=00:30:00
+#SBATCH -N 2
+#SBATCH -n 12
 #SBATCH --output=./R_%x.out                                        
 #SBATCH --error=./R_%x.err
 
+# --gres=gpu:6
+
 SKIP_OPENMM=false
 SHORTENED_PIPELINE=true
-MD_RUNS=$TASKS
-ITER_COUNT=$ITER_NUM # TBD
-SIM_LENGTH=$TEST_SIZE
+MD_RUNS=12
+ITER_COUNT=5 # TBD
+SIM_LENGTH=0.1
 SIZE=$(echo "$SIM_LENGTH * 1000" | bc)
 SIZE=${SIZE%.*}
-TRIAL=$TRIAL
-# EXPERIMENT_PATH=/rcfs/projects/chess/$USER/ddmd_runs/test_${SIZE}ps_i${ITER_COUNT} #PFS
-EXPERIMENT_PATH=/qfs/projects/oddite/tang584/ddmd_runs/test_${SIZE}ps_i${ITER_COUNT}_${TRIAL} #NFS
-DDMD_PATH=/people/$USER/scripts/deepdrivemd #NFS
-MOLECULES_PATH=/qfs/projects/oddite/$USER/git/molecules #NFS
+TRIAL="nfs1"
+FS_PATH="NFS"
+
+if [ "$FS_PATH" == "NFS" ]
+then
+    echo "Running on NFS"
+    EXPERIMENT_PATH=/qfs/projects/oddite/$USER/ddmd_runs/test_${SIZE}ps_i${ITER_COUNT}_${TRIAL} #NFS
+    DDMD_PATH=/people/leeh736/git/deepdrivemd #NFS
+    MOLECULES_PATH=/qfs/projects/oddite/leeh736/git/molecules #NFS
+else
+    echo "Running on PFS"
+    EXPERIMENT_PATH=/rcfs/projects/chess/$USER/ddmd_runs/test_${SIZE}ps_i${ITER_COUNT}_${TRIAL} #PFS
+    DDMD_PATH=/rcfs/projects/chess/$USER/git/deepdrivemd #PFS
+    MOLECULES_PATH=/rcfs/projects/chess/$USER/git/molecules #PFS
+fi
+
+mkdir -p $DDMD_PATH
 mkdir -p $EXPERIMENT_PATH
+
 
 GPU_PER_NODE=6
 MD_START=0
@@ -31,26 +46,22 @@ STAGE_IDX_FORMAT=$(seq -f "stage%04g" $STAGE_IDX $STAGE_IDX)
 
 NODE_NAMES=`echo $SLURM_JOB_NODELIST|scontrol show hostnames`
 
-if [ "$SKIP_OPENMM" == true ]
-then
-    # keep molecular_dynamics_runs
-    rm -rf $EXPERIMENT_PATH/agent_runs
-    rm -rf $EXPERIMENT_PATH/inference_runs
-    rm -rf $EXPERIMENT_PATH/machine_learning_runs
-    rm -rf $EXPERIMENT_PATH/model_selection_runs
-    ls $EXPERIMENT_PATH/* -hl
-else
-    rm -rf $EXPERIMENT_PATH/*
-    ls $EXPERIMENT_PATH/* -hl
-fi
+rm -rf $EXPERIMENT_PATH/*
+ls $EXPERIMENT_PATH/* -hl
 
 # OPENMM_PYTHON=~/.conda/envs/hm_ddmd_openmm_deception/bin/python
 # PYTORCH_PYTHON=~/.conda/envs/hm_ddmd_pytorch_deception/bin/python
 
-module purge
-module load python/miniconda3.7 gcc/9.1.0 git/2.31.1 cmake/3.21.4 openmpi/4.1.3
-source /share/apps/python/miniconda3.7/etc/profile.d/conda.sh
+# module purge
+# module load python/miniconda3.7 gcc/9.1.0 git/2.31.1 cmake/3.21.4 openmpi/4.1.3
+# source /share/apps/python/miniconda3.7/etc/profile.d/conda.sh
 # conda activate hermes_ddmd #/files0/oddite/conda/ddmd/
+
+readarray -t NODE_ARR <<< "$NODE_NAMES"
+TRAINING_NODE=${NODE_ARR[1]}
+INFERENCE_NODE=${NODE_ARR[0]}
+echo "TRAINING_NODE on = ${TRAINING_NODE}"
+echo "INFERENCE_NODE on = ${INFERENCE_NODE}"
 
 OPENMM () {
 
@@ -66,9 +77,7 @@ OPENMM () {
         yaml_path=$DDMD_PATH/test/bba/${stage_name}_stage_test.yaml
     fi
 
-    # module purge
-    # module load python/miniconda3.7 gcc/9.1.0 git/2.31.1 cmake/3.21.4 openmpi/4.1.3
-    # source /share/apps/python/miniconda3.7/etc/profile.d/conda.sh
+    module load python/miniconda3.7 gcc/9.1.0
     source activate hm_ddmd_openmm_deception
 
     mkdir -p $dest_path
@@ -79,6 +88,8 @@ OPENMM () {
     yaml_path=$dest_path/$(basename $yaml_path)
 
     PYTHONPATH=$DDMD_PATH:$MOLECULES_PATH srun -w $node_id -n1 -N1 --exclusive ~/.conda/envs/hm_ddmd_openmm_deception/bin/python $DDMD_PATH/deepdrivemd/sim/openmm/run_openmm.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log &
+
+    # PYTHONPATH=$DDMD_PATH:$MOLECULES_PATH srun -w $node_id -n1 -N1 --exclusive ~/.conda/envs/hm_ddmd_openmm_deception/bin/python $DDMD_PATH/deepdrivemd/sim/openmm/run_openmm.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log &
     #PYTHONPATH=~/git/molecules/ srun -w $node_id -N1 python /people/leeh736/git/DeepDriveMD-pipeline/deepdrivemd/sim/openmm/run_openmm.py -c $yaml_path &>> $task_id.log &
     #srun -n1 env LD_PRELOAD=~/git/tazer_forked/build.h5/src/client/libclient.so PYTHONPATH=~/git/molecules/ python /people/leeh736/git/DeepDriveMD-pipeline/deepdrivemd/sim/openmm/run_openmm.py -c /qfs/projects/oddite/leeh736/ddmd_runs/test/md_direct.yaml &> $task_id.log &
 }
@@ -92,9 +103,8 @@ AGGREGATE () {
     dest_path=$EXPERIMENT_PATH/molecular_dynamics_runs/$STAGE_IDX_FORMAT/$task_id
     yaml_path=$DDMD_PATH/test/bba/${stage_name}_stage_test.yaml
 
-    # module purge
-    # module load python/miniconda3.7 gcc/9.1.0 git/2.31.1 cmake/3.21.4 openmpi/4.1.3
-    # source /share/apps/python/miniconda3.7/etc/profile.d/conda.sh
+
+    module load python/miniconda3.7 gcc/9.1.0
     source activate hm_ddmd_openmm_deception
     mkdir -p $dest_path
     cd $dest_path
@@ -120,6 +130,8 @@ TRAINING () {
     mkdir -p $EXPERIMENT_PATH/model_selection_runs/$STAGE_IDX_FORMAT/$task_id/
     cp -p $DDMD_PATH/test/bba/stage0000_$task_id.json $EXPERIMENT_PATH/model_selection_runs/$STAGE_IDX_FORMAT/$task_id/${STAGE_IDX_FORMAT}_$task_id.json
 
+
+    module load python/miniconda3.7 gcc/9.1.0
     source activate hm_ddmd_pytorch_deception
 
     mkdir -p $dest_path
@@ -132,13 +144,13 @@ TRAINING () {
     # PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH ~/.conda/envs/hm_ddmd_pytorch_deception/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log 
 
    echo PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH ~/.conda/envs/hm_ddmd_pytorch_deception/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path ${task_id}_${FUNCNAME[0]}.log 
-#    PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH ~/.conda/envs/hm_ddmd_pytorch_deception/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log
-   if [ "$SHORTENED_PIPELINE" == true ]
-   then
-       PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH srun -n1 -N1 --exclusive ~/.conda/envs/hm_ddmd_pytorch_deception/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log &
-   else
-       PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH srun -n1 -N1 --exclusive ~/.conda/envs/hm_ddmd_pytorch_deception/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log
-   fi
+   PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH ~/.conda/envs/hm_ddmd_pytorch_deception/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log
+#    if [ "$SHORTENED_PIPELINE" == true ]
+#    then
+#        PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH srun -n1 -N1 --exclusive ~/.conda/envs/hm_ddmd_pytorch_deception/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log &
+#    else
+#        PYTHONPATH=$DDMD_PATH/:$MOLECULES_PATH srun -n1 -N1 --exclusive ~/.conda/envs/hm_ddmd_pytorch_deception/bin/python $DDMD_PATH/deepdrivemd/models/aae/train.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log
+#    fi
 
 }
 
@@ -154,6 +166,7 @@ INFERENCE () {
     # module purge
     # module load python/miniconda3.7 gcc/9.1.0 git/2.31.1 cmake/3.21.4 openmpi/4.1.3
     # source /share/apps/python/miniconda3.7/etc/profile.d/conda.sh
+    module load python/miniconda3.7 gcc/9.1.0
     source activate hm_ddmd_pytorch_deception
 
     mkdir -p $dest_path
@@ -196,35 +209,31 @@ STAGE_UPDATE() {
     echo $tmp
 }
 
-total_start_time=$SECONDS
+total_start_time=$(($(date +%s%N)/1000000))
 
 for iter in $(seq $ITER_COUNT)
 do
 
     # STAGE 1: OpenMM
-    start_time=$SECONDS
-
-    if [ "$SKIP_OPENMM" != true ]
-    then
-        for node in $NODE_NAMES
+    start_time=$(($(date +%s%N)/1000000))
+    for node in $NODE_NAMES
+    do
+        while [ $MD_SLICE -gt 0 ] && [ $MD_START -lt $MD_RUNS ]
         do
-            while [ $MD_SLICE -gt 0 ] && [ $MD_START -lt $MD_RUNS ]
-            do
-                echo $node
-                OPENMM $MD_START $node
-                MD_START=$(($MD_START + 1))
-                MD_SLICE=$(($MD_SLICE - 1))
-            done
-            MD_SLICE=$(($MD_RUNS/$NODE_COUNT))
+            echo $node
+            OPENMM $MD_START $node # --oversubscribe
+            # srun -n1 -N1 --exclusive -w $node $( OPENMM $MD_START $node ) &
+            MD_START=$(($MD_START + 1))
+            MD_SLICE=$(($MD_SLICE - 1))
         done
-    else
-        echo "OpenMM Skipped ---"
-    fi
-    
-    MD_START=0
+        MD_SLICE=$(($MD_RUNS/$NODE_COUNT))
+    done
     wait
-    duration=$(($SECONDS - $start_time))
-    echo "OpenMM done... $(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed ($duration secs)."
+
+    MD_START=0
+
+    duration=$(( $(date +%s%N)/1000000 - $start_time))
+    echo "OpenMM done... $duration milliseconds elapsed."
 
     STAGE_IDX_FORMAT="$(STAGE_UPDATE)"
     STAGE_IDX=$((STAGE_IDX + 1))
@@ -233,30 +242,31 @@ do
     # STAGE 2: Aggregate       
     if [ "$SHORTENED_PIPELINE" != true ]
     then
-        start_time=$SECONDS
+        start_time=$(($(date +%s%N)/1000000))
         srun -N1 $( AGGREGATE )
         wait 
-        duration=$(($SECONDS - $start_time))
-        echo "Aggregate done... $(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed ($duration secs)."
+        duration=$(( $(date +%s%N)/1000000 - $start_time))
+        echo "Aggregate done... $duration milliseconds elapsed."
     else
         echo "No AGGREGATE, SHORTENED_PIPELINE = $SHORTENED_PIPELINE..."
     fi
-        
+    
+    
     STAGE_IDX_FORMAT="$(STAGE_UPDATE)"
     STAGE_IDX=$((STAGE_IDX + 1))
     echo $STAGE_IDX_FORMAT
 
     # STAGE 3: Training
-    start_time=$SECONDS
-    TRAINING
-    # srun -n1 -N1 --exclusive $( TRAINING ) &
-
+    start_time=$(($(date +%s%N)/1000000))
+    # TRAINING
     if [ "$SHORTENED_PIPELINE" != true ]
     then
+        srun -n1 -N1 --exclusive $( TRAINING )
         wait
-        duration=$(($SECONDS - $start_time))
-        echo "Training done... $(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed ($duration secs)."
+        duration=$(( $(date +%s%N)/1000000 - $start_time))
+        echo "Training done... $duration milliseconds elapsed."
     else
+        srun  -n1 -N1 --exclusive $( TRAINING ) &
         echo "Training not waited, SHORTENED_PIPELINE = $SHORTENED_PIPELINE..."
     fi
 
@@ -265,11 +275,11 @@ do
     echo $STAGE_IDX_FORMAT $STAGE_IDX
 
     # STAGE 4: Inference
-    start_time=$SECONDS
+    start_time=$(($(date +%s%N)/1000000))
     srun $( INFERENCE )
     wait
-    duration=$(($SECONDS - $start_time))
-    echo "Inference done... $(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed ($duration secs)."
+    duration=$(( $(date +%s%N)/1000000 - $start_time))
+    echo "Inference done... $duration milliseconds elapsed."
 
     STAGE_IDX_FORMAT="$(STAGE_UPDATE)"
     STAGE_IDX=$((STAGE_IDX + 1))
@@ -278,14 +288,11 @@ do
 
 done
 
-wait
+# wait
 
-total_duration=$(($SECONDS - $total_start_time))
-echo "All done... $(($total_duration / 60)) minutes and $(($total_duration % 60)) seconds elapsed ($total_duration secs)."
+total_duration=$(( $(date +%s%N)/1000000 - $total_start_time))
+echo "All done... $total_duration milliseconds elapsed."
 
-# ls $EXPERIMENT_PATH/molecular_dynamics_runs/*/* -hl
-# ls $EXPERIMENT_PATH/machine_learning_runs/*/* -hl
-# ls $EXPERIMENT_PATH/inference_runs/*/* -hl
 ls $EXPERIMENT_PATH/*/*/* -hl
 
 hostname;date;

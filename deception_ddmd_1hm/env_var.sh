@@ -34,7 +34,7 @@ HERMES_CLIENT_CONF=$CONFIG_DIR/$CLIENT_CONF_NAME
 
 # HERMES_INSTALL_DIR=$INSTALL_DIR/hermes
 HERMES_INSTALL_DIR=$INSTALL_DIR/1dec_hermes
-#8dec_hermes dec_hermes
+#8dec_hermes dec_hermes 1dec_hermes
 
 # Debug
 ASAN_LIB=""

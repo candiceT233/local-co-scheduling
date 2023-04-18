@@ -2,7 +2,7 @@
 
 OPT=$1
 
-TASKS=24
+TASKS=48
 NODES=4
 ITER_NUM=5
 mode="WORKFLOW" # "SCRATCH" "WORKFLOW"
@@ -14,7 +14,7 @@ HERMES_DDMD()
     DEFAULT_SLURM=/qfs/people/tang584/scripts/local-co-scheduling/test_hm_ddmd.sbatch
     RUN_SLURM=/qfs/people/tang584/scripts/local-co-scheduling/run_hm_ddmd.sbatch
 
-    for trial in 1 #2 3
+    for trial in 1 2 3
     do
         for sim_length in 0.1 0.2 0.4 #0.8
         do
@@ -43,7 +43,7 @@ DDMD()
     DEFAULT_SLURM=/qfs/people/tang584/scripts/local-co-scheduling/test_ddmd.sbatch
     RUN_SLURM=/qfs/people/tang584/scripts/local-co-scheduling/run_ddmd.sbatch
 
-    for trial in 1 #2 3
+    for trial in 1 2 3
     do
         for sim_length in 0.1 0.2 0.4 #0.8
         do

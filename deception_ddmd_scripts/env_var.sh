@@ -23,17 +23,11 @@ MOCHI_REPO=$STAGE_DIR/mochi
 SPACK_DIR=$MNT_HOME/spack
 
 # Hermes config files -----------
-DEFAULT_CONF_NAME=hermes_server_default.yaml
-HERMES_DEFAULT_CONF=$CONFIG_DIR/$DEFAULT_CONF_NAME
-
-CONF_NAME=hermes_server.yaml
-HERMES_CONF=$CONFIG_DIR/$CONF_NAME
-
-CLIENT_CONF_NAME=hermes_client.yaml
-HERMES_CLIENT_CONF=$CONFIG_DIR/$CLIENT_CONF_NAME
+HERMES_DEFAULT_CONF=$CONFIG_DIR/hermes_deception_default.yaml
+HERMES_CONF=$CONFIG_DIR/hermes_deception.yaml
 
 # HERMES_INSTALL_DIR=$INSTALL_DIR/hermes
-HERMES_INSTALL_DIR=$INSTALL_DIR/1dec_hermes
+HERMES_INSTALL_DIR=$INSTALL_DIR/8dec_hermes
 #8dec_hermes dec_hermes
 # Debug
 ASAN_LIB=""
@@ -68,13 +62,15 @@ mkdir -p $LOG_DIR
 PY_VENV=$SCRIPT_DIR/venv_ddmd
 
 
-export GLOG_minloglevel=0
-export FLAGS_logtostderr=0
+export GLOG_minloglevel=2
+export FLAGS_logtostderr=2
 export HDF5_USE_FILE_LOCKING='FALSE' #'TRUE'
 # export MPICH_GNI_NDREG_ENTRIES=1024
 # export I_MPI_HYDRA_TOPOLIB=ipl
 # export I_MPI_PMI_LIBRARY=libpmi2.so
 
-export HERMES_PAGESIZE=262144
+# export OFI_INTERFACE=ib0
+
+export HERMES_PAGE_SIZE=131072
 # page size : 4096 8192 32768 65536 131072 262144 524288 1048576 4194304 8388608
 # default : 1048576
