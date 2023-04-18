@@ -9,6 +9,16 @@ venv_ddmd/
 vol-log-passthrough/
 vol-provenance/
 
+# directories not needed
+1000genome/
+bluesky_ddmd_scripts/
+deception_ddmd_scripts/
+sankey_diagram/
+analysis_scripts/
+save_outputs/
+vol-provenance/
+vfd/
+
 # saved logs
 1job_log/  
 2job_log/  
