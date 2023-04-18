@@ -1,12 +1,5 @@
 #!/bin/bash
 
-#CWD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-
-# source /share/apps/python/miniconda3.7/etc/profile.d/conda.sh
-
-#spack load hdf5 mochi-thallium catch2 glpk gflags glog
-#spack find --loaded
-
 USER=$(whoami)
 
 # User directories
@@ -32,25 +25,15 @@ HERMES_CONF=$CONFIG_DIR/$CONF_NAME
 CLIENT_CONF_NAME=hermes_client.yaml
 HERMES_CLIENT_CONF=$CONFIG_DIR/$CLIENT_CONF_NAME
 
-# HERMES_INSTALL_DIR=$INSTALL_DIR/hermes
-HERMES_INSTALL_DIR=$INSTALL_DIR/1dec_hermes
-#8dec_hermes dec_hermes 1dec_hermes
+HERMES_INSTALL_DIR=$INSTALL_DIR/hermes
 
 # Debug
 ASAN_LIB=""
-# HERMES_INSTALL_DIR=$INSTALL_DIR/debug_hermes
-# HERMES_INSTALL_DIR=$INSTALL_DIR/8_hermes
 
 
 # System storage dirs -----------
-# DEV0_DIR="" # this is memory
-export DEV1_DIR=/scratch/$USER # this is BurstBuffer
-export DEV2_DIR=/rcfs/projects/chess/$USER # this is Parallel File System
-
-# export DEV1_DIR="." # current dir
-# export DEV2_DIR="." # current dir
-# export DEV1_DIR="/tmp" # current dir
-# export DEV2_DIR="/tmp" # current dir
+export DEV1_DIR=/tmp/tmp1 # 1st buffer area
+export DEV2_DIR=/tmp/tmp2 # 2nd buffer area
 
 # Other tools dirs -----------
 BENCHMARKS_DIR=$HERMES_REPO/benchmarks
@@ -61,19 +44,9 @@ HDF5_INSTALL=$INSTALL_DIR/hdf5-1_13_1
 LOG_DIR=$SCRIPT_DIR/tmp_outputs
 mkdir -p $LOG_DIR
 
-#conda activate /files0/oddite/conda/ddmd/ # original global env
-#conda activate hermes_ddmd # local
-
-PY_VENV=$SCRIPT_DIR/venv_ddmd
-
 
 export GLOG_minloglevel=0
 export FLAGS_logtostderr=0
 export HDF5_USE_FILE_LOCKING='FALSE' #'TRUE'
-# export MPICH_GNI_NDREG_ENTRIES=1024
-# export I_MPI_HYDRA_TOPOLIB=ipl
-# export I_MPI_PMI_LIBRARY=libpmi2.so
 
-export HERMES_PAGESIZE=262144
-# page size : 4096 8192 32768 65536 131072 262144 524288 1048576 4194304 8388608
-# default : 1048576
+export HERMES_TRAIT_PATH=$HERMES_INSTALL_DIR/lib

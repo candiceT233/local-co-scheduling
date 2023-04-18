@@ -3,7 +3,7 @@ SHORTENED_PIPELINE=true
 S1_HM=true
 MD_RUNS=1 #12
 ITER_COUNT=1 # TBD
-SIM_LENGTH=0.1
+SIM_LENGTH=0.01
 SIZE=$(echo "$SIM_LENGTH * 1000" | bc)
 SIZE=${SIZE%.*}
 TRIAL=0
@@ -11,9 +11,9 @@ ADAPTER_MODE="WORKFLOW"
 
 TEST_OUT_PATH=hermes_test_${SIZE}ps_i${ITER_COUNT}_${TRIAL}
 
-EXPERIMENT_PATH=$HOME/ddmd_runs/$TEST_OUT_PATH #NFS
-DDMD_PATH=$HOME/scripts/deepdrivemd #NFS
-MOLECULES_PATH=/qfs/projects/oddite/$USER/git/molecules #NFS
+EXPERIMENT_PATH=$HOME/scripts/ddmd_runs/$TEST_OUT_PATH
+DDMD_PATH=$HOME/scripts/deepdrivemd
+MOLECULES_PATH=$HOME/scripts/molecules
 mkdir -p $EXPERIMENT_PATH
 
 GPU_PER_NODE=6
@@ -37,9 +37,7 @@ else
     ls $EXPERIMENT_PATH/* -hl
 fi
 
-# load environment variables for Hermes
-# ulimit -c unlimited
-# . $HOME/zen2_dec/dec_spack/share/spack/setup-env.sh
+# prepare environment variables for Hermes
 source $HOME/scripts/local-co-scheduling/load_hermes_deps.sh
 source $HOME/scripts/local-co-scheduling/env_var.sh
 
@@ -48,13 +46,11 @@ mkdir -p $DEV2_DIR/hermes_swaps
 rm -rf $DEV1_DIR/hermes_slabs/*
 rm -rf $DEV2_DIR/hermes_swaps/*
 
-# ib_hostlist=$(echo -e "$NODE_NAMES" | xargs | sed -e 's/ /,/g')
-# echo "ib_hostlist=$ib_hostlist"
+
 list=()
 while read -ra tmp; do
     list+=("${tmp[@]}")
 done <<< "$NODE_NAMES"
-
 hostlist=$(echo "$NODE_NAMES" | tr '\n' ',')
 echo "hostlist: $hostlist"
 
@@ -68,10 +64,6 @@ done
 cat ./host_ip
 ib_hostlist=$(cat ./host_ip | xargs | sed -e 's/ /,/g')
 echo "ib_hostlist: $ib_hostlist"
-
-# IFS=',' read -r -a NODE_ARR <<< "$ib_hostlist"
-# echo "TRAINING on = ${NODE_ARR[0]}"
-# echo "INFERENCE on = ${NODE_ARR[1]}"
 
 # export TMPDIR=/scratch/$USER
 # export OMP_NUM_THREADS=16
@@ -99,7 +91,7 @@ OPENMM () {
     sed -e "s/\$SIM_LENGTH/${SIM_LENGTH}/" -e "s/\$OUTPUT_PATH/${dest_path//\//\\/}/" -e "s/\$EXPERIMENT_PATH/${EXPERIMENT_PATH//\//\\/}/" -e "s/\$DDMD_PATH/${DDMD_PATH//\//\\/}/" -e "s/\$GPU_IDX/${gpu_idx}/" -e "s/\$STAGE_IDX/${STAGE_IDX}/" $yaml_path  > $dest_path/$(basename $yaml_path)
     yaml_path=$dest_path/$(basename $yaml_path)
 
-    # # HERMES_STOP_DAEMON=0 HERMES_CLIENT=1 \ #must have --oversubscribe --exclusive
+    # # HERMES_STOP_DAEMON=0 HERMES_CLIENT=1 \ # srun -w $node_id -n1 -N1 --oversubscribe \
     ## --mpi=pmi2 
     set -x
 
@@ -107,8 +99,7 @@ OPENMM () {
         HERMES_CONF=$HERMES_CONF \
         HERMES_CLIENT_CONF=$HERMES_CLIENT_CONF \
         PYTHONPATH=$DDMD_PATH:$MOLECULES_PATH \
-        srun -w $node_id -n1 -N1 --oversubscribe \
-        ~/.conda/envs/hm_ddmd_openmm_deception/bin/python $DDMD_PATH/deepdrivemd/sim/openmm/run_openmm.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log &
+        ~/anaconda3/envs/hermes_openmm_ddmd/bin/python $DDMD_PATH/deepdrivemd/sim/openmm/run_openmm.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log &
 
 }
 
@@ -147,7 +138,6 @@ HERMES_DIS_CONFIG () {
     echo "node_range=${node_range[@]}"
     echo "rpc_host_number_range=$rpc_host_number_range"
 
-    # echo "]" >> $HERMES_CONF
 }
 
 START_HERMES_DAEMON () {
@@ -167,8 +157,9 @@ START_HERMES_DAEMON () {
 
 
     sleep 5
-    echo ls -l $DEV1_DIR/hermes_slabs
+
     ls -l $DEV1_DIR/hermes_slabs
+    ls -l $DEV2_DIR/hermes_slabs
     set +x
 }
 
@@ -179,8 +170,6 @@ echo "Hermes Config : ADAPTER_MODE=$ADAPTER_MODE HERMES_PAGE_SIZE=$HERMES_PAGE_S
 
 HERMES_DIS_CONFIG
 START_HERMES_DAEMON
-
-total_start_time=$(($(date +%s%N)/1000000))
 
 (
 total_start_time=$(($(date +%s%N)/1000000))
