@@ -20,6 +20,8 @@ set(HDF5_HERMES_VFD_PACKAGE_TARNAME "${HDF5_HERMES_VFD_PACKAGE}")
 
 # Dynamically loaded VFDs must be shared libraries
 set(HDF5_HERMES_VFD_LIBTYPE SHARED)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DENABLE_HDF5_IO_LOGGING")
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DENABLE_HDF5_IO_LOGGING")
 
 #-----------------------------------------------------------------------------
 # Targets built within this project are exported at Install time for use
