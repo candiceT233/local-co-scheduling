@@ -67,8 +67,6 @@
 
 #define STAT_FUNC_MOD 733//a reasonably big size to avoid expensive collision handling, make sure it works with 62 function names.
 
-//H5PL_type_t H5PLget_plugin_type(void) {return H5PL_TYPE_FILTER;}
-//const void *H5PLget_plugin_info(void) {return &H5VL_provenance_cls;}
 
 /************/
 /* Typedefs */
@@ -178,6 +176,7 @@ static herr_t H5VL_provenance_object_specific(void *obj, const H5VL_loc_params_t
 static herr_t H5VL_provenance_object_optional(void *obj, const H5VL_loc_params_t *loc_params, H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
 
 /* Container/connector introspection callbacks */
+static herr_t H5VL_provenance_introspect_get_conn_cls(void *obj, H5VL_get_conn_lvl_t lvl,const H5VL_class_t **conn_cls);
 static herr_t H5VL_provenance_introspect_get_cap_flags(const void *info, unsigned *cap_flags);
 static herr_t H5VL_provenance_introspect_opt_query(void *obj, H5VL_subclass_t cls, int opt_type, uint64_t *flags);
 
@@ -291,7 +290,7 @@ static const H5VL_class_t H5VL_provenance_cls = {
         H5VL_provenance_object_optional,            /* optional */
     },
     {                                           /* introspect_cls */
-        NULL,                                       /* get_conn_cls */
+        H5VL_provenance_introspect_get_conn_cls,    /* get_conn_cls */
         H5VL_provenance_introspect_get_cap_flags,   /* get_cap_flags */
         H5VL_provenance_introspect_opt_query,       /* opt_query */
     },
@@ -1744,7 +1743,6 @@ void dataset_info_print(char * func_name, hid_t mem_type_id, hid_t mem_space_id,
         printf("\"access_size\": %ld, ", access_size);
 
     printf("\"layout\": \"%s\", ", dset_info->layout); //TODO
-
     
     printf("\"offset\": %ld, ", dataset_get_offset(dset->under_object, dset->under_vol_id, dxpl_id));
     // printf("\"offset\": %ld, ", dset_info->dset_offset); // assigned based on analysis
@@ -4170,7 +4168,7 @@ H5VL_provenance_dataset_close(void *dset, hid_t dxpl_id, void **req)
 
         prov_write(o->prov_helper, __func__, get_time_usec() - start);
         // dataset_stats_prov_write(dset_info);//output stats
-        dump_dset_stat_yaml(PROV_HELPER->prov_file_handle,dset_info);
+        // dump_dset_stat_yaml(PROV_HELPER->prov_file_handle,dset_info);
         
         rm_dataset_node(o->prov_helper, o->under_object, o->under_vol_id, dset_info);
 
@@ -5031,7 +5029,7 @@ H5VL_provenance_file_close(void *file, hid_t dxpl_id, void **req)
     // printf("H5VLfile_close Time[%ld]", get_time_usec());
     // printf(" FileName[%s]\n", file_info->file_name);
     file_info_print("H5VLfile_close", file, dxpl_id);
-    dump_file_stat_yaml(PROV_HELPER->prov_file_handle,file_info);
+    // dump_file_stat_yaml(PROV_HELPER->prov_file_handle,file_info);
 #endif
 
 #ifdef ENABLE_PROVNC_LOGGING
@@ -6010,6 +6008,39 @@ H5VL_provenance_object_optional(void *obj, const H5VL_loc_params_t *loc_params,
 } /* end H5VL_provenance_object_optional() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL_provenance_introspect_get_conn_cls
+ *
+ * Purpose:     Query the connector class.
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_provenance_introspect_get_conn_cls(void *obj, H5VL_get_conn_lvl_t lvl,
+    const H5VL_class_t **conn_cls)
+{
+    H5VL_provenance_t *o = (H5VL_provenance_t *)obj;
+    herr_t ret_value;
+
+#ifdef ENABLE_PROVNC_LOGGING
+    printf("PROVENANCE VOL INTROSPECT GetConnCls\n");
+#endif
+
+    /* Check for querying this connector's class */
+    if(H5VL_GET_CONN_LVL_CURR == lvl) {
+        *conn_cls = &H5VL_provenance_cls;
+        ret_value = 0;
+    } /* end if */
+    else
+        ret_value = H5VLintrospect_get_conn_cls(o->under_object, o->under_vol_id,
+            lvl, conn_cls);
+
+    return ret_value;
+} /* end H5VL_provenance_introspect_get_conn_cls() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5VL_provenance_introspect_get_cap_flags
  *
  * Purpose:     Query the capability flags for this connector and any
@@ -6585,3 +6616,5 @@ H5VL_provenance_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, v
 
     return ret_value;
 } /* end H5VL_provenance_optional() */
+
+
