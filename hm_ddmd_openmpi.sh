@@ -6,10 +6,9 @@ ITER_COUNT=1 # TBD
 SIM_LENGTH=0.01
 SIZE=$(echo "$SIM_LENGTH * 1000" | bc)
 SIZE=${SIZE%.*}
-TRIAL=0
 ADAPTER_MODE="WORKFLOW"
 
-TEST_OUT_PATH=hermes_test_${SIZE}ps_i${ITER_COUNT}_${TRIAL}
+TEST_OUT_PATH=hermes_test_${SIZE}ps_i${ITER_COUNT}
 
 EXPERIMENT_PATH=$HOME/scripts/ddmd_runs/$TEST_OUT_PATH
 DDMD_PATH=$HOME/scripts/deepdrivemd
@@ -72,6 +71,7 @@ OPENMM () {
         yaml_path=$DDMD_PATH/test/bba/${stage_name}_stage_test.yaml
     fi
 
+    echo "Activating conda env hermes_openmm_ddmd ... "
     source activate hermes_openmm_ddmd
 
     mkdir -p $dest_path
@@ -84,12 +84,12 @@ OPENMM () {
     # # HERMES_STOP_DAEMON=0 HERMES_CLIENT=1 \ # srun -w $node_id -n1 -N1 --oversubscribe \
     ## --mpi=pmi2 
     set -x
-
-    LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so:$LD_PRELOAD \
-        HERMES_CONF=$HERMES_CONF \
-        HERMES_CLIENT_CONF=$HERMES_CLIENT_CONF \
-        PYTHONPATH=$DDMD_PATH:$MOLECULES_PATH \
-        ~/anaconda3/envs/hermes_openmm_ddmd/bin/python $DDMD_PATH/deepdrivemd/sim/openmm/run_openmm.py -c $yaml_path &> ${task_id}_${FUNCNAME[0]}.log &
+    mpirun -n 1 \
+        -x LD_PRELOAD=$HERMES_INSTALL_DIR/bin/libhermes_posix.so:$LD_PRELOAD \
+        -x HERMES_CONF=$HERMES_CONF \
+        -x HERMES_CLIENT_CONF=$HERMES_CLIENT_CONF \
+        -x PYTHONPATH=$DDMD_PATH:$MOLECULES_PATH \
+        ~/anaconda3/envs/hermes_openmm_ddmd/bin/python $DDMD_PATH/deepdrivemd/sim/openmm/run_openmm.py -c $yaml_path 2>&1 | tee $dest_path/${task_id}_${FUNCNAME[0]}.log &
 
 }
 
@@ -99,7 +99,7 @@ STOP_DAEMON() {
 
     set -x
     mpirun --host $hostlist --pernode \
-        -x LD_PRELOAD=$HERMES_INSTALL_DIR/lib/libhermes_posix.so \
+        -x LD_PRELOAD=$HERMES_INSTALL_DIR/bin/libhermes_posix.so \
         -x HERMES_CONF=$HERMES_CONF \
         -x HERMES_CLIENT_CONF=$HERMES_CLIENT_CONF \
         -x HERMES_STOP_DAEMON=1 \
@@ -116,11 +116,11 @@ START_HERMES_DAEMON () {
     # -mca btl self -mca pml ucx \
     # -map-by node:PE=1 , --npernode 1 , --map-by ppr:1:node , --pernode
 
-    echo "Starting hermes_daemon..."
+    echo "Starting hermes_daemon ..."
     set -x
 
     mpirun --host $hostlist --npernode 1 \
-        -x HERMES_CONF=$HERMES_CONF $HERMES_INSTALL_DIR/bin/hermes_daemon & #> ${FUNCNAME[0]}.log &
+        -x HERMES_CONF=$HERMES_CONF $HERMES_INSTALL_DIR/bin/hermes_daemon 2>&1 | tee ${FUNCNAME[0]}.log &
 
     sleep 5
 
@@ -130,6 +130,7 @@ START_HERMES_DAEMON () {
     set +x
 }
 
+echo "Killing existing hermes_daemon ... "
 mpirun --host $hostlist --pernode killall hermes_daemon
 
 hostname;date;
@@ -137,8 +138,9 @@ echo "Hermes Config : ADAPTER_MODE=$ADAPTER_MODE HERMES_PAGE_SIZE=$HERMES_PAGE_S
 
 START_HERMES_DAEMON
 
-(
 total_start_time=$(($(date +%s%N)/1000000))
+
+(
 
 for iter in $(seq $ITER_COUNT)
 do
@@ -164,7 +166,7 @@ do
         done
         wait
 
-        duration=$(( $(date +%s%N)/1000000 - $start_time))
+        duration="$(( $(date +%s%N)/1000000 - $start_time))"
         echo "OpenMM done... $duration milliseconds elapsed."
     fi
 
@@ -173,7 +175,7 @@ done
 )
 
 
-total_duration=$(( $(date +%s%N)/1000000 - $total_start_time))
+total_duration="$(($(date +%s%N)/1000000 - $total_start_time))" #$(($(date +%s%N)/1000000 - $total_start_time))
 echo "All done... $total_duration milliseconds elapsed."
 
 hostname;date;
@@ -182,5 +184,6 @@ STOP_DAEMON
 
 ls $EXPERIMENT_PATH/*/*/* -hl
 
-sacct -j $SLURM_JOB_ID -o jobid,submit,start,end,state
+# sacct -j $SLURM_JOB_ID -o jobid,submit,start,end,state
+rm -rf $EXPERIMENT_PATH/core.*
 rm -rf $SCRIPT_DIR/core.*

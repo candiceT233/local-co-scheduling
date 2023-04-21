@@ -37,10 +37,22 @@ total 824K
 -rw-rw-r-- 1 cc cc 2.0K Apr 18 01:59 task0001_OPENMM.log
 ```
 
-## hm_ddmd_openmpi.sh (TODO)
+## hm_ddmd_openmpi.sh
+Running the OpenMM simulation with Hermes, the mpi commands are for OpenMPI.
+```
+./hm_ddmd_openmpi.sh
+```
+- Hermes daemon stderr and stdout are store in START_HERMES_DAEMON.log in the current directory.
+- Program outputs are stored under `$HOME/script/ddmd_runs/hermes_test_.*ps_i1`, particularly the `molecular_dynamics_runs/stage0000/*/task0000_OPENMM.log` contains the stderr and stdout.
+
+
+# Hermes Build
 Running the OpenMM simulation with Hermes, the mpi commands are for OpenMPI. \
-Get Hermes related environment variables from `env_var.sh`. \
-Hermes is installed with `spack install hermes@pnnl ^mercury+ofi+ucx ^openmpi@4.1.3 %gcc@9.1.0`.
+Hermes is installed with `spack install hermes@pnnl ^mercury+ofi+ucx %gcc@9.1.0`. The `openmpi@4.1.3` is separatly installed to mimic the PNNL environment. 
 
 ## load_hermes_deps.sh
-Script to initialize spack and load hermes dependencies from spack.
+Script to initialize spack and load hermes dependencies from spack. \
+Hermes build in `~/download/hermes/build` depends on the variables loaded from `load_hermes_deps.sh`, which includes `spack load gcc boost mochi-thallium@0.8.3 catch2@3.0.1 glpk glog yaml-cpp openmpi`.
+
+## env_var.sh
+Hermes gets related environment variables from `env_var.sh`. \
