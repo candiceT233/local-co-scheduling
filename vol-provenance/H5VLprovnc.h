@@ -17,6 +17,9 @@
 #ifndef _H5VLprovnc_H
 #define _H5VLprovnc_H
 
+/* Public headers needed by this file */
+#include "H5VLpublic.h"        /* Virtual Object Layer                 */
+
 /* Identifier for the pass-through VOL connector */
 #define H5VL_PROVNC	(H5VL_provenance_register())
 

@@ -22,6 +22,7 @@ curr_outputs/
 
 *.err
 *.log
+*.out
 !prov-sim.log
 !prov-agg.log
 
@@ -33,6 +34,14 @@ aggregate.h5
 hermes_swap/
 device*_slab*.hermes
 swap*.hermes
+*.so
 *.csv
 *.log
 *.txt
+core.*
+hermes.yaml
+
+# large files
+*.gz
+*.vcf
+*chr1n-*

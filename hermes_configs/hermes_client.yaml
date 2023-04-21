@@ -1,0 +1,25 @@
+stop_daemon: false
+path_inclusions: [
+  # "/qfs/projects/oddite/tang584/ddmd_runs/hermes_test_100ps",
+  # "/files0/oddite/tang584/ddmd_runs/hermes_test_100ps/",
+  # "/files0/oddite/tang584/ddmd_runs/hermes_test_100ps/molecular_dynamics_runs/stage0000/task0000/stage0000_task0000.dcd",
+  # "/files0/oddite/tang584/ddmd_runs/hermes_test_100ps/molecular_dynamics_runs/stage0000/task0000/stage0000_task0000.h5",
+  # "/files0/oddite/tang584/ddmd_runs/hermes_test_100ps/molecular_dynamics_runs/stage0000/task0000/stage0000_task0000.log",
+  # "/files0/oddite/tang584/ddmd_runs/hermes_test_100ps/molecular_dynamics_runs/stage0000/task0000/system__1FME-unfolded.pdb",
+  # "/files0/oddite/tang584/ddmd_runs/hermes_test_100ps/molecular_dynamics_runs/stage0000/task0000/molecular_dynamics_stage_test.yaml",
+  # "/people/tang584/scripts/deepdrivemd/deepdrivemd/config.py",
+  # "/people/tang584/scripts/deepdrivemd/deepdrivemd/sim/openmm/run_openmm.py",
+  "/qfs/projects/oddite/tang584/ddmd_runs/",
+  # "/files0/oddite/tang584/aggregate.h5",
+  # "/files0/oddite/tang584",
+]
+path_exclusions: [
+  # "/files0/oddite/tang584/ddmd_runs/hermes_test_100ps/molecular_dynamics_runs/stage0000/task0000/molecular_dynamics_stage_test.yaml",
+  ]
+file_page_size: 4096KB
+base_adapter_mode: kDefault
+
+# file_adapter_configs:
+#   - path: "/"
+#     page_size: 1MB
+#     mode: kDefault
